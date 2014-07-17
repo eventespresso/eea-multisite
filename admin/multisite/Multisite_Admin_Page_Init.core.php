@@ -36,7 +36,7 @@ class Multisite_Admin_Page_Init extends EE_Admin_Page_Init  {
 		do_action( 'AHEE_log', __FILE__, __FUNCTION__, '' );
 
 		define( 'MULTISITE_PG_SLUG', 'espresso_multisite' );
-		define( 'MULTISITE_LABEL', __( 'Multisite', 'event_espresso' ));
+		define( 'MULTISITE_LABEL', __( 'EE Multisite', 'event_espresso' ));
 		define( 'EE_MULTISITE_ADMIN_URL', admin_url( 'admin.php?page=' . MULTISITE_PG_SLUG ));
 		define( 'EE_MULTISITE_ADMIN_ASSETS_PATH', EE_MULTISITE_ADMIN . 'assets' . DS );
 		define( 'EE_MULTISITE_ADMIN_ASSETS_URL', EE_MULTISITE_URL . 'assets' . DS );
@@ -65,10 +65,10 @@ class Multisite_Admin_Page_Init extends EE_Admin_Page_Init  {
 	*		@return 		void
 	*/
 	protected function _set_menu_map() {
-		$this->_menu_map = new EE_Admin_Page_Sub_Menu( array(
-			'menu_group' => 'addons',
+		$this->_menu_map = new EE_Admin_Page_Main_Menu( array(
+			'menu_group' => 'main',
 			'menu_order' => 25,
-			'show_on_menu' => TRUE,
+			'show_on_menu' => EE_Admin_Page_Menu_Map::NETWORK_ADMIN_ONLY,
 			'parent_slug' => 'espresso_events',
 			'menu_slug' => MULTISITE_PG_SLUG,
 			'menu_label' => MULTISITE_LABEL,
