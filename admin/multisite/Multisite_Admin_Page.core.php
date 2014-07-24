@@ -55,7 +55,8 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 	protected function _set_page_routes() {
 		$this->_page_routes = array(
-			'default' => '_basic_settings',
+			'default' => '_migrate',
+			'settings' => '_basic_settings',
 			'update_settings' => array(
 				'func' => '_update_settings',
 				'noheader' => TRUE
@@ -108,7 +109,10 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 
 
-
+	protected function _migrate(){
+		echo "migrate foo!";
+		var_dump( EEM_Blog::instance()->get_all()) ;
+	}
 
 	protected function _basic_settings() {
 		$this->_settings_page( 'multisite_basic_settings.template.php' );

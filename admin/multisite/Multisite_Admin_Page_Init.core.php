@@ -69,7 +69,7 @@ class Multisite_Admin_Page_Init extends EE_Admin_Page_Init  {
 			'menu_group' => 'main',
 			'menu_order' => 25,
 			'show_on_menu' => EE_Admin_Page_Menu_Map::NETWORK_ADMIN_ONLY,
-			'parent_slug' => 'espresso_events',
+			'parent_slug' => MULTISITE_PG_SLUG,
 			'menu_slug' => MULTISITE_PG_SLUG,
 			'menu_label' => MULTISITE_LABEL,
 			'capability' => 'administrator',
