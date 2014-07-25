@@ -24,12 +24,9 @@ Class  EE_Multisite extends EE_Addon {
 	}
 
 	public static function register_addon() {
-		// register addon via Plugin API
-		EE_Register_Addon::register(
-			'Multisite',
-			array(
+		$registration_params = array(
 				'version' 					=> EE_MULTISITE_VERSION,
-				'min_core_version' => '4.3.0',
+				'min_core_version' => '4.5.0',
 				'main_file_path' 				=> EE_MULTISITE_PLUGIN_FILE,
 				'admin_path' 			=> EE_MULTISITE_ADMIN,
 				'admin_callback'		=> 'additional_admin_hooks',
@@ -41,7 +38,6 @@ Class  EE_Multisite extends EE_Addon {
 					'Multisite_Admin_Page' 		=> EE_MULTISITE_ADMIN . 'Multisite_Admin_Page.core.php',
 					'Multisite_Admin_Page_Init' => EE_MULTISITE_ADMIN . 'Multisite_Admin_Page_Init.core.php',
 				),
-//				'dms_paths' 			=> array( EE_MULTISITE_PATH . 'core' . DS . 'data_migration_scripts' . DS ),
 				'module_paths' 		=> array( EE_MULTISITE_PATH . 'EED_Multisite.module.php' ),
 				'shortcode_paths' 	=> array( EE_MULTISITE_PATH . 'EES_Multisite.shortcode.php' ),
 				'widget_paths' 		=> array( EE_MULTISITE_PATH . 'EEW_Multisite.widget.php' ),
@@ -60,9 +56,18 @@ Class  EE_Multisite extends EE_Addon {
 				'capability_maps' => array(
 					new EE_Meta_Capability_Map_Edit( 'edit_addon', array( EEM_Event::instance(), '', 'edit_others_addon', 'edit_private_addon' ) )
 					),
-				'model_paths' => array ( EE_MULTISITE_PATH . 'core/db_models' ),
-				'class_paths' => array( EE_MULTISITE_PATH . 'core/db_classes' ),
-			)
+			);
+		//only register the DMS and models if on the main site. This way we avoid adding tables, and trying to remove tables,
+		//from blogs which aren't the main one
+		if( is_main_site() ){
+			$registration_params['dms_paths'] = array( EE_MULTISITE_PATH . 'core' . DS . 'data_migration_scripts' . DS );
+			$registration_params['model_paths'] = array ( EE_MULTISITE_PATH . 'core/db_models' );
+			$registration_params['class_paths'] = array( EE_MULTISITE_PATH . 'core/db_classes' );
+		}
+		// register addon via Plugin API
+		EE_Register_Addon::register(
+			'Multisite',
+			$registration_params
 		);
 	}
 
