@@ -34,9 +34,41 @@ class EE_DMS_Multisite_1_0_0 extends EE_Data_Migration_Script_Base{
 				blog_id int(10) unsigned,
 				STS_ID VARCHAR(10) NOT NULL,
 				BLM_last_requested datetime NOT NULL default '0000-00-00 00:00:00',
-				PRIMARY KEY  (BMS_ID)"
+				PRIMARY KEY  (BLM_ID)"
 					);
+//			$this->insert_default_status_codes();
 		}
+	}
+	/**
+	 * inserts other status codes for blogs... except type 'blog' isn't allowed,
+	 * because the MYSQL column is a set and its tricky changing what it allows.
+	 * Besides, even if we add these stati, if the addon were deactivated then these
+	 * stati in that table would become invalid and probably throw errors (and so would need
+	 * to be removed). For now we don't need these to be rows in the status table.
+	 * However, if we do need that one day, here's the function.
+	 *
+	 * 	@access public
+	 * 	@static
+	 * 	@return void
+	 */
+	public static function insert_default_status_codes() {
+		global $wpdb;
+		$table = $wpdb->get_var("SHOW TABLES LIKE '" . EEM_Status::instance()->table() . "'");
+
+		if ( $table == EEM_Status::instance()->table()) {
+
+			$SQL = "DELETE FROM " . EEM_Status::instance()->table() . " WHERE STS_ID IN ( 'BOD','BUN','BUD' );";
+			$wpdb->query($SQL);
+
+			$SQL = "INSERT INTO " . EEM_Status::instance()->table() . "
+					(STS_ID, STS_code, STS_type, STS_can_edit, STS_desc, STS_open) VALUES
+					('BOD', 'OUT_OF_DATE', 'blog', 0, NULL, 0),
+					('BUN', 'UNSURE', 'blog', 0, NULL, 0),
+					('BUD', 'UP_TO_DATE', 'blog', 0, NULL, 1);";
+			$wpdb->query($SQL);
+
+		}
+
 	}
 }
 

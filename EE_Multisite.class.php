@@ -24,6 +24,7 @@ Class  EE_Multisite extends EE_Addon {
 	}
 
 	public static function register_addon() {
+		//add_filter( 'FHEE__EEM_Status__construct__status_types', array('EE_Multisite', 'add_blog_stati_types') );
 		$registration_params = array(
 				'version' 					=> EE_MULTISITE_VERSION,
 				'min_core_version' => '4.5.0',
@@ -69,6 +70,18 @@ Class  EE_Multisite extends EE_Addon {
 			'Multisite',
 			$registration_params
 		);
+	}
+
+	/**
+	 * Adds 'blog' as a valid status on the EEM_Status's field 'STS_type'.
+	 * However, we'd also need to modify the database column to allow 'blog' in the set
+	 * in order for this to properly work. For now this isn't used.
+	 * @param array $valid_stati_types
+	 * @return array
+	 */
+	public static function add_blog_stati_types( $valid_stati_types ){
+		$valid_stati_types['blog'] = __( 'Blog', 'event_espresso' );
+		return $valid_stati_types;
 	}
 
 
