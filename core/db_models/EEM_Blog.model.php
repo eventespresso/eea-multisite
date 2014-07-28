@@ -14,16 +14,20 @@ if (!defined('EVENT_ESPRESSO_VERSION')) {
  *
  */
 class EEM_Blog extends EEM_Soft_Delete_Base{
-
-	/**
-	 * This blog is definetely out of date and should be migrated
-	 */
-	const status_out_of_date = 'BOD';
 	/**
 	 * The blog might be out of date. EE core or an addon has been upgraded
 	 * and we havent checked if it needs to be migrated
 	 */
 	const status_unsure = 'BUN';
+	/**
+	 * This blog is definetely out of date and should be migrated
+	 */
+	const status_out_of_date = 'BOD';
+	/**
+	 * this blog is currently being migrated by the EE multisite addon
+	 * (others may be getting migrated without the EE multisite addon)
+	 */
+	const status_migrating = 'BCM';
 	/**
 	 * The blog has been updated and EE core and its addons havent been updated since
 	 */
@@ -85,7 +89,7 @@ class EEM_Blog extends EEM_Soft_Delete_Base{
 				'BLM_ID' => new EE_DB_Only_Int_Field('BLM_ID', __('Blog Meta ID','event_espresso'), FALSE, 0),
 				'blog_id_fk' => new EE_DB_Only_Int_Field('blog_id_fk', __('Blog ID','event_espresso'), FALSE, 0),
 				'STS_ID' => new EE_Foreign_Key_String_Field('STS_ID', __( 'Status', 'event_espresso' ), FALSE, self::status_unsure, 'Status' ),
-				'BLM_last_requested' => new EE_Datetime_Field('BLM_last_requested', __('Last Request for this Blog', 'event_espresso'), FALSE, current_time('timestamp') ),
+				'BLG_last_requested' => new EE_Datetime_Field('BLG_last_requested', __('Last Request for this Blog', 'event_espresso'), FALSE, current_time('timestamp') ),
 			));
 		$this->_model_relations = array(
 			'Site'=>new EE_Belongs_To_Relation()
@@ -96,16 +100,33 @@ class EEM_Blog extends EEM_Soft_Delete_Base{
 
 	/**
 	 * Counts all the blogs which MIGHT need to be mgirated
+	 * @param array $query_params @see EEM_Base::get_all()
 	 * @return int
 	 */
-	public function count_blogs_maybe_needing_migration(){
-		return $this->count( array(
-			array(
-				'OR' => array(
+	public function count_blogs_maybe_needing_migration( $query_params = array() ){
+		return $this->count( $this->_add_where_query_params_for_maybe_needs_migrating( $query_params )  );
+	}
+
+	/**
+	 * Gets all blogs that might need to be migrated
+	 * @param array $query_params @see EEM_Base::get_all()
+	 * @return EE_Blog[]
+	 */
+	public function get_all_blogs_maybe_needing_migration( $query_params = array() ){
+		return $this->get_all( $this->_add_where_query_params_for_maybe_needs_migrating( $query_params ));
+	}
+
+	/**
+	 * Adds teh where conditions to get all the blogs that might need to be migrated (unsure)
+	 * @param array $query_params @see EEM_base::get_all()
+	 * @return array @see EEM_Base::get_all()
+	 */
+	private function _add_where_query_params_for_maybe_needs_migrating( $query_params = array() ){
+		$query_params[0]['OR*maybe_needs_migrating'] = array(
 					'STS_ID*unsure' => self::status_unsure,
-					'STS_ID*null' => array('IS NULL'))
-			)
-		));
+					'STS_ID*null' => array('IS NULL')
+			);
+		return $query_params;
 	}
 
 	/**
@@ -126,6 +147,30 @@ class EEM_Blog extends EEM_Soft_Delete_Base{
 				'STS_ID' => self::status_up_to_date
 			)
 		));
+	}
+
+	/**
+	 * Gets the blog which is marked as currently updating, or
+	 * @return EE_Blog
+	 */
+	public function get_migrating_blog_or_most_recently_requested(){
+		$currently_migrating = $this->get_one( array(
+			array(
+				'STS_ID' => self::status_migrating
+			)
+		));
+		if( $currently_migrating ){
+			return $currently_migrating;
+		}else{
+			return $this->get_one( array(
+				array(
+					'STS_ID' => self::status_out_of_date
+				),
+				'order_by' => array(
+					'BLG_last_requested' => 'DESC'
+				)
+			));
+		}
 	}
 }
 
