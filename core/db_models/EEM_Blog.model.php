@@ -51,7 +51,7 @@ class EEM_Blog extends EEM_Soft_Delete_Base{
 	}
 	/**
 	 * resets the model and returns it
-	 * @return EEM_Answer
+	 * @return EEM_Blog
 	 */
 	public static function reset(){
 		self::$_instance = NULL;
@@ -65,15 +65,15 @@ class EEM_Blog extends EEM_Soft_Delete_Base{
 		$this->plural_item = __('Blogs','event_espresso');
 		$this->_tables = array(
 			'Blog'=> new EE_Primary_Table('blogs', 'blog_id'),
-			'Blog_Meta' => new EE_Secondary_Table('esp_blog_meta', 'BLM_ID', 'blog_id' )
+			'Blog_Meta' => new EE_Secondary_Table('esp_blog_meta', 'BLM_ID', 'blog_id_fk' )
 		);
 		$this->_fields = array(
 			'Blog'=>array(
 				'blog_id' => new EE_Primary_Key_Int_Field('blog_id', __('Blog ID','event_espresso')),
 				'site_id' => new EE_Foreign_Key_Int_Field('site_id', __('Site ID','event_espresso'), FALSE, 0, 'Site'),
 				'domain' => new EE_Plain_Text_Field('domain', __( 'Domain', 'event_espresso' ), FALSE ),
-				'registered' => new EE_Datetime_Field('registered', __('Registered', 'event_espresso'), FALSE, current_time('mysql') ),
-				'last_updated' => new EE_Datetime_Field('last_updated', __('Last Updated', 'event_espresso'), FALSE, current_time('mysql') ),
+				'registered' => new EE_Datetime_Field('registered', __('Registered', 'event_espresso'), FALSE, current_time('timestamp') ),
+				'last_updated' => new EE_Datetime_Field('last_updated', __('Last Updated', 'event_espresso'), FALSE, current_time('timestamp') ),
 				'public' => new EE_Boolean_Field('public', __('Public?', 'event_espresso'), FALSE, TRUE ),
 				'archived' => new EE_Boolean_Field('archived', __('Archived', 'event_espresso'), FALSE, FALSE ),
 				'mature' => new EE_Boolean_Field('mature', __('Mature', 'event_espresso'), FALSE, FALSE ),
@@ -82,10 +82,10 @@ class EEM_Blog extends EEM_Soft_Delete_Base{
 				'lang_id' => new EE_Integer_Field('lang_id', __('Language ID', 'event_espresso'), FALSE, 0 )
 			),
 			'Blog_Meta'=>array(
-				'BLM_ID' => new EE_Primary_Key_Int_Field('BLM_ID', __('Blog Meta ID','event_espresso')),
-				'blog_id' => new EE_DB_Only_Int_Field('blog_Id', __('Blog ID','event_espresso'), FALSE, 0),
+				'BLM_ID' => new EE_DB_Only_Int_Field('BLM_ID', __('Blog Meta ID','event_espresso'), FALSE, 0),
+				'blog_id_fk' => new EE_DB_Only_Int_Field('blog_id_fk', __('Blog ID','event_espresso'), FALSE, 0),
 				'STS_ID' => new EE_Foreign_Key_String_Field('STS_ID', __( 'Status', 'event_espresso' ), FALSE, self::status_unsure, 'Status' ),
-				'BLM_last_requested' => new EE_Datetime_Field('BLM_last_requested', __('Last Request for this Blog', 'event_espresso'), FALSE, current_time('mysql') ),
+				'BLM_last_requested' => new EE_Datetime_Field('BLM_last_requested', __('Last Request for this Blog', 'event_espresso'), FALSE, current_time('timestamp') ),
 			));
 		$this->_model_relations = array(
 			'Site'=>new EE_Belongs_To_Relation()
@@ -102,8 +102,8 @@ class EEM_Blog extends EEM_Soft_Delete_Base{
 		return $this->count( array(
 			array(
 				'OR' => array(
-					'STS_ID' => self::status_unsure,
-					'STS_ID' => array('IS NULL'))
+					'STS_ID*unsure' => self::status_unsure,
+					'STS_ID*null' => array('IS NULL'))
 			)
 		));
 	}

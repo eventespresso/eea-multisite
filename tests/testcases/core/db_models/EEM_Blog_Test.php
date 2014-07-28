@@ -15,9 +15,43 @@ if (!defined('EVENT_ESPRESSO_VERSION')) {
  */
 class EEM_Blog_Test extends EE_UnitTestCase{
 
-	public function test_thing(){
-		$this->assertTrue(TRUE);
+	public function test_get_all(){
+		$this->assertEquals( 1, EEM_Blog::instance()->count() );
+		//insert one using the normal WP way
+		$this->factory->blog->create_many( 2 );
+		$this->assertEquals( 3, EEM_Blog::instance()->count() );
+		//insert one using the nomra l EE way
+		$this->new_model_obj_with_dependencies('Blog');
+		$this->assertEquals( 4, EEM_Blog::instance()->count() );
 	}
+
+	public function test_count_blogs_needing_migration(){
+		//these two don't need to be migrated
+		$this->factory->blog->create_many( 2 );
+		$blog_needing_migration = $this->new_model_obj_with_dependencies('Blog', array( 'STS_ID' => EEM_Blog::status_out_of_date ) );
+
+		$blog_maybe_needing_migration = $this->new_model_obj_with_dependencies('Blog', array( 'STS_ID' => EEM_Blog::status_unsure ) );
+		$blog_up_to_date = $this->new_model_obj_with_dependencies('Blog', array( 'STS_ID' => EEM_Blog::status_up_to_date ) );
+		$this->assertEquals( 1, EEM_Blog::instance()->count_blogs_needing_migration() );
+	}
+	public function test_count_blogs_maybe_needing_migration(){
+		//these two MIGHT need migrating, so MIGHT the main site
+		$this->factory->blog->create_many( 2 );
+		$blog_needing_migration = $this->new_model_obj_with_dependencies('Blog', array( 'STS_ID' => EEM_Blog::status_out_of_date ) );
+		$blog_maybe_needing_migration = $this->new_model_obj_with_dependencies('Blog', array( 'STS_ID' => EEM_Blog::status_unsure ) );
+		$blog_up_to_date = $this->new_model_obj_with_dependencies('Blog', array( 'STS_ID' => EEM_Blog::status_up_to_date ) );
+		$this->assertEquals( 4, EEM_Blog::instance()->count_blogs_maybe_needing_migration() );//main site, 2 created using factorya, and one with statu s'unsure'
+	}
+	public function test_count_blogs_up_to_date(){
+		//these two MIGHT need migrating, so MIGHT the main site
+		$this->factory->blog->create_many( 2 );
+		$blog_needing_migration = $this->new_model_obj_with_dependencies('Blog', array( 'STS_ID' => EEM_Blog::status_out_of_date ) );
+		$blog_maybe_needing_migration = $this->new_model_obj_with_dependencies('Blog', array( 'STS_ID' => EEM_Blog::status_unsure ) );
+		$blog_up_to_date = $this->new_model_obj_with_dependencies('Blog', array( 'STS_ID' => EEM_Blog::status_up_to_date ) );
+		$this->assertEquals( 1, EEM_Blog::instance()->count_blogs_up_to_date() );//just the last created one is KNOWN to be up-to-date
+	}
+
+
 }
 
 // End of file EEM_Blog_Test.php
