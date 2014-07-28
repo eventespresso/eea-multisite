@@ -15,19 +15,6 @@ if (!defined('EVENT_ESPRESSO_VERSION')) {
  */
 class EEM_Blog_Migration_Status extends EEM_Base{
 	/**
-	 * This blog is definetely out of date and should be migrated
-	 */
-	const status_out_of_date = 'BOD';
-	/**
-	 * The blog might be out of date. EE core or an addon has been upgraded
-	 * and we havent checked if it needs to be migrated
-	 */
-	const status_unsure = 'BUN';
-	/**
-	 * The blog has been updated and EE core and its addons havent been updated since
-	 */
-	const status_up_to_date = 'BUD';
-	/**
 	 * private instance of the EEM_Answer object
 	 * @type EEM_Blog_Migration_Status
 	 */
@@ -68,6 +55,14 @@ class EEM_Blog_Migration_Status extends EEM_Base{
 		);
 
 		parent::__construct();
+	}
+
+
+	/**
+	 * refreshes this list
+	 */
+	public function refresh(){
+
 	}
 }
 

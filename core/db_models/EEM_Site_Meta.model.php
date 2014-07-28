@@ -6,34 +6,42 @@ if (!defined('EVENT_ESPRESSO_VERSION')) {
 
 /**
  *
- * EE_Site_meta
+ * EE_Site_meta. THe DB site actually bein ghte NETWORK
  *
  * @package			Event Espresso
  * @subpackage
  * @author				Mike Nelson
  *
  */
-class EEM_Site_meta extends EEM_Soft_Delete_Base{
+class EEM_Site_Meta extends EEM_Soft_Delete_Base{
 
 	/**
 	 * private instance of the EEM_Answer object
-	 * @type EEM_Answer
+	 * @type EEM_Site_Meta
 	 */
 	private static $_instance = NULL;
 	/**
 	 *		This function is a singleton method used to instantiate the EEM_Answer object
 	 *
 	 *		@access public
-	 *		@return EEM_Blog
+	 *		@return EEM_Site_Meta
 	 */
 	public static function instance(){
 
 		// check if instance of EEM_Answer already exists
-		if ( ! self::$_instance instanceof EEM_Answer ) {
+		if ( ! self::$_instance instanceof EEM_Site_Meta ) {
 			// instantiate Espresso_model
 			self::$_instance = new self();
 		}
 		return self::$_instance;
+	}
+	/**
+	 * resets the model and returns it
+	 * @return EEM_Site_Meta
+	 */
+	public static function reset(){
+		self::$_instance = NULL;
+		return self::instance();
 	}
 	/**
 	 * 	constructor

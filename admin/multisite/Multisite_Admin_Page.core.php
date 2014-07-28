@@ -111,6 +111,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 	protected function _migrate(){
 		echo "migrate foo!";
+		EEM_Blog::instance()->show_next_x_db_queries(2);
 		var_dump( EEM_Blog::instance()->get_all()) ;
 	}
 

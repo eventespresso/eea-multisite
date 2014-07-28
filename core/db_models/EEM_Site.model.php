@@ -6,7 +6,7 @@ if (!defined('EVENT_ESPRESSO_VERSION')) {
 
 /**
  *
- * EEM_Site
+ * EEM_Site. The DB Site, of course, actually being the NETWORK
  *
  * @package			Event Espresso
  * @subpackage
@@ -29,11 +29,19 @@ class EEM_Site extends EEM_Base{
 	public static function instance(){
 
 		// check if instance of EEM_Answer already exists
-		if ( ! self::$_instance instanceof EEM_Answer ) {
+		if ( ! self::$_instance instanceof EEM_Site ) {
 			// instantiate Espresso_model
 			self::$_instance = new self();
 		}
 		return self::$_instance;
+	}
+	/**
+	 * resets the model and returns it
+	 * @return EEM_Site
+	 */
+	public static function reset(){
+		self::$_instance = NULL;
+		return self::instance();
 	}
 	/**
 	 * 	constructor
