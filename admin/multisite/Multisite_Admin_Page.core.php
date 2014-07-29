@@ -37,7 +37,9 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 
 
-	protected function _ajax_hooks() {}
+	protected function _ajax_hooks() {
+		add_action('wp_ajax_migration_step',array($this,'migrating'));
+	}
 
 
 
@@ -55,7 +57,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 	protected function _set_page_routes() {
 		$this->_page_routes = array(
-			'default' => '_migrate',
+			'default' => '_migration_page',
 			'settings' => '_basic_settings',
 			'update_settings' => array(
 				'func' => '_update_settings',
@@ -95,11 +97,17 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 	protected function _add_screen_options_default() {}
 	protected function _add_feature_pointers() {}
 	public function load_scripts_styles() {
+		wp_enqueue_script('ee_admin_js');
 		wp_register_script( 'espresso_multisite_admin', EE_MULTISITE_ADMIN_ASSETS_URL . 'espresso_multisite_admin.js', array( 'espresso_core' ), EE_MULTISITE_VERSION, TRUE );
 		wp_enqueue_script( 'espresso_multisite_admin');
 
 		EE_Registry::$i18n_js_strings['confirm_reset'] = __( 'Are you sure you want to reset ALL your Event Espresso Multisite Information? This cannot be undone.', 'event_espresso' );
 		wp_localize_script( 'espresso_multisite_admin', 'eei18n', EE_Registry::$i18n_js_strings );
+
+
+		//steal the styles etc from the normal maintenance page
+		wp_register_style( 'espresso_multisite_migration', EE_MULTISITE_ADMIN_ASSETS_URL . 'espresso_multisite_admin.css', array(), EE_MULTISITE_VERSION );
+		wp_enqueue_style('espresso_multisite_migration');
 	}
 
 	public function admin_init() {}
@@ -109,10 +117,15 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 
 
-	protected function _migrate(){
-		echo "migrate foo!";
-		EEM_Blog::instance()->show_next_x_db_queries(2);
-		var_dump( EEM_Blog::instance()->get_all()) ;
+	protected function _migration_page(){
+		EE_Registry::instance()->load_helper( 'Form_Fields' );
+		$this->_template_path = EE_MULTISITE_ADMIN_TEMPLATE_PATH . 'multisite_migration.template.php';
+
+		$this->_template_args['reset_url'] = EE_Admin_Page::add_query_args_and_nonce( array('action'=> 'reset_settings','return_action'=>$this->_req_action), EE_MULTISITE_ADMIN_URL );
+		$this->_set_add_edit_form_tags( 'update_settings' );
+		$this->_set_publish_post_box_vars( NULL, FALSE, FALSE, NULL, FALSE);
+		$this->_template_args['admin_page_content'] = EEH_Template::display_template( $this->_template_path, $this->_template_args, TRUE );
+		$this->display_admin_page_with_sidebar();
 	}
 
 	protected function _basic_settings() {
@@ -225,6 +238,17 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				return NULL;
 
 		}
+	}
+
+	/**
+	 * Receives AJAX requests from client, which first:
+	 * assesses how many blogs are out of date, (by switching to them then checking for migration scripts)
+	 * THEN grabs one of those blogs needing migration and migrates it (by swithcing to it and doing the normal migration step).
+	 * Both of these tasks are done in small units in order to avoid timeouts
+	 *
+	 */
+	public function migrating(){
+		echo "YOU ARE AJAxed!";
 	}
 
 
