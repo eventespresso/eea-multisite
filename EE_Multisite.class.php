@@ -12,6 +12,7 @@
  * ------------------------------------------------------------------------
  */
 // define the plugin directory path and URL
+define( 'EE_MULTISITE_BASENAME', plugin_basename( EE_MULTISITE_PLUGIN_FILE ) );
 define( 'EE_MULTISITE_PATH', plugin_dir_path( __FILE__ ));
 define( 'EE_MULTISITE_URL', plugin_dir_url( __FILE__ ));
 define( 'EE_MULTISITE_ADMIN', EE_MULTISITE_PATH . 'admin' . DS . 'multisite' . DS );
@@ -94,8 +95,8 @@ Class  EE_Multisite extends EE_Addon {
 	 */
 	public function additional_admin_hooks() {
 		// is admin and not in M-Mode ?
-		if ( is_admin() && ! EE_Maintenance_Mode::instance()->level() ) {
-			add_filter( 'plugin_action_links', array( $this, 'plugin_actions' ), 10, 2 );
+		if ( is_admin() && ! EE_Maintenance_Mode::instance()->level() && is_network_admin() ) {
+			add_filter( 'network_admin_plugin_action_links', array( $this, 'plugin_actions' ), 10, 2 );
 		}
 	}
 
@@ -110,7 +111,7 @@ Class  EE_Multisite extends EE_Addon {
 	 * @return array
 	 */
 	public function plugin_actions( $links, $file ) {
-		if ( $file == EE_MULTISITE_PLUGIN_FILE ) {
+		if ( $file == EE_MULTISITE_BASENAME ) {
 			// before other links
 			array_unshift( $links, '<a href="admin.php?page=espresso_multisite">' . __('Settings') . '</a>' );
 		}
