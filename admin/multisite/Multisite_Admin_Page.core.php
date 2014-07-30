@@ -38,7 +38,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 
 	protected function _ajax_hooks() {
-		add_action('wp_ajax_migration_step',array($this,'migrating'));
+		add_action('wp_ajax_multisite_migration_step',array($this,'migrating'));
 	}
 
 
@@ -248,7 +248,41 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 	 *
 	 */
 	public function migrating(){
-		echo "YOU ARE AJAxed!";
+		$items_to_migrate = 500;
+		//see if there are any blogs which aren't known to be up-to-date
+		$all_blogs_count = EEM_Blog::instance()->count();
+		$up_to_date_blogs_count = EEM_Blog::instance()->count_blogs_up_to_date();
+		if( $all_blogs_count > $up_to_date_blogs_count ){
+			//ok so there's some work to be done
+			//let's jsut check that we at least know how much work needs doing
+			$unknown_status_blog_count = EEM_Blog::instance()->count_blogs_maybe_needing_migration();
+			if( $unknown_status_blog_count ){
+				//ok we still don't even know how many need to be migrated
+				$newly_found_needing_migration_count = EEM_Blog::instance()->assess_sites_needing_migration( $items_to_migrate / 10 );
+
+			}else{
+				//we know how many need to be migrated. so let's do that
+				$this->_migrate_highest_priority_blogs($num_to_migrate);
+				throw new EE_Error( 'and we now need to make the proper response, then unit test it');
+			}
+		}
+
+	}
+
+	protected function _migrate_highest_priority_blogs( $num_to_migrate ){
+		$num_migrated = 0;
+
+		while( $num_migrated < $num_to_migrate && $blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested() ){
+			switch_to_blog( $blog_to_migrate->ID() );
+			do{
+				$results = EE_Data_Migration_Manager::reset()->migration_step( $num_to_migrate );
+				$num_migrated += $results[ 'records_migrated' ];
+			}while( $num_migrated < $num_to_migrate &&
+				EE_Maintenance_Mode::instance()->set_maintenance_level( EE_Maintenance_Mode::level_2_complete_maintenance ) );
+			restore_current_blog();
+			EE_Data_Migration_Manager::reset();
+		}
+		return $num_migrated;
 	}
 
 

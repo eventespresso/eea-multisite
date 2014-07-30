@@ -82,6 +82,40 @@ class EE_Blog extends EE_Soft_Delete_Base_Class{
 	function set_registered($registered) {
 		return $this->set('registered', $registered);
 	}
+	/**
+	 * Gets STS_ID
+	 * @return string
+	 */
+	function STS_ID() {
+		return $this->get('STS_ID');
+	}
+
+	/**
+	 * Sets STS_ID
+	 * @param string $STS_ID
+	 * @return boolean
+	 */
+	function set_STS_ID($STS_ID) {
+		return $this->set('STS_ID', $STS_ID);
+	}
+	/**
+	 * Gets last_requested
+	 * @return string
+	 */
+	function last_requested() {
+		return $this->get('BLG_last_requested');
+	}
+
+	/**
+	 * Sets last_requested
+	 * @param string $last_requested
+	 * @return boolean
+	 */
+	function set_last_requested($last_requested) {
+		return $this->set('BLG_last_requested', $last_requested);
+	}
+
+
 
 
 }
