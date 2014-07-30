@@ -8,20 +8,47 @@
 
 
 
-//JS FOR HANDLING MIGRATION SCRIPT UPDATING
-var BG = {
-	update_progress_to: function( items_complete, items_total ){
-		items_complete = parseInt( items_complete );
-		items_total = parseInt( items_total );
-		percent_complete = items_complete / items_total;
-		bar_size = jQuery('#progress-responsive figure').innerWidth();
-		new_bar_size = percent_complete * parseFloat( bar_size );
-		jQuery('#progress-responsive__bar').width( new_bar_size );
-		percent_complete = Math.floor( percent_complete * 100 ) + '% ('+items_complete+'/'+items_total+')';
-		jQuery('#progress-responsive__percent').text(percent_complete);
-	}
-}; // BAR GRAPH window object
+function EE_Multisite_DMS_Driver(){
+	this.sites_total = 1;
+	this.sites_migrated = 0;
+	this.current_blog_name;
+	this.migration_scripts_div_content;
+	this.current_dms_records_migrated = 0;
+	this.current_dms_records_to_migrate = 1;
+	//sends off an ajax request and handles the response
+	this.step = function(){
+		this.do_ajax({
+			action : 'multisite_migration_step',
+			page : 'espresso_multisite'}, this.handle_multisite_migration_step_response );
+	};
+	//performs the ajax request, and if successful, calls setup.callback;
+	//on failure with HTML response, calls report_general_migration_error with the content and loads that content to the screen
+	this.do_ajax = function(data, success_callback) {
 
+		data.ee_admin_ajax = true;
+
+		jQuery.ajax({
+			type: "POST",
+			url: ajaxurl,
+			data: data,
+			success: success_callback
+		});
+		return false;
+	};
+
+	this.handle_multisite_migration_step_response = function(response, status, xhr){
+		alert("reponse received:"+ response);
+	}
+}
+
+//for converting a div like
+//<div id="current-migration-progress-bar" class="progress-bar">
+//	<figure>
+//		<div class="bar" style="background:#2EA2CC;"></div>
+//		<div class="percent"></div>
+//	</figure>
+//</div>
+//into a progress bar that can be updated dynamically, probably in response to ajax requests
 function EE_Progress_Bar( containing_div ){
 	this.containing_div = containing_div;
 	this.items_total = 1;
@@ -190,4 +217,6 @@ jQuery(function() {
 	sites_pg = new EE_Progress_Bar(jQuery('#sites-needing-migration-progress-bar'));
 	migration_pg = new EE_Progress_Bar(jQuery('#current-migration-progress-bar'));
 	sites_pg.update_progress_to(23, 98 );
+	driver = new EE_Multisite_DMS_Driver();
+	driver.step();
 });
