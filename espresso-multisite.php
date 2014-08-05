@@ -2,7 +2,7 @@
 /*
   Plugin Name: Event Espresso - Multisite
   Plugin URI: http://www.eventespresso.com
-  Description: The Event Espresso Multisite adds NEW stuff to Event Espresso
+  Description: Helps Network admins manage a Network running Event Espresso. Compatible with Event Espresso Core 4.5 or higher
   Version: 0.0.1.dev.002
   Author: Event Espresso
   Author URI: http://www.eventespresso.com
