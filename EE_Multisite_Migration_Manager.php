@@ -67,12 +67,11 @@ class EE_Multisite_Migration_Manager {
 		$num_migrated = 0;
 		$multisite_migration_message = '';
 		$current_script_names = array();
-
 		while( $num_migrated < $records_to_migrate && $blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested() ){
 			switch_to_blog( $blog_to_migrate->ID() );
 			EE_Data_Migration_Manager::reset();
 			do{
-				$results = EE_Data_Migration_Manager::instance()->migration_step( $records_to_migrate );
+				$results = EE_Data_Migration_Manager::instance()->migration_step( $records_to_migrate - $num_migrated );
 				$num_migrated += $results[ 'records_migrated' ];
 				$multisite_migration_message .= "<br>" . $results[ 'message' ];
 				switch( $results[ 'status' ] ){
