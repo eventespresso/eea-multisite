@@ -39,6 +39,7 @@ Class  EE_Multisite extends EE_Addon {
 					'EE_Multisite_Config' 			=> EE_MULTISITE_PATH . 'EE_Multisite_Config.php',
 					'Multisite_Admin_Page' 		=> EE_MULTISITE_ADMIN . 'Multisite_Admin_Page.core.php',
 					'Multisite_Admin_Page_Init' => EE_MULTISITE_ADMIN . 'Multisite_Admin_Page_Init.core.php',
+					'EE_Multisite_Migration_Manager' => EE_MULTISITE_PATH . 'EE_Multisite_Migration_Manager.php',
 				),
 				'module_paths' 		=> array( EE_MULTISITE_PATH . 'EED_Multisite.module.php' ),
 				'shortcode_paths' 	=> array( EE_MULTISITE_PATH . 'EES_Multisite.shortcode.php' ),
@@ -56,7 +57,7 @@ Class  EE_Multisite extends EE_Addon {
 						),
 					),
 				'capability_maps' => array(
-					new EE_Meta_Capability_Map_Edit( 'edit_addon', array( EEM_Event::instance(), '', 'edit_others_addon', 'edit_private_addon' ) )
+					new EE_Meta_Capability_Map_Edit( 'edit_addon', array( 'Event', '', 'edit_others_addon', 'edit_private_addon' ) )
 					),
 			);
 		//only register the DMS and models if on the main site. This way we avoid adding tables, and trying to remove tables,

@@ -32,6 +32,11 @@ class EEM_Blog extends EEM_Soft_Delete_Base{
 	 * The blog has been updated and EE core and its addons havent been updated since
 	 */
 	const status_up_to_date = 'BUD';
+	/**
+	 * The blog is borked. Probably because a migration script died on it.
+	 * We can't migrate it, but we don't want to claim it's 'up-to-date' either
+	 */
+	const status_borked = 'BRK';
 
 	/**
 	 * private instance of the EEM_Answer object
@@ -150,6 +155,27 @@ class EEM_Blog extends EEM_Soft_Delete_Base{
 	}
 
 	/**
+	 * Counts all blogs which DEFINETELY DO need to be migrated
+	 * @return int
+	 */
+	public function count_borked_blogs(){
+		return $this->count( array(
+			array(
+				'STS_ID' => self::status_borked
+			)
+		));
+	}
+	/**
+	 * Gets all the blogs which are broken, probably from a failed migration
+	 * @param array $query_params @see EEM_Base::get_all()
+	 * @return EE_Blog[]
+	 */
+	public function get_all_borked_blogs( $query_params = array() ){
+		$query_params[ 0 ][ 'STS_ID' ] = self::status_borked;
+		return $this->get_all( $query_params );
+	}
+
+	/**
 	 * Gets the blog which is marked as currently updating, or
 	 * @return EE_Blog
 	 */
@@ -171,31 +197,6 @@ class EEM_Blog extends EEM_Soft_Delete_Base{
 				)
 			));
 		}
-	}
-
-	/**
-	 * Assesses $num_to_assess blogs and finds whether they need ot be migrated or not,
-	 * and updates their status. Returns the number that were found to need migrating
-	 * (NOT the total number needing migrating. For that, use EEM_Blog::count_blogs_needing_migration())
-	 * @param int $num_to_assess
-	 * @return int number of blogs needing to be migrated, amongst those inspected
-	 */
-	public function assess_sites_needing_migration( $num_to_assess = 10 ){
-		$blogs = EEM_Blog::instance()->get_all_blogs_maybe_needing_migration( array( 'LIMIT' => $num_to_assess ) );
-		foreach( $blogs as $blog ){
-			//switch to that blog and assess whether or not it needs to be migrated
-			switch_to_blog( $blog->ID() );
-			EE_Data_Migration_Manager::reset();
-			$needs_migrating = EE_Maintenance_Mode::instance()->set_maintenance_mode_if_db_old();
-			restore_current_blog();
-			if( $needs_migrating ){
-				$blog->set_STS_ID( EEM_Blog::status_out_of_date );
-			}else{
-				$blog->set_STS_ID( EEM_Blog::status_up_to_date );
-			}
-			$blog->save();
-		}
-		EE_Data_Migration_Manager::reset();
 	}
 }
 

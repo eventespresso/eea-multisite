@@ -258,7 +258,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			$unknown_status_blog_count = EEM_Blog::instance()->count_blogs_maybe_needing_migration();
 			if( $unknown_status_blog_count ){
 				//ok we still don't even know how many need to be migrated
-				$newly_found_needing_migration_count = EEM_Blog::instance()->assess_sites_needing_migration( $items_to_migrate / 10 );
+				$newly_found_needing_migration_count = EE_Multisite_Migration_Manager::instance()->assess_sites_needing_migration( (int) $items_to_migrate / 10 );
 
 			}else{
 				//we know how many need to be migrated. so let's do that
@@ -270,19 +270,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 	}
 
 	protected function _migrate_highest_priority_blogs( $num_to_migrate ){
-		$num_migrated = 0;
 
-		while( $num_migrated < $num_to_migrate && $blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested() ){
-			switch_to_blog( $blog_to_migrate->ID() );
-			do{
-				$results = EE_Data_Migration_Manager::reset()->migration_step( $num_to_migrate );
-				$num_migrated += $results[ 'records_migrated' ];
-			}while( $num_migrated < $num_to_migrate &&
-				EE_Maintenance_Mode::instance()->set_maintenance_level( EE_Maintenance_Mode::level_2_complete_maintenance ) );
-			restore_current_blog();
-			EE_Data_Migration_Manager::reset();
-		}
-		return $num_migrated;
 	}
 
 

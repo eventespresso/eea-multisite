@@ -64,7 +64,8 @@ class EE_DMS_Multisite_1_0_0 extends EE_Data_Migration_Script_Base{
 					(STS_ID, STS_code, STS_type, STS_can_edit, STS_desc, STS_open) VALUES
 					('BOD', 'OUT_OF_DATE', 'blog', 0, NULL, 0),
 					('BUN', 'UNSURE', 'blog', 0, NULL, 0),
-					('BUD', 'UP_TO_DATE', 'blog', 0, NULL, 1);";
+					('BUD', 'UP_TO_DATE', 'blog', 0, NULL, 1),
+					('BRK', 'BORKED', 'blog', 0, NULL, 0);";
 			$wpdb->query($SQL);
 
 		}
