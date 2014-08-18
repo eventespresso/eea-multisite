@@ -38,6 +38,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 
 	protected function _ajax_hooks() {
+		add_action('wp_ajax_multisite_migration_assessment_step',array($this,'assessing_sites_needing_migration'));
 		add_action('wp_ajax_multisite_migration_step',array($this,'migrating'));
 	}
 
@@ -125,6 +126,11 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		$this->_set_add_edit_form_tags( 'update_settings' );
 		$this->_set_publish_post_box_vars( NULL, FALSE, FALSE, NULL, FALSE);
 		$this->_template_args['admin_page_content'] = EEH_Template::display_template( $this->_template_path, $this->_template_args, TRUE );
+		wp_localize_script('espresso_multisite_admin','ee_i18n_text',array(
+			'done_assessment' => __( 'Assessment Complete', 'event_espresso' ),
+			'network_needs_migration' => __( 'Network requires migration', 'event_espresso' ),
+			'no_migrations_required' => __( 'No migrations are required', 'event_espresso' ),
+		));
 		$this->display_admin_page_with_sidebar();
 	}
 
@@ -238,6 +244,26 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				return NULL;
 
 		}
+	}
+
+	/**
+	 * receives AJAX request to assess how many sites need to be migrated
+	 */
+	public function assessing_sites_needing_migration(){
+		$original_unknown_status_blog_count = EEM_Blog::instance()->count_blogs_maybe_needing_migration();
+		if( $original_unknown_status_blog_count ){
+			//ok we still don't even know how many need to be migrated
+			$newly_found_needing_migration_count = EE_Multisite_Migration_Manager::instance()->assess_sites_needing_migration( (int) 10 );
+
+		}
+		$this->_template_args['data'] = array(
+			'total_blogs' => EEM_Blog::instance()->count(),
+			'up_to_date_blogs' => EEM_Blog::instance()->count_blogs_up_to_date(),
+			'unknown_status_blogs' => EEM_Blog::instance()->count_blogs_maybe_needing_migration(),
+			'out_of_date_blogs' => EEM_Blog::instance()->count_blogs_needing_migration(),
+			'borked_blogs' => EEM_Blog::instance()->count_borked_blogs(),
+		);
+		$this->_return_json();
 	}
 
 	/**

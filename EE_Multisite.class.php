@@ -55,11 +55,11 @@ Class  EE_Multisite extends EE_Addon {
 					'administrator' => array(
 						'read_addon', 'edit_addon', 'edit_others_addon', 'edit_private_addon'
 						),
-					),
-				'capability_maps' => array(
-					new EE_Meta_Capability_Map_Edit( 'edit_addon', array( 'Event', '', 'edit_others_addon', 'edit_private_addon' ) )
-					),
+					)
 			);
+		if( class_exists( 'EE_Meta_Capability_Map_Edit' ) ){
+			$registration_params[ 'capability_ma' ] = new EE_Meta_Capability_Map_Edit( 'edit_addon', array( 'Event', '', 'edit_others_addon', 'edit_private_addon' ) );
+		}
 		//only register the DMS and models if on the main site. This way we avoid adding tables, and trying to remove tables,
 		//from blogs which aren't the main one
 		if( is_main_site() ){

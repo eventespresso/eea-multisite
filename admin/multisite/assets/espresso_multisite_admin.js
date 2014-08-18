@@ -15,6 +15,9 @@ function EE_Multisite_DMS_Driver(){
 	this.migration_scripts_div_content;
 	this.current_dms_records_migrated = 0;
 	this.current_dms_records_to_migrate = 1;
+	this.assessment_pg = new EE_Progress_Bar(jQuery('#sites-needing-migration-progress-bar'));
+	this.sites_pg = new EE_Progress_Bar(jQuery('#sites-migrated-progress-bar'));
+	this.current_dms_pg = new EE_Progress_Bar(jQuery('#current-migration-progress-bar'));
 	//sends off an ajax request and handles the response
 	this.step = function(){
 		this.do_ajax({
@@ -37,7 +40,41 @@ function EE_Multisite_DMS_Driver(){
 	};
 
 	this.handle_multisite_migration_step_response = function(response, status, xhr){
-		alert("reponse received:"+ response);
+
+	}
+
+
+	this.assessment_step = function(){
+		this.do_ajax({
+			action : 'multisite_migration_assessment_step',
+			page : 'espresso_multisite'}, this.handle_multisite_migration_assessment_step_response
+		);
+	}
+	this.handle_multisite_migration_assessment_step_response = function(response, status, xhr){
+		if( response.data ){
+			var total = response.data.total_blogs;
+			var utd = response.data.up_to_date_blogs;
+			var ofd = response.data.out_of_date_blogs;
+			var b = response.data.borked_blogs;
+			var u = response.data.unknown_status_blogs;
+			jQuery('#migration-assessment-total').html( total );
+			jQuery('#migration-assessment-up-to-date').html( utd );
+			jQuery('#migration-asssment-out-of-date').html( ofd );
+			jQuery('#migration-assessment-borked').html( b );
+			driver.assessment_pg.update_progress_to( total - u, total );
+			if( total == utd ){//no need to migrate anything
+				jQuery('#main-title').html(ee_i18n_text.done_assessment);
+				jQuery('#sub-title').html(ee_i18n_text.no_migrations_required);
+			}else if( u == 0){//at least we are done assessing
+				jQuery('#main-title').html(ee_i18n_text.done_assessment);
+				jQuery('#sub-title').html(ee_i18n_text.network_needs_migration);
+				jQuery('#begin-multisite-migration').show();
+			}else{
+				//still not done assessing
+				driver.assessment_step();
+			}
+		}
+
 	}
 }
 
@@ -214,9 +251,11 @@ var Maintenance_helper = {
 
 jQuery(function() {
 //	alert("jquery a go");
-	sites_pg = new EE_Progress_Bar(jQuery('#sites-needing-migration-progress-bar'));
-	migration_pg = new EE_Progress_Bar(jQuery('#current-migration-progress-bar'));
-	sites_pg.update_progress_to(23, 98 );
 	driver = new EE_Multisite_DMS_Driver();
-	driver.step();
+	driver.assessment_step();
+	jQuery('#begin-multisite-migration').click(function(){
+		jQuery('#migration-pane').toggle('slow');
+		jQuery('#assessment-pane').toggle('slow');
+		driver.step();
+	});
 });
