@@ -107,12 +107,26 @@ class EE_Multisite_Migration_Manager {
 			}
 			$blog_to_migrate->save();
 		}
-		return array(
-			'current_blog_name' => $blog_to_migrate->name(),
-			'current_blog_script_names' => $current_script_names,
-			'current_dms' => $results,
-			'message' => $multisite_migration_message
-		);
+		if( $blog_to_migrate ){
+			return array(
+				'current_blog_name' => $blog_to_migrate->name(),
+				'current_blog_script_names' => $current_script_names,
+				'current_dms' => $results,
+				'message' => $multisite_migration_message
+			);
+		}else{
+			return array(
+				'current_blog_name' => __( 'All blogs up-to-date', 'event_espresso' ),
+				'current_blog_script_names' => array(),
+				'current_dms' => array(
+					'records_to_migrate'=>1,
+					'records_migrated'=>1,
+					'status'=>  EE_Data_Migration_Manager::status_no_more_migration_scripts,
+					'script'=>__("Data Migration Completed Successfully", "event_espresso"),
+				),
+				'message' => __( 'All blogs up-to-date', 'event_espresso' )
+			);
+		}
 	}
 
 	/**

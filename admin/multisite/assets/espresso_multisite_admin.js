@@ -40,7 +40,26 @@ function EE_Multisite_DMS_Driver(){
 	};
 
 	this.handle_multisite_migration_step_response = function(response, status, xhr){
+		if( response.data ){
+			var blogs_total = response.data.blogs_total;
+			var blogs_needing_migration = response.data.blogs_needing_migration;
+			var current_blog_name = response.data.current_blog_name;
+			var current_blog_script_names = response.data.current_blog_script_names;
+			var current_dms = response.data.current_dms;
+			driver.sites_pg.update_progress_to( blogs_total - blogs_needing_migration, blogs_total );
+			jQuery('#current-blog-title').html(current_blog_name);
+			var script_names_html = '';
+			var i;
+			for (i=0;i<current_blog_script_names.length;i++){
+				script_names_html += "<li>"+current_blog_script_names[i]+"</li>";
+			}
+			jQuery('#migration-scripts').html(script_names_html);
+			driver.current_dms_pg.update_progress_to( current_dms.records_migrated, current_dms.records_to_migrate );
+			jQuery('#current-blog-current-script').html( current_dms.script );
+			jQuery('#progress-text').append( current_dms.message);
 
+
+		}
 	}
 
 

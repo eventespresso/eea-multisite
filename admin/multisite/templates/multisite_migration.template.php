@@ -23,13 +23,14 @@
 			<div class="percent"></div>
 		</figure>
 	</div>
-	<h2 id="current_blog_title"><?php _e( 'Current Site: Garths dental visit', 'event_espresso' );?></h2>
-	<div id="migration_scripts">
+	<h2 id="current-blog-title"><?php _e( 'Current Site: Garths dental visit', 'event_espresso' );?></h2>
+	<div id="migration-scripts">
 		<ol>
 			<li>Core 4.3 DMS</li>
 			<li>Calendar 3.1 DMS</li>
 		</ol>
 	</div>
+	<h3 id="current-blog-current-script"><?php __( 'Loading Data Migration Script', 'event_espresso' )?></h3>
 	<div id="current-migration-progress-bar" class="progress-bar">
 		<figure>
 			<div class="bar" style="background:#2EA2CC;"></div>

@@ -274,35 +274,14 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 	 *
 	 */
 	public function migrating(){
-		$items_to_migrate = 500;
-		//see if there are any blogs which aren't known to be up-to-date
-		$all_blogs_count = EEM_Blog::instance()->count();
-		$up_to_date_blogs_count = EEM_Blog::instance()->count_blogs_up_to_date();
-		if( $all_blogs_count > $up_to_date_blogs_count ){
-			//ok so there's some work to be done
-			//let's jsut check that we at least know how much work needs doing
-			$unknown_status_blog_count = EEM_Blog::instance()->count_blogs_maybe_needing_migration();
-			if( $unknown_status_blog_count ){
-				//ok we still don't even know how many need to be migrated
-				$newly_found_needing_migration_count = EE_Multisite_Migration_Manager::instance()->assess_sites_needing_migration( (int) $items_to_migrate / 10 );
-
-			}else{
-				//we know how many need to be migrated. so let's do that
-				$this->_migrate_highest_priority_blogs($num_to_migrate);
-				throw new EE_Error( 'and we now need to make the proper response, then unit test it');
-			}
-		}
-
+		//we know how many need to be migrated. so let's do that
+		$step_size = defined('EE_MIGRATION_STEP_SIZE' ) ? EE_MIGRATION_STEP_SIZE * 10 : 500;
+		$migration_status = EE_Multisite_Migration_Manager::instance()->migration_step( $step_size );
+		$migration_status[ 'blogs_total' ] = EEM_Blog::instance()->count();
+		$migration_status[ 'blogs_needing_migration' ] = EEM_Blog::instance()->count_blogs_needing_migration();
+		$this->_template_args['data'] = $migration_status;
+		$this->_return_json();
 	}
-
-	protected function _migrate_highest_priority_blogs( $num_to_migrate ){
-
-	}
-
-
-
-
-
 }
 // End of file Multisite_Admin_Page.core.php
 // Location: /wp-content/plugins/espresso-multisite/admin/multisite/Multisite_Admin_Page.core.php
