@@ -34,11 +34,15 @@ function EE_Multisite_DMS_Driver(){
 			type: "POST",
 			url: ajaxurl,
 			data: data,
-			success: success_callback
+			success: success_callback,
+			error: driver.display_error
 		});
 		return false;
 	};
 
+	this.display_error = function( xhr, status, error ){
+		alert( ee_i18n_text.ajax_error + error );
+	}
 	this.handle_multisite_migration_step_response = function(response, status, xhr){
 		if( response.data ){
 			var blogs_total = response.data.blogs_total;
@@ -57,8 +61,14 @@ function EE_Multisite_DMS_Driver(){
 			driver.current_dms_pg.update_progress_to( current_dms.records_migrated, current_dms.records_to_migrate );
 			jQuery('#current-blog-current-script').html( current_dms.script );
 			jQuery('#progress-text').append( current_dms.message);
-
-
+			//are we all done then?
+			if( blogs_needing_migration == 0 ){
+				alert(ee_i18n_text.all_done);
+			}else{
+				driver.step();
+			}
+		}else{
+			alert( ee_i18n_text.ajax_error );
 		}
 	}
 
@@ -92,6 +102,8 @@ function EE_Multisite_DMS_Driver(){
 				//still not done assessing
 				driver.assessment_step();
 			}
+		}else{
+			alert( ee_i18n_text.ajax_error );
 		}
 
 	}

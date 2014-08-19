@@ -25,7 +25,8 @@
 			<div class="percent"></div>
 		</figure>
 	</div>
-	<h2 id="current-blog-title"><?php _e( 'Current Site: Garths dental visit', 'event_espresso' );?></h2>
+	<br style='clear:both'>
+	<h2 id="current-blog-title"></h2>
 	<div id="migration-scripts">
 		<ol><!-- content added dynamically by javascript --></ol>
 	</div>
@@ -35,8 +36,14 @@
 			<div class="percent"></div>
 		</figure>
 	</div>
+	<br style='clear:both'>
 	<h3 id="current-blog-current-script"><?php __( 'Loading Data Migration Script', 'event_espresso' )?></h3>
 	<div id="progress-text" style='height:400px;overflow-y:scroll'>
 		<!-- content added dynamically by javascript -->
 	</div>
 </div>
+
+<!-- modal dialog for displaying ajax errors. But so far haven't got it working -->
+<h2 id="admin-modal-dialog-apply-payment-h2" class="admin-modal-dialog-h2 hdr-has-icon" style="display:none;">
+	<div class="ee-icon ee-icon-cash-add float-left"></div>
+</h2>

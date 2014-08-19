@@ -103,7 +103,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 	protected function _add_feature_pointers() {}
 	public function load_scripts_styles() {
 		wp_enqueue_script('ee_admin_js');
-		wp_register_script( 'espresso_multisite_admin', EE_MULTISITE_ADMIN_ASSETS_URL . 'espresso_multisite_admin.js', array( 'espresso_core' ), EE_MULTISITE_VERSION, TRUE );
+		wp_register_script( 'espresso_multisite_admin', EE_MULTISITE_ADMIN_ASSETS_URL . 'espresso_multisite_admin.js', array( 'espresso_core', 'ee-dialog', ), EE_MULTISITE_VERSION, TRUE );
 		wp_enqueue_script( 'espresso_multisite_admin');
 
 		EE_Registry::$i18n_js_strings['confirm_reset'] = __( 'Are you sure you want to reset ALL your Event Espresso Multisite Information? This cannot be undone.', 'event_espresso' );
@@ -134,6 +134,8 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			'done_assessment' => __( 'Assessment Complete', 'event_espresso' ),
 			'network_needs_migration' => __( 'Network requires migration', 'event_espresso' ),
 			'no_migrations_required' => __( 'No migrations are required', 'event_espresso' ),
+			'ajax_error' => __( 'An error occurred communicating with the server. Please contact support', 'event_espresso' ),
+			'all_done' => __( 'All done migration network', 'event_espresso' )
 		));
 		$this->display_admin_page_with_sidebar();
 	}
@@ -265,7 +267,8 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		$original_unknown_status_blog_count = EEM_Blog::instance()->count_blogs_maybe_needing_migration();
 		if( $original_unknown_status_blog_count ){
 			//ok we still don't even know how many need to be migrated
-			$newly_found_needing_migration_count = EE_Multisite_Migration_Manager::instance()->assess_sites_needing_migration( (int) 1 );
+			$step_size = max( 1, defined('EE_MIGRATION_STEP_SIZE' ) ? EE_MIGRATION_STEP_SIZE / 10 : 5 );
+			$newly_found_needing_migration_count = EE_Multisite_Migration_Manager::instance()->assess_sites_needing_migration( $step_size );
 
 		}
 		$this->_template_args['data'] = array(
