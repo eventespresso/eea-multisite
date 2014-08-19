@@ -64,6 +64,10 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				'func' => '_update_settings',
 				'noheader' => TRUE
 			),
+			'force_reassess' => array(
+				'func' => '_force_reassess',
+				'noheader' => TRUE
+			),
 			'usage' => '_usage'
 		);
 	}
@@ -122,7 +126,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		EE_Registry::instance()->load_helper( 'Form_Fields' );
 		$this->_template_path = EE_MULTISITE_ADMIN_TEMPLATE_PATH . 'multisite_migration.template.php';
 
-		$this->_template_args['reset_url'] = EE_Admin_Page::add_query_args_and_nonce( array('action'=> 'reset_settings','return_action'=>$this->_req_action), EE_MULTISITE_ADMIN_URL );
+		$this->_template_args['reassess_url'] = EE_Admin_Page::add_query_args_and_nonce( array('action'=> 'force_reassess'), EE_MULTISITE_ADMIN_URL );
 		$this->_set_add_edit_form_tags( 'update_settings' );
 		$this->_set_publish_post_box_vars( NULL, FALSE, FALSE, NULL, FALSE);
 		$this->_template_args['admin_page_content'] = EEH_Template::display_template( $this->_template_path, $this->_template_args, TRUE );
@@ -247,13 +251,21 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 	}
 
 	/**
+	 * forces EE to re-assess which sites are up-to-date and which need migration
+	 */
+	public function _force_reassess(){
+		$count = EEM_Blog::instance()->mark_all_blogs_migration_status_as_unsure();
+		$this->_redirect_after_action( $count, 'Blogs', 'migration status updated', array( 'action' => 'default' ) );
+	}
+
+	/**
 	 * receives AJAX request to assess how many sites need to be migrated
 	 */
 	public function assessing_sites_needing_migration(){
 		$original_unknown_status_blog_count = EEM_Blog::instance()->count_blogs_maybe_needing_migration();
 		if( $original_unknown_status_blog_count ){
 			//ok we still don't even know how many need to be migrated
-			$newly_found_needing_migration_count = EE_Multisite_Migration_Manager::instance()->assess_sites_needing_migration( (int) 10 );
+			$newly_found_needing_migration_count = EE_Multisite_Migration_Manager::instance()->assess_sites_needing_migration( (int) 1 );
 
 		}
 		$this->_template_args['data'] = array(

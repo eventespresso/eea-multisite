@@ -13,6 +13,8 @@
 		<tr><th><?php _e( 'Broken', 'event_espresso' );?></th><td id="migration-assessment-borked">0</td></tr>
 	</table>
 		<a id="begin-multisite-migration" class="button button-primary" style='display:none'><?php _e( 'Migrate Network', 'event_espresso' );?></a>
+		<p><?php _e( 'Think there are other sites that need migrating? You may want to force a reassessment of which blogs need to be migrated', 'event_espresso' )?></p>
+		<a id="begin-multisite-migration" href="<?php echo $reassess_url?>" class="button button-secondary"><?php _e( 'Reassess Network Migration Needs', 'event_espresso' );?></a>
 </div>
 </div>
 <div id="migration-pane" style="display:none">
@@ -25,20 +27,16 @@
 	</div>
 	<h2 id="current-blog-title"><?php _e( 'Current Site: Garths dental visit', 'event_espresso' );?></h2>
 	<div id="migration-scripts">
-		<ol>
-			<li>Core 4.3 DMS</li>
-			<li>Calendar 3.1 DMS</li>
-		</ol>
+		<ol><!-- content added dynamically by javascript --></ol>
 	</div>
-	<h3 id="current-blog-current-script"><?php __( 'Loading Data Migration Script', 'event_espresso' )?></h3>
 	<div id="current-migration-progress-bar" class="progress-bar">
 		<figure>
 			<div class="bar" style="background:#2EA2CC;"></div>
 			<div class="percent"></div>
 		</figure>
 	</div>
-	<div id="progress-text">
-		234 records migrated<br/>
-		342 records migrated...
+	<h3 id="current-blog-current-script"><?php __( 'Loading Data Migration Script', 'event_espresso' )?></h3>
+	<div id="progress-text" style='height:400px;overflow-y:scroll'>
+		<!-- content added dynamically by javascript -->
 	</div>
 </div>

@@ -37,7 +37,7 @@ class Multisite_Admin_Page_Init extends EE_Admin_Page_Init  {
 
 		define( 'MULTISITE_PG_SLUG', 'espresso_multisite' );
 		define( 'MULTISITE_LABEL', __( 'EE Multisite', 'event_espresso' ));
-		define( 'EE_MULTISITE_ADMIN_URL', admin_url( 'admin.php?page=' . MULTISITE_PG_SLUG ));
+		define( 'EE_MULTISITE_ADMIN_URL', network_admin_url( 'admin.php?page=' . MULTISITE_PG_SLUG ));
 		define( 'EE_MULTISITE_ADMIN_ASSETS_PATH', EE_MULTISITE_ADMIN . 'assets' . DS );
 		define( 'EE_MULTISITE_ADMIN_ASSETS_URL', EE_MULTISITE_URL . 'admin' . DS .'multisite' . DS . 'assets' . DS );
 		define( 'EE_MULTISITE_ADMIN_TEMPLATE_PATH', EE_MULTISITE_ADMIN . 'templates' . DS );
