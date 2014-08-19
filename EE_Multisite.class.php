@@ -55,17 +55,17 @@ Class  EE_Multisite extends EE_Addon {
 					'administrator' => array(
 						'read_addon', 'edit_addon', 'edit_others_addon', 'edit_private_addon'
 						),
-					)
+					),
+			'model_paths' => array ( EE_MULTISITE_PATH . 'core/db_models' ),
+			'class_paths' => array( EE_MULTISITE_PATH . 'core/db_classes' ),
 			);
 		if( class_exists( 'EE_Meta_Capability_Map_Edit' ) ){
 			$registration_params[ 'capability_map' ] = new EE_Meta_Capability_Map_Edit( 'edit_addon', array( 'Event', '', 'edit_others_addon', 'edit_private_addon' ) );
 		}
-		//only register the DMS and models if on the main site. This way we avoid adding tables, and trying to remove tables,
+		//only register the DMS if on the main site. This way we avoid adding tables, and trying to remove tables,
 		//from blogs which aren't the main one
 		if( is_main_site() ){
 			$registration_params['dms_paths'] = array( EE_MULTISITE_PATH . 'core' . DS . 'data_migration_scripts' . DS );
-			$registration_params['model_paths'] = array ( EE_MULTISITE_PATH . 'core/db_models' );
-			$registration_params['class_paths'] = array( EE_MULTISITE_PATH . 'core/db_classes' );
 		}
 		// register addon via Plugin API
 		EE_Register_Addon::register(

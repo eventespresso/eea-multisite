@@ -40,6 +40,8 @@ class EED_Multisite extends EED_Module {
 	  */
 	 public static function set_hooks() {
 		 EE_Config::register_route( 'multisite', 'EED_Multisite', 'run' );
+		 add_action( 'wp_loaded', array( 'EED_Multisite', 'update_last_requested' ) );
+		 self::set_hooks_both();
 	 }
 
 	 /**
@@ -52,6 +54,57 @@ class EED_Multisite extends EED_Module {
 		 // ajax hooks
 		 add_action( 'wp_ajax_get_multisite', array( 'EED_Multisite', '_get_multisite' ));
 		 add_action( 'wp_ajax_nopriv_get_multisite', array( 'EED_Multisite', '_get_multisite' ));
+		 self::set_hooks_both();
+	 }
+
+	 protected static function set_hooks_both(){
+		 //set hooks for detecting an upgrade to EE or an addon
+		 $actions_that_could_change_mm = array(
+			 'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation',
+			 'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation_but_not_installed',
+			 'AHEE__EE_System__detect_if_activation_or_upgrade__reactivation',
+			 'AHEE__EE_System__detect_if_activation_or_upgrade__upgrade',
+			 'AHEE__EE_System__detect_if_activation_or_upgrade__downgrade'
+		 );
+		 foreach( array_keys( get_object_vars( EE_Registry::instance()->addons ) ) as $addon_classname ){
+			$actions_that_could_cause_mm_from_addon = array(
+					   "AHEE__{$addon_classname}__detect_activations_or_upgrades__new_activation",
+					   "AHEE__{$addon_classname}__detect_activations_or_upgrades__new_activation_but_not_installed",
+					   "AHEE__{$addon_classname}__detect_activations_or_upgrades__reactivation",
+					   "AHEE__{$addon_classname}__detect_activations_or_upgrades__upgrade",
+					   "AHEE__{$addon_classname}__detect_activations_or_upgrades__downgrade");
+			$actions_that_could_change_mm = array_merge( $actions_that_could_change_mm, $actions_that_could_cause_mm_from_addon );
+		 }
+		 foreach( $actions_that_could_change_mm as $action_name ){
+			add_action( $action_name, array('EED_Multisite', 'possible_maintenance_mode_change_detected' ) );
+		 }
+	 }
+
+	 /**
+	  * Called when maintenance mode made have been set or unset
+	  *
+	  * This is usually a good point to mark all blogs as status 'unsure'
+	  * in regards to their migration needs
+	  */
+	 public function possible_maintenance_mode_change_detected(){
+		 /* only mark blogs as unsure migration status when the main site has a possible
+		  * change to maintenance mode. Otherwise, as an example, when a new version of
+		  * EE is activated, this will occur again for EACH blog
+		  */
+		 if( is_main_site() ){
+			EEM_Blog::instance()->mark_all_blogs_migration_status_as_unsure();
+		 }
+	 }
+
+	 /**
+	  * Run on frontend requests to update when the blog was last updated
+	  */
+	 public static function update_last_requested(){
+		 global $current_site;
+		 $current_blog_id = get_current_blog_id();
+		 switch_to_blog( $current_site->blog_id );
+		 EEM_Blog::instance()->update_last_requested( $current_blog_id );
+		 restore_current_blog();
 	 }
 
 

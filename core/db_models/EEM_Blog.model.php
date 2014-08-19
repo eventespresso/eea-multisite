@@ -198,6 +198,27 @@ class EEM_Blog extends EEM_Soft_Delete_Base{
 			));
 		}
 	}
+
+	/**
+	 * Updates all the blogs' status to indicate we're unsure as to whether
+	 * or not they need to be migrated. This should probably be done
+	 * anytime a new version of EE is installed or an addon is activated or upgraded.
+	 *
+	 * @param array $query_params @see EEM_Base::get_all()
+	 * @return int how many blog were marked as unsure
+	 */
+	public function mark_all_blogs_migration_status_as_unsure( $query_params = array() ){
+		return $this->update( array( 'STS_ID' => self::status_unsure ), $query_params );
+	}
+
+	/**
+	 * Updates the time the specified blog was last requested to right now
+	 * @param int $blog_id
+	 * @return int number of rows updated
+	 */
+	public function update_last_requested( $blog_id ){
+		return $this->update_by_ID( array( 'BLG_last_requested' => current_time('mysql', TRUE) ), $blog_id );
+	}
 }
 
 // End of file EE_Blogs.model.php
