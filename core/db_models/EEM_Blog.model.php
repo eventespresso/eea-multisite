@@ -141,7 +141,11 @@ class EEM_Blog extends EEM_Soft_Delete_Base{
 	public function count_blogs_needing_migration(){
 		return $this->count( array(
 			array(
-				'STS_ID' => self::status_out_of_date
+				'OR' => array(
+					'STS_ID*outdated' => self::status_out_of_date,
+					'STS_ID*in_progress' => self::status_migrating
+				)
+
 			)
 		));
 	}

@@ -107,6 +107,29 @@ class EED_Multisite extends EED_Module {
 		 restore_current_blog();
 	 }
 
+	 /**
+	  * Similar to wp's switch_to_blog(), but also reset
+	  * a few EE singletons that need to be
+	  * reset too
+	  * @param int $new_blog_id
+	  * @param int $old_blog_id
+	  */
+	 public static function switch_to_blog( $new_blog_id ){
+		 switch_to_blog($new_blog_id);
+		 EE_Config::reset();
+		 EE_Data_Migration_Manager::reset();
+	 }
+
+	 /**
+	  * The same as wp's restore_current_blog(), but also takes care of restoring
+	  * a few EE-speicifc singletons
+	  */
+	 public static function restore_current_blog(){
+		 restore_current_blog();
+		 EE_Config::reset();
+		 EE_Data_Migration_Manager::reset();
+	 }
+
 
 
 

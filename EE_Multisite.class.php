@@ -47,7 +47,7 @@ Class  EE_Multisite extends EE_Addon {
 				// if plugin update engine is being used for auto-updates. not needed if PUE is not being used.
 				'pue_options'			=> array(
 					'pue_plugin_slug' => 'espresso_multisite',
-					'plugin_basename' => EE_MULTISITE_PLUGIN_FILE,
+					'plugin_basename' => EE_MULTISITE_BASENAME,
 					'checkPeriod' => '24',
 					'use_wp_update' => FALSE,
 					),

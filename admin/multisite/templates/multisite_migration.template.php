@@ -1,6 +1,6 @@
 <div id="assessment-pane">
 	<h1 id="main-title"><?php _e( 'Assessing what sites need Migrating...', 'event_espresso' )?></h1>
-	<h2 id='sub-title'> <?php _e( 'Once done assessing, the option will to migrate the network\'s data, if necessary', 'event_espresso' );?></h2>
+	<h2 id='sub-title'> <?php _e( 'Once done assessing, the option to migrate the network\'s data will appear, if necessary', 'event_espresso' );?></h2>
 	<div id="sites-needing-migration-progress-bar" class="progress-bar">
 	<figure>
 		<div class="bar" style="background:#2EA2CC;"></div>

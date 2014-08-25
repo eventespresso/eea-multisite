@@ -24,3 +24,5 @@ require WP_TESTS_DIR . '/includes/bootstrap.php';
 
 //Load the EE_specific testing tools
 require EE_TESTS_DIR . 'includes/EE_UnitTestCase.class.php';
+
+require EEADDON_TESTS_DIR . 'includes/EE_Multisite_UnitTestCase.class.php';

@@ -68,8 +68,7 @@ class EE_Multisite_Migration_Manager {
 		$multisite_migration_message = '';
 		$current_script_names = array();
 		while( $num_migrated < $records_to_migrate && $blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested() ){
-			switch_to_blog( $blog_to_migrate->ID() );
-			EE_Data_Migration_Manager::reset();
+			EED_Multisite::switch_to_blog( $blog_to_migrate->ID() );
 			do{
 				$results = EE_Data_Migration_Manager::instance()->migration_step( $records_to_migrate - $num_migrated );
 				$num_migrated += $results[ 'records_migrated' ];
@@ -92,8 +91,7 @@ class EE_Multisite_Migration_Manager {
 			if( $num_migrated >= $records_to_migrate ){
 				$current_script_names = $this->_get_applicable_dms_names();
 			}
-			restore_current_blog();
-			EE_Data_Migration_Manager::reset();
+			EED_Multisite::restore_current_blog();
 
 			//if appropriate, update this blog's status
 			if( $results[ 'status' ] == EE_Data_Migration_Manager::status_fatal_error ){
@@ -155,8 +153,7 @@ class EE_Multisite_Migration_Manager {
 		$blogs_needing_to_migrate = 0;
 		foreach( $blogs as $blog ){
 			//switch to that blog and assess whether or not it needs to be migrated
-			switch_to_blog( $blog->ID() );
-			EE_Data_Migration_Manager::reset();
+			EED_Multisite::switch_to_blog( $blog->ID() );
 			$needs_migrating = EE_Maintenance_Mode::instance()->set_maintenance_mode_if_db_old();
 			restore_current_blog();
 			if( $needs_migrating ){
@@ -167,7 +164,7 @@ class EE_Multisite_Migration_Manager {
 			}
 			$blog->save();
 		}
-		EE_Data_Migration_Manager::reset();
+		EED_Multisite::restore_current_blog();
 		return $blogs_needing_to_migrate;
 	}
 }
