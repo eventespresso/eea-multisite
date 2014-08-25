@@ -210,7 +210,7 @@ class EED_Multisite extends EED_Module {
 	 */
 	public static function filter_get_default_creator_id( $network_admin_id ) {
 
-		if ( $user_id = self::get_default_creator_id() ) {
+		if ( $user_id = self::get_current_blogs_oldest_admin() ) {
 			return $user_id;
 		} else {
 			return $network_admin_id;
@@ -218,12 +218,32 @@ class EED_Multisite extends EED_Module {
 	}
 
 
-
-	public static function get_default_creator_id() {
-		//find the earliest user id for the current blog
+	/**
+	 * Tries to find the oldest admin for this blog. If there are no admins for this blog,
+	 * then we return NULL
+	 * @global type $wpdb
+	 * @return int WP_User ID
+	 */
+	public static function get_current_blogs_oldest_admin() {
+		//find the earliest admin id for the current blog
 		global $wpdb;
-		$query = $wpdb->prepare( "SELECT user_id from {$wpdb->usermeta} WHERE meta_key='primary_blog' AND meta_value=%s ORDER BY umeta_id ASC LIMIT 1", get_current_blog_id() );
-		$user_id = $wpdb->get_var( $query );
+		$best_user_so_far = NULL;
+		$offset = 0;
+		do{
+			$query = $wpdb->prepare( "SELECT user_id from {$wpdb->usermeta} WHERE meta_key='primary_blog' AND meta_value=%s ORDER BY umeta_id ASC LIMIT %d, 1", get_current_blog_id(), $offset++ );
+			$user_id = $wpdb->get_var( $query );
+			if( $best_user_so_far &&
+				! user_can( $best_user_so_far, 'administrator' ) && //the previous best user wasn't an admin
+				user_can( $user_id, 'administrator' ) //but this one is
+					){
+				$best_user_so_far = $user_id;
+			}
+		}while( $user_id && ! user_can( $user_id, 'administrator' ) );
+		//if we didn't find anyone, or the last one found wasn't an admin
+		//then use the best one we found
+		if( ! $user_id || ! user_can( $user_id, 'administrator' ) ) {
+			$user_id = $best_user_so_far;
+		}
 		if ( $user_id && intval( $user_id ) ) {
 			return intval( $user_id );
 		} else {

@@ -44,7 +44,7 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 		$admin = $this->factory->user->create_and_get();
 		wp_update_user( array(
 			'ID' => $admin->ID,
-			'role' => 'Administrator',
+			'role' => 'administrator',
 		) );
 		update_user_meta( $admin->ID, 'primary_blog', get_current_blog_id() );
 		restore_current_blog();

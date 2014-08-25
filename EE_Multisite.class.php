@@ -75,9 +75,7 @@ Class EE_Multisite extends EE_Addon {
 			$registration_params[ 'dms_paths' ] = array( EE_MULTISITE_PATH . 'core' . DS . 'data_migration_scripts' . DS );
 		}
 		// register addon via Plugin API
-		EE_Register_Addon::register(
-				'Multisite', $registration_params
-		);
+		EE_Register_Addon::register( 'Multisite', $registration_params );
 	}
 
 
