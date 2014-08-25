@@ -12,13 +12,13 @@ if ( !defined( 'EVENT_ESPRESSO_VERSION' ) ) {
  * @author				Mike Nelson
  *
  */
-class EE_Multisite_UnitTestCase extends EE_UnitTestCase{
+class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 
 	/**
 	 * Sets up a blog with the latest EE installed on it
 	 * @return EE_Blog
 	 */
-	protected function _create_a_blog_with_ee(){
+	protected function _create_a_blog_with_ee() {
 		global $wpdb;
 		$blog = $this->factory->blog->create_and_get();
 		//grab one
@@ -45,12 +45,15 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase{
 		wp_update_user( array(
 			'ID' => $admin->ID,
 			'role' => 'Administrator',
-		));
+		) );
 		update_user_meta( $admin->ID, 'primary_blog', get_current_blog_id() );
 		restore_current_blog();
 
 		return EEM_Blog::instance()->get_one_by_ID( $blog->blog_id );
 	}
+
+
+
 }
 
 // End of file EE_Multisite_UnitTestCase.php

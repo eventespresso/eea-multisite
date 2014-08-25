@@ -12,18 +12,20 @@ if ( !defined( 'EVENT_ESPRESSO_VERSION' ) ) {
  * @author				Mike Nelson
  *
  */
-class EE_Blog_Test extends EE_UnitTestCase{
+class EE_Blog_Test extends EE_UnitTestCase {
 
-	public function test_get_blog_option(){
+	public function test_get_blog_option() {
 		//these two don't need to be migrated
 		$this->factory->blog->create_many( 2 );
 		//grab one
 		$blog1 = EEM_Blog::instance()->get_one();
 		$blog2 = EEM_Blog::instance()->get_one( array( array( 'blog_id' => array( '!=', $blog1->ID() ) ) ) );
-		$this->assertNotEquals( $blog1->get_blog_option( 'blogname', 'not_found' ), $blog2->get_blog_option( 'blogname', 'not_found') );
+		$this->assertNotEquals( $blog1->get_blog_option( 'blogname', 'not_found' ), $blog2->get_blog_option( 'blogname', 'not_found' ) );
 	}
 
-	public function test_cache_blog_options(){
+
+
+	public function test_cache_blog_options() {
 		//these two don't need to be migrated
 		$this->factory->blog->create_many( 2 );
 		//grab the 2nd blog, just for variety
@@ -37,8 +39,10 @@ class EE_Blog_Test extends EE_UnitTestCase{
 		$this->assertNotEmpty( $blog2->get_blog_option( 'siteurl' ) );
 		//now check we didn't actually switch blog
 		$this->assertEquals( $blog_switch_count, $wp_actions[ 'switch_blog' ] );
-
 	}
+
+
+
 }
 
 // End of file EE_Blog_Test.php

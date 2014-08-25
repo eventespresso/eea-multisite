@@ -7,7 +7,6 @@
  * @subpackage 	tests
  */
 
-
 /**
  * Test class for espresso_addon_skeleton.php
  *
@@ -23,7 +22,10 @@ class espresso_promotions_tests extends EE_UnitTestCase {
 	 * @since 0.0.1.dev.002
 	 */
 	function test_loading_multisite() {
-		$this->assertEquals( has_action('AHEE__EE_System__load_espresso_addons', 'load_espresso_multisite'), 10 );
+		$this->assertEquals( has_action( 'AHEE__EE_System__load_espresso_addons', 'load_espresso_multisite' ), 10 );
 		$this->assertTrue( class_exists( 'EE_Multisite' ) );
 	}
+
+
+
 }

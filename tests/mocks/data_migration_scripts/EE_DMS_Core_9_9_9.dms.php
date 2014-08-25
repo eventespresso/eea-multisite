@@ -12,7 +12,8 @@ if ( !defined( 'EVENT_ESPRESSO_VERSION' ) ) {
  * @author				Mike Nelson
  *
  */
-class EE_DMS_Core_9_9_9 extends EE_Data_Migration_Script_Base{
+class EE_DMS_Core_9_9_9 extends EE_Data_Migration_Script_Base {
+
 	public function __construct() {
 		$this->_pretty_name = __( 'Multisite Mock Migration', 'event_espresso' );
 		$this->_migration_stages = array(
@@ -21,6 +22,9 @@ class EE_DMS_Core_9_9_9 extends EE_Data_Migration_Script_Base{
 		);
 		parent::__construct();
 	}
+
+
+
 	/**
 	 * This one just always needs to migrate
 	 * @param type $version_string
@@ -41,13 +45,20 @@ class EE_DMS_Core_9_9_9 extends EE_Data_Migration_Script_Base{
 	public function schema_changes_before_migration() {
 
 	}
+
+
+
 }
 
-class EE_DMS_9_9_9_first extends EE_Data_Migration_Script_Stage{
+class EE_DMS_9_9_9_first extends EE_Data_Migration_Script_Stage {
+
 	public function __construct() {
 		$this->_pretty_name = __( 'First Stage', 'event_espresso' );
 		parent::__construct();
 	}
+
+
+
 	protected function _count_records_to_migrate() {
 		return 111;
 	}
@@ -57,31 +68,43 @@ class EE_DMS_9_9_9_first extends EE_Data_Migration_Script_Stage{
 	protected function _migration_step( $num_items_to_migrate = 50 ) {
 		$records_remaining_to_migrate = $this->count_records_to_migrate() - $this->count_records_migrated();
 		$num_items_to_migrate = min( array( $num_items_to_migrate, $records_remaining_to_migrate ) );
-		if($this->count_records_migrated() + $num_items_to_migrate >= $this->count_records_to_migrate()){
+		if ( $this->count_records_migrated() + $num_items_to_migrate >= $this->count_records_to_migrate() ) {
 			$this->set_completed();
 		}
 		return $num_items_to_migrate;
 	}
+
+
+
 }
 
-class EE_DMS_9_9_9_second extends EE_Data_Migration_Script_Stage{
+class EE_DMS_9_9_9_second extends EE_Data_Migration_Script_Stage {
+
 	public function __construct() {
 		$this->_pretty_name = __( 'Second Stage', 'event_espresso' );
 		parent::__construct();
 	}
+
+
+
 	protected function _count_records_to_migrate() {
 		return 222;
 	}
 
+
+
 	protected function _migration_step( $num_items_to_migrate = 50 ) {
 		$records_remaining_to_migrate = $this->count_records_to_migrate() - $this->count_records_migrated();
 		$num_items_to_migrate = min( array( $num_items_to_migrate, $records_remaining_to_migrate ) );
-		if($this->count_records_migrated() + $num_items_to_migrate >= $this->count_records_to_migrate()){
+		if ( $this->count_records_migrated() + $num_items_to_migrate >= $this->count_records_to_migrate() ) {
 			$this->set_completed();
 		}
-		$this->add_error( 'Some error occured. JK!');
+		$this->add_error( 'Some error occured. JK!' );
 		return $num_items_to_migrate;
 	}
+
+
+
 }
 
 // End of file EE_DMS_Core_9_9_9.dms.php

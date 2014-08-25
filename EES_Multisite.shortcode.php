@@ -1,4 +1,7 @@
-<?php if ( ! defined( 'EVENT_ESPRESSO_VERSION' )) { exit(); }
+<?php
+if ( !defined( 'EVENT_ESPRESSO_VERSION' ) ) {
+	exit();
+}
 /*
  * ------------------------------------------------------------------------
  *
@@ -24,9 +27,8 @@
  *
  * ------------------------------------------------------------------------
  */
-class EES_Multisite  extends EES_Shortcode {
 
-
+class EES_Multisite extends EES_Shortcode {
 
 	/**
 	 * 	set_hooks - for hooking into EE Core, modules, etc
@@ -35,6 +37,7 @@ class EES_Multisite  extends EES_Shortcode {
 	 *  @return 	void
 	 */
 	public static function set_hooks() {
+
 	}
 
 
@@ -46,6 +49,7 @@ class EES_Multisite  extends EES_Shortcode {
 	 *  @return 	void
 	 */
 	public static function set_hooks_admin() {
+
 	}
 
 
@@ -57,6 +61,7 @@ class EES_Multisite  extends EES_Shortcode {
 	 *  @return 	void
 	 */
 	public static function set_definitions() {
+
 	}
 
 
@@ -88,17 +93,18 @@ class EES_Multisite  extends EES_Shortcode {
 	 * @param 	array $attributes
 	 * @return 	void
 	 */
-	public function process_shortcode( $attributes = array() ) {
+	public function process_shortcode( $attributes = array( ) ) {
 		// make sure $attributes is an array
 		$attributes = array_merge(
-			// defaults
-			array(),
-			(array)$attributes
+				// defaults
+				array( ), ( array ) $attributes
 		);
-		return EE_Registry::instance()->modules['multisite']->display_multisite( $attributes );
+		return EE_Registry::instance()->modules[ 'multisite' ]->display_multisite( $attributes );
 	}
 
 
+
 }
+
 // End of file EES_Multisite.shortcode.php
 // Location: /wp-content/plugins/espresso-multisite/EES_Multisite.shortcode.php

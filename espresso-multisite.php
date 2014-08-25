@@ -37,7 +37,8 @@
  * ------------------------------------------------------------------------
  */
 define( 'EE_MULTISITE_VERSION', '0.0.1.dev.002' );
-define( 'EE_MULTISITE_PLUGIN_FILE',  __FILE__ );
+define( 'EE_MULTISITE_PLUGIN_FILE', __FILE__ );
+
 function load_espresso_multisite() {
 	if ( class_exists( 'EE_Addon' ) ) {
 		// multisite version
@@ -45,6 +46,9 @@ function load_espresso_multisite() {
 		EE_Multisite::register_addon();
 	}
 }
+
+
+
 add_action( 'AHEE__EE_System__load_espresso_addons', 'load_espresso_multisite' );
 // End of file espresso_multisite.php
 // Location: wp-content/plugins/espresso-multisite/espresso_multisite.php

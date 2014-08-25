@@ -22,7 +22,8 @@ function EE_Multisite_DMS_Driver(){
 	this.step = function(){
 		this.do_ajax({
 			action : 'multisite_migration_step',
-			page : 'espresso_multisite'}, this.handle_multisite_migration_step_response );
+			page : 'espresso_multisite'
+		}, this.handle_multisite_migration_step_response );
 	};
 	//performs the ajax request, and if successful, calls setup.callback;
 	//on failure with HTML response, calls report_general_migration_error with the content and loads that content to the screen
@@ -76,7 +77,8 @@ function EE_Multisite_DMS_Driver(){
 	this.assessment_step = function(){
 		this.do_ajax({
 			action : 'multisite_migration_assessment_step',
-			page : 'espresso_multisite'}, this.handle_multisite_migration_assessment_step_response
+			page : 'espresso_multisite'
+		}, this.handle_multisite_migration_assessment_step_response
 		);
 	}
 	this.handle_multisite_migration_assessment_step_response = function(response, status, xhr){
@@ -152,7 +154,11 @@ var Maintenance_helper = {
 			action: 'migration_step',
 			page: 'espresso_maintenance_settings'
 		};
-		Maintenance_helper.do_ajax(data,{'where':'#migration-messages', 'what':'prepend','callback':Maintenance_helper.update_progress});
+		Maintenance_helper.do_ajax(data,{
+			'where':'#migration-messages',
+			'what':'prepend',
+			'callback':Maintenance_helper.update_progress
+		});
 
 	},
 	/**
@@ -199,56 +205,58 @@ var Maintenance_helper = {
 			document.location.href = document.location.href + '&continue_migration=true';
 		});
 		BG.update_progress_to( records_migrated, records_to_migrate );
-		jQuery( '#progress-responsive__percent' ).css({ 'color' : '#fff' });
+		jQuery( '#progress-responsive__percent' ).css({
+			'color' : '#fff'
+		});
 		alert(ee_maintenance.click_next_when_ready);
 	},
 	//performs the ajax request, and if successful, calls setup.callback;
 	//on failure with HTML response, calls report_general_migration_error with the content and loads that content to the screen
 	do_ajax: function(data, setup) {
 
-			if ( typeof(setup) === 'undefined' ) {
-				setup = {
-					where: '#migration-messages',
-					what: 'clear',
-					callback: undefined
-				};
-			}
+		if ( typeof(setup) === 'undefined' ) {
+			setup = {
+				where: '#migration-messages',
+				what: 'clear',
+				callback: undefined
+			};
+		}
 
-			data.ee_admin_ajax = true;
+		data.ee_admin_ajax = true;
 
-			jQuery.ajax({
-				type: "POST",
-				url: ajaxurl,
-				data: data,
-				success: function(response, status, xhr) {
-//					alert('response:'+response);
-					var ct = xhr.getResponseHeader("content-type") || "";
-					if (ct.indexOf('html') > -1) {
-						Maintenance_helper.display_content(response,setup.where,setup.what);
-						if( typeof(setup.dont_report) === 'undefined'){
-							Maintenance_helper.report_general_migration_error(response);
-							Maintenance_helper.display_content(ee_maintenance.fatal_error, '#main-message', 'clear');
-							Maintenance_helper.finish();
-						}
-					}
-
-					if (ct.indexOf('json') > -1 ) {
-						var resp = response,
-						wht = typeof(resp.data.what) === 'undefined' ? setup.what : resp.data.what,
-						whr = typeof(resp.data.where) === 'undefined' ? setup.where : resp.data.where,
-						display_content = resp.error ? resp.error : resp.content;
-
-						Maintenance_helper.display_notices(resp.notices);
-						Maintenance_helper.display_content(display_content, whr, wht);
-						//call the callback that was passed in
-						if (typeof(setup.callback) !== 'undefined'){
-							setup.callback(response);
-						}
+		jQuery.ajax({
+			type: "POST",
+			url: ajaxurl,
+			data: data,
+			success: function(response, status, xhr) {
+				//					alert('response:'+response);
+				var ct = xhr.getResponseHeader("content-type") || "";
+				if (ct.indexOf('html') > -1) {
+					Maintenance_helper.display_content(response,setup.where,setup.what);
+					if( typeof(setup.dont_report) === 'undefined'){
+						Maintenance_helper.report_general_migration_error(response);
+						Maintenance_helper.display_content(ee_maintenance.fatal_error, '#main-message', 'clear');
+						Maintenance_helper.finish();
 					}
 				}
-			});
-			return false;
-		},
+
+				if (ct.indexOf('json') > -1 ) {
+					var resp = response,
+					wht = typeof(resp.data.what) === 'undefined' ? setup.what : resp.data.what,
+					whr = typeof(resp.data.where) === 'undefined' ? setup.where : resp.data.where,
+					display_content = resp.error ? resp.error : resp.content;
+
+					Maintenance_helper.display_notices(resp.notices);
+					Maintenance_helper.display_content(display_content, whr, wht);
+					//call the callback that was passed in
+					if (typeof(setup.callback) !== 'undefined'){
+						setup.callback(response);
+					}
+				}
+			}
+		});
+		return false;
+	},
 	//sends an ajax message to the backend for logging
 	report_general_migration_error: function(message){
 		var data = {
@@ -256,13 +264,17 @@ var Maintenance_helper = {
 			page: 'espresso_maintenance_settings',
 			message:message
 		};
-		Maintenance_helper.do_ajax(data,{'where':'#migration-messages', 'what':'prepend','dont_report':true});
+		Maintenance_helper.do_ajax(data,{
+			'where':'#migration-messages',
+			'what':'prepend',
+			'dont_report':true
+		});
 	},
 
-//we actually want to display notices in the same place as all normal ajax messages appear
+	//we actually want to display notices in the same place as all normal ajax messages appear
 	display_notices: function(content) {
 		jQuery('#migration-messages').prepend(content);
-//		jQuery('#ajax-notices-container').prepend(content);
+	//		jQuery('#ajax-notices-container').prepend(content);
 	},
 
 	display_content: function(content, where, what) {
@@ -281,7 +293,7 @@ var Maintenance_helper = {
 };
 
 jQuery(function() {
-//	alert("jquery a go");
+	//	alert("jquery a go");
 	driver = new EE_Multisite_DMS_Driver();
 	driver.assessment_step();
 	jQuery('#begin-multisite-migration').click(function(){
