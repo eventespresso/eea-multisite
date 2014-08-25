@@ -78,6 +78,8 @@ class EED_Multisite extends EED_Module {
 		 foreach( $actions_that_could_change_mm as $action_name ){
 			add_action( $action_name, array('EED_Multisite', 'possible_maintenance_mode_change_detected' ) );
 		 }
+		 //a very specific hook for when running the EE_DMS_Core_4_5_0
+		 add_filter( 'FHEE__EE_DMS_Core_4_5_0__get_default_creator_id', array('EED_Multisite', 'filter_get_default_creator_id' ) );
 	 }
 
 	 /**
@@ -190,6 +192,33 @@ class EED_Multisite extends EED_Module {
 		}
 	}
 
+	/**
+	 * When running the EE_DMS_Core_4_5_0 migration, user each blog admin's ID,
+	 * not the network admin's
+	 * @global type $wpdb
+	 * @param type $network_admin_id
+	 * @return int
+	 */
+	public static function filter_get_default_creator_id( $network_admin_id ){
+
+		if( $user_id = self::get_default_creator_id() ){
+			return $user_id ;
+		}else{
+			return $network_admin_id;
+		}
+	}
+
+	public static function get_default_creator_id(){
+		//find the earliest user id for the current blog
+		global $wpdb;
+		$query = $wpdb->prepare( "SELECT user_id from {$wpdb->usermeta} WHERE meta_key='primary_blog' AND meta_value=%s ORDER BY umeta_id ASC LIMIT 1",get_current_blog_id() );
+		$user_id = $wpdb->get_var( $query );
+		if( $user_id && intval( $user_id ) ){
+			return intval( $user_id );
+		}else{
+			return NULL;
+		}
+	}
 
 
 
