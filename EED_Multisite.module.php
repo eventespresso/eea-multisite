@@ -116,8 +116,7 @@ class EED_Multisite extends EED_Module {
 	  */
 	 public static function switch_to_blog( $new_blog_id ){
 		 switch_to_blog($new_blog_id);
-		 EE_Config::reset();
-		 EE_Data_Migration_Manager::reset();
+		 EE_Registry::reset();
 	 }
 
 	 /**
@@ -126,8 +125,7 @@ class EED_Multisite extends EED_Module {
 	  */
 	 public static function restore_current_blog(){
 		 restore_current_blog();
-		 EE_Config::reset();
-		 EE_Data_Migration_Manager::reset();
+		 EE_Registry::reset();
 	 }
 
 
