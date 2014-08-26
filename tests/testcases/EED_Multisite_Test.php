@@ -22,10 +22,10 @@ class EED_Multisite_Test extends EE_Multisite_UnitTestCase {
 		$this->assertEquals( 3, $this->_count_all_users() );
 
 		//ok now let's go to test this
-//		switch_to_blog( $blog2->ID() );
-//		$blog2_creator_id = EED_Multisite::get_default_creator_id();
-//		$this->assertTrue( !empty( $blog2_creator_id ) );
-//		$this->assertEquals( '2', get_user_meta( $blog2_creator_id, 'primary_blog', TRUE ) );
+		switch_to_blog( $blog2->ID() );
+		$blog2_creator_id = EED_Multisite::get_default_creator_id();
+		$this->assertTrue( !empty( $blog2_creator_id ) );
+		$this->assertEquals( '2', get_user_meta( $blog2_creator_id, 'primary_blog', TRUE ) );
 
 		//and just to be sure, try it again. this time we'll delete the original
 		//blog admin, create a subscriber, then the new blog admin, then another
