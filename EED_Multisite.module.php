@@ -69,7 +69,6 @@ class EED_Multisite extends EED_Module {
 
 	public static function show_multisite_admin_in_mm( $admin_page_folder_names){
 		$admin_page_folder_names[ 'multisite' ] = EE_MULTISITE_ADMIN;
-//		var_dump( $admin_page_folder_names);
 		return $admin_page_folder_names;
 	}
 
@@ -222,7 +221,7 @@ class EED_Multisite extends EED_Module {
 	 */
 	public static function filter_get_default_creator_id( $network_admin_id ) {
 
-		if ( $user_id = self::get_current_blogs_oldest_admin() ) {
+		if ( $user_id = self::get_default_creator_id() ) {
 			return $user_id;
 		} else {
 			return $network_admin_id;
@@ -236,26 +235,18 @@ class EED_Multisite extends EED_Module {
 	 * @global type $wpdb
 	 * @return int WP_User ID
 	 */
-	public static function get_current_blogs_oldest_admin() {
+	public static function get_default_creator_id() {
 		//find the earliest admin id for the current blog
 		global $wpdb;
-		$best_user_so_far = NULL;
 		$offset = 0;
+
+		$role_to_check = apply_filters( 'FHEE__EED_Multisite__get_default_creator_id__role_to_check', 'administrator' );
 		do{
-			$query = $wpdb->prepare( "SELECT user_id from {$wpdb->usermeta} WHERE meta_key='primary_blog' AND meta_value=%s ORDER BY umeta_id ASC LIMIT %d, 1", get_current_blog_id(), $offset++ );
+			$query = $wpdb->prepare( "SELECT user_id from {$wpdb->usermeta} WHERE meta_key='primary_blog' AND meta_value=%s ORDER BY user_id ASC LIMIT %d, 1", get_current_blog_id(), $offset++ );
 			$user_id = $wpdb->get_var( $query );
-			if( $best_user_so_far &&
-				! user_can( $best_user_so_far, 'administrator' ) && //the previous best user wasn't an admin
-				user_can( $user_id, 'administrator' ) //but this one is
-					){
-				$best_user_so_far = $user_id;
-			}
-		}while( $user_id && ! user_can( $user_id, 'administrator' ) );
-		//if we didn't find anyone, or the last one found wasn't an admin
-		//then use the best one we found
-		if( ! $user_id || ! user_can( $user_id, 'administrator' ) ) {
-			$user_id = $best_user_so_far;
-		}
+		}while( $user_id && ! user_can( $user_id, $role_to_check ) );
+		
+		$user_id = apply_filters( 'FHEE__EED_Multisite__get_default_creator_id__user_id', $user_id );
 		if ( $user_id && intval( $user_id ) ) {
 			return intval( $user_id );
 		} else {
