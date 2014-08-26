@@ -150,20 +150,31 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 	protected function _migration_page() {
 		EE_Registry::instance()->load_helper( 'Form_Fields' );
-		$this->_template_path = EE_MULTISITE_ADMIN_TEMPLATE_PATH . 'multisite_migration.template.php';
+		if( EE_Maintenance_Mode::instance()->models_can_query() ){
+			$this->_template_path = EE_MULTISITE_ADMIN_TEMPLATE_PATH . 'multisite_migration.template.php';
 
-		$this->_template_args[ 'reassess_url' ] = EE_Admin_Page::add_query_args_and_nonce( array( 'action' => 'force_reassess' ), EE_MULTISITE_ADMIN_URL );
-		$this->_set_add_edit_form_tags( 'update_settings' );
-		$this->_set_publish_post_box_vars( NULL, FALSE, FALSE, NULL, FALSE );
-		$this->_template_args[ 'admin_page_content' ] = EEH_Template::display_template( $this->_template_path, $this->_template_args, TRUE );
-		wp_localize_script( 'espresso_multisite_admin', 'ee_i18n_text', array(
-			'done_assessment' => __( 'Assessment Complete', 'event_espresso' ),
-			'network_needs_migration' => __( 'Network requires migration', 'event_espresso' ),
-			'no_migrations_required' => __( 'No migrations are required', 'event_espresso' ),
-			'ajax_error' => __( 'An error occurred communicating with the server. Please contact support', 'event_espresso' ),
-			'all_done' => __( 'All done migration network', 'event_espresso' )
-		) );
-		$this->display_admin_page_with_sidebar();
+			$this->_template_args[ 'reassess_url' ] = EE_Admin_Page::add_query_args_and_nonce( array( 'action' => 'force_reassess' ), EE_MULTISITE_ADMIN_URL );
+			$this->_set_add_edit_form_tags( 'update_settings' );
+			$this->_set_publish_post_box_vars( NULL, FALSE, FALSE, NULL, FALSE );
+			$this->_template_args[ 'admin_page_content' ] = EEH_Template::display_template( $this->_template_path, $this->_template_args, TRUE );
+			wp_localize_script( 'espresso_multisite_admin', 'ee_i18n_text', array(
+				'done_assessment' => __( 'Assessment Complete', 'event_espresso' ),
+				'network_needs_migration' => __( 'Network requires migration', 'event_espresso' ),
+				'no_migrations_required' => __( 'No migrations are required', 'event_espresso' ),
+				'ajax_error' => __( 'An error occurred communicating with the server. Please contact support', 'event_espresso' ),
+				'all_done' => __( 'All done migration network', 'event_espresso' )
+			) );
+			$this->display_admin_page_with_sidebar();
+		}else{
+			$migration_page = get_admin_url( get_current_blog_id(), 'admin.php?page=espresso_maintenance_settings' );
+			$this->_template_args['admin_page_content'] = EEH_Template::display_template( EE_MULTISITE_ADMIN_TEMPLATE_PATH . 'multisite_migration_in_mm.template.php', array('migration_page_url' => $migration_page), TRUE);
+//			$this->_template_args['whatever'] ='';
+//			$this->_set_add_edit_form_tags( 'update_settings' );
+//			$this->_set_publish_post_box_vars( NULL, FALSE, FALSE, NULL, FALSE );
+//
+//		$this->_template_args[ 'reassess_url' ] = EE_Admin_Page::add_query_args_and_nonce( array( 'action' => 'force_reassess' ), EE_MULTISITE_ADMIN_URL );
+			$this->display_admin_page_with_sidebar();
+		}
 	}
 
 

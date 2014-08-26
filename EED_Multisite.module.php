@@ -58,7 +58,19 @@ class EED_Multisite extends EED_Module {
 		// ajax hooks
 		add_action( 'wp_ajax_get_multisite', array( 'EED_Multisite', '_get_multisite' ) );
 		add_action( 'wp_ajax_nopriv_get_multisite', array( 'EED_Multisite', '_get_multisite' ) );
+
 		self::set_hooks_both();
+
+		//true admin-only hooks
+		if( ! EE_Maintenance_Mode::instance()->models_can_query() ){
+			add_filter('FHEE__EE_Admin_Page_Loader___get_installed_pages__installed_refs', array('EED_Multisite','show_multisite_admin_in_mm'), 110 );
+		}
+	}
+
+	public static function show_multisite_admin_in_mm( $admin_page_folder_names){
+		$admin_page_folder_names[ 'multisite' ] = EE_MULTISITE_ADMIN;
+//		var_dump( $admin_page_folder_names);
+		return $admin_page_folder_names;
 	}
 
 

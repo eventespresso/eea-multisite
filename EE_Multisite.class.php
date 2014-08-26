@@ -102,7 +102,7 @@ Class EE_Multisite extends EE_Addon {
 	 */
 	public function additional_admin_hooks() {
 		// is admin and not in M-Mode ?
-		if ( is_admin() && !EE_Maintenance_Mode::instance()->level() && is_network_admin() ) {
+		if ( is_admin() && is_network_admin() ) {
 			add_filter( 'network_admin_plugin_action_links', array( $this, 'plugin_actions' ), 10, 2 );
 		}
 	}
