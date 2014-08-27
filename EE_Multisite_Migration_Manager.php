@@ -120,8 +120,10 @@ class EE_Multisite_Migration_Manager {
 				'message' => $multisite_migration_message
 			);
 		} else {
+			//theoreticlly we could receive another request like this when there are no
+			//more blogs that need to be migrated
 			return array(
-				'current_blog_name' => __( 'All blogs up-to-date', 'event_espresso' ),
+				'current_blog_name' => '',
 				'current_blog_script_names' => array( ),
 				'current_dms' => array(
 					'records_to_migrate' => 1,

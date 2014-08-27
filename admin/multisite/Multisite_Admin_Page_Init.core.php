@@ -44,7 +44,6 @@ class Multisite_Admin_Page_Init extends EE_Admin_Page_Init {
 		define( 'EE_MULTISITE_ADMIN_ASSETS_URL', EE_MULTISITE_URL . 'admin' . DS . 'multisite' . DS . 'assets' . DS );
 		define( 'EE_MULTISITE_ADMIN_TEMPLATE_PATH', EE_MULTISITE_ADMIN . 'templates' . DS );
 		define( 'EE_MULTISITE_ADMIN_TEMPLATE_URL', EE_MULTISITE_URL . 'admin' . DS . 'multisite' . DS . 'templates' . DS );
-
 		parent::__construct();
 		$this->_folder_path = EE_MULTISITE_ADMIN;
 	}
@@ -75,8 +74,6 @@ class Multisite_Admin_Page_Init extends EE_Admin_Page_Init {
 					'admin_init_page' => $this
 						) );
 	}
-
-
 
 }
 

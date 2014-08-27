@@ -64,6 +64,7 @@ function EE_Multisite_DMS_Driver(){
 			jQuery('#progress-text').append( current_dms.message);
 			//are we all done then?
 			if( blogs_needing_migration == 0 ){
+				jQuery('#sites-migrated-progress-bar-header').html( ee_i18n_text.all_done );
 				alert(ee_i18n_text.all_done);
 			}else{
 				driver.step();

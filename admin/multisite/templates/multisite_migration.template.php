@@ -18,7 +18,7 @@
 	</div>
 </div>
 <div id="migration-pane" style="display:none">
-	<h2><?php _e( 'Sites Migrated', 'event_espresso' ); ?></h2>
+	<h2 id="sites-migrated-progress-bar-header"><?php _e( 'Sites Migrated', 'event_espresso' ); ?></h2>
 	<div id="sites-migrated-progress-bar" class="progress-bar">
 		<figure>
 			<div class="bar" style="background:#2EA2CC;"></div>

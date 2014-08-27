@@ -162,7 +162,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				'network_needs_migration' => __( 'Network requires migration', 'event_espresso' ),
 				'no_migrations_required' => __( 'No migrations are required', 'event_espresso' ),
 				'ajax_error' => __( 'An error occurred communicating with the server. Please contact support', 'event_espresso' ),
-				'all_done' => __( 'All done migration network', 'event_espresso' )
+				'all_done' => __( 'All done migrating network', 'event_espresso' )
 			) );
 			$this->display_admin_page_with_sidebar();
 		}else{
@@ -339,7 +339,13 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		//we know how many need to be migrated. so let's do that
 		$step_size = defined( 'EE_MIGRATION_STEP_SIZE' ) ? EE_MIGRATION_STEP_SIZE * 10 : 500;
 		$migration_status = EE_Multisite_Migration_Manager::instance()->migration_step( $step_size );
-		$migration_status[ 'blogs_total' ] = EEM_Blog::instance()->count();
+		$blogs_left = EEM_Blog::instance()->count();
+		if( $blogs_left == 0 ){
+			$migration_status[ 'current_blog_name' ] = '';
+			$migration_status[ 'current_blog_script_names' ] = array();
+			$migration_status[ 'message' ] = __( 'All blogs up-to-date', 'event_espresso' );
+		}
+		$migration_status[ 'blogs_total' ] = $blogs_left;
 		$migration_status[ 'blogs_needing_migration' ] = EEM_Blog::instance()->count_blogs_needing_migration();
 		$this->_template_args[ 'data' ] = $migration_status;
 		$this->_return_json();
