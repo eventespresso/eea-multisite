@@ -79,6 +79,34 @@ class EED_Multisite_Test extends EE_Multisite_UnitTestCase {
 		return $wpdb->get_var( "SELECT count(*) FROM $wpdb->users" );
 	}
 
+	/**
+	 * we don't test that the EE_System and EE_Addon hooks are fired correctly (already tested in EE_System_Test
+	 * and EE_System_Test_With_Addon and EE_Addon_Test in core. We just test that our callbacks are
+	 * correctly set on them and that when that callback is called the correctly behaviour happens
+	 */
+	public function test_possible_maintenance_mode_change_detected(){
+		$actions_that_should_call_callback = array(
+			'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation',
+			'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation_but_not_installed',
+			'AHEE__EE_System__detect_if_activation_or_upgrade__reactivation',
+			'AHEE__EE_System__detect_if_activation_or_upgrade__upgrade',
+			'AHEE__EE_System__detect_if_activation_or_upgrade__downgrade',
+			"AHEE__EE_Addon__detect_activations_or_upgrades__new_activation",
+			"AHEE__EE_Addon__detect_activations_or_upgrades__new_activation_but_not_installed",
+			"AHEE__EE_Addon__detect_activations_or_upgrades__reactivation",
+			"AHEE__EE_Addon__detect_activations_or_upgrades__upgrade",
+			"AHEE__EE_Addon__detect_activations_or_upgrades__downgrade"
+		);
+		foreach( $actions_that_should_call_callback as $action ){
+			$this->assertTrue( FALSE != has_action( $action, array( 'EED_Multisite', 'possible_maintenance_mode_change_detected' ) ) );
+		}
+		//we COULD do integration testing to verify that EE_System is calling those hooks at the right time
+		//and because EED_Multisite::possible_maintenance_mode_change_detected() mostly just calls
+		//EEM_Blog::instance()->mark_all_blogs_migration_status_as_unsure() we will leave that
+		//to be tested in EEM_Blog_Test
+
+	}
+
 
 
 }

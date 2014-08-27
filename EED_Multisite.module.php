@@ -78,17 +78,13 @@ class EED_Multisite extends EED_Module {
 			'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation_but_not_installed',
 			'AHEE__EE_System__detect_if_activation_or_upgrade__reactivation',
 			'AHEE__EE_System__detect_if_activation_or_upgrade__upgrade',
-			'AHEE__EE_System__detect_if_activation_or_upgrade__downgrade'
+			'AHEE__EE_System__detect_if_activation_or_upgrade__downgrade',
+			"AHEE__EE_Addon__detect_activations_or_upgrades__new_activation",
+			"AHEE__EE_Addon__detect_activations_or_upgrades__new_activation_but_not_installed",
+			"AHEE__EE_Addon__detect_activations_or_upgrades__reactivation",
+			"AHEE__EE_Addon__detect_activations_or_upgrades__upgrade",
+			"AHEE__EE_Addon__detect_activations_or_upgrades__downgrade"
 		);
-		foreach ( array_keys( get_object_vars( EE_Registry::instance()->addons ) ) as $addon_classname ) {
-			$actions_that_could_cause_mm_from_addon = array(
-				"AHEE__{$addon_classname}__detect_activations_or_upgrades__new_activation",
-				"AHEE__{$addon_classname}__detect_activations_or_upgrades__new_activation_but_not_installed",
-				"AHEE__{$addon_classname}__detect_activations_or_upgrades__reactivation",
-				"AHEE__{$addon_classname}__detect_activations_or_upgrades__upgrade",
-				"AHEE__{$addon_classname}__detect_activations_or_upgrades__downgrade" );
-			$actions_that_could_change_mm = array_merge( $actions_that_could_change_mm, $actions_that_could_cause_mm_from_addon );
-		}
 		foreach ( $actions_that_could_change_mm as $action_name ) {
 			add_action( $action_name, array( 'EED_Multisite', 'possible_maintenance_mode_change_detected' ) );
 		}

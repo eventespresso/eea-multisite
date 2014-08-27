@@ -12,7 +12,7 @@ if ( !defined( 'EVENT_ESPRESSO_VERSION' ) ) {
  * @author				Mike Nelson
  *
  */
-class EEM_Blog_Test extends EE_UnitTestCase {
+class EEM_Blog_Test extends EE_Multisite_UnitTestCase {
 
 	public function test_get_all() {
 		$this->assertEquals( 1, EEM_Blog::instance()->count() );
@@ -73,6 +73,21 @@ class EEM_Blog_Test extends EE_UnitTestCase {
 		$this->assertEquals( $blog_migrating, EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested() );
 		$blog_migrating->delete();
 		$this->assertEquals( $blog_needing_migration_last_requetsed_now, EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested() );
+	}
+
+	public function test_mark_all_blogs_migration_status_as_unsure(){
+		$blog1 = $this->_create_a_blog_with_ee();
+		$blog1->save( array( 'STS_ID' => EEM_Blog::status_up_to_date ) );
+		$this->assertEquals( EEM_Blog::status_up_to_date, $blog1->STS_ID() );
+		$blog2 = $this->_create_a_blog_with_ee();
+		$blog2->save( array( 'STS_ID' => EEM_Blog::status_out_of_date ) );
+		$this->assertEquals( EEM_Blog::status_out_of_date, $blog2->STS_ID() );
+		EEM_Blog::reset()->mark_all_blogs_migration_status_as_unsure();
+		$refreshed_blog1 = EEM_Blog::instance()->get_one_by_ID( $blog1->ID() );
+		$refreshed_blog2 = EEM_Blog::instance()->get_one_by_ID( $blog2->ID() );
+		$this->assertEquals( EEM_Blog::status_unsure, $refreshed_blog1->STS_ID() );
+		$this->assertEquals( EEM_Blog::status_unsure, $refreshed_blog2->STS_ID() );
+
 	}
 
 
