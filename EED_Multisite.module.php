@@ -55,9 +55,6 @@ class EED_Multisite extends EED_Module {
 	 *  @return 	void
 	 */
 	public static function set_hooks_admin() {
-		// ajax hooks
-		add_action( 'wp_ajax_get_multisite', array( 'EED_Multisite', '_get_multisite' ) );
-		add_action( 'wp_ajax_nopriv_get_multisite', array( 'EED_Multisite', '_get_multisite' ) );
 
 		self::set_hooks_both();
 
@@ -245,7 +242,7 @@ class EED_Multisite extends EED_Module {
 			$query = $wpdb->prepare( "SELECT user_id from {$wpdb->usermeta} WHERE meta_key='primary_blog' AND meta_value=%s ORDER BY user_id ASC LIMIT %d, 1", get_current_blog_id(), $offset++ );
 			$user_id = $wpdb->get_var( $query );
 		}while( $user_id && ! user_can( $user_id, $role_to_check ) );
-		
+
 		$user_id = apply_filters( 'FHEE__EED_Multisite__get_default_creator_id__user_id', $user_id );
 		if ( $user_id && intval( $user_id ) ) {
 			return intval( $user_id );
