@@ -358,12 +358,17 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		//so update the last blog as borked
 		//and ask its data migration manager to log the error
 		$blog_migrating = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested();
-		$blog_migrating->set_STS_ID( EEM_Blog::status_borked );
-		$blog_migrating->save();
-		EED_Multisite::switch_to_blog($blog_migrating->ID());
-		EE_Data_Migration_Manager::instance()->add_error_to_migrations_ran( $this->_req_data[ 'message' ] );
-		EED_Multisite::restore_current_blog();
-		wp_mail( get_site_option( 'admin_email' ), sprintf( __( 'General error running multisite migration. Last ran blog was: %s', 'event_espresso' ), $blog_migrating->name() ), sprintf( __( 'Did not receive proper JSON response while running multisite migration. This was the response: %s', 'event_espresso' ), $this->_req_data[ 'message' ] ) );
+		if( $blog_migrating ){
+			$blog_migrating->set_STS_ID( EEM_Blog::status_borked );
+			$blog_migrating->save();
+			EED_Multisite::switch_to_blog($blog_migrating->ID());
+			EE_Data_Migration_Manager::instance()->add_error_to_migrations_ran( $this->_req_data[ 'message' ] );
+			EED_Multisite::restore_current_blog();
+			$blog_name = $blog_migrating->name();
+		}else{
+			$blog_name = __( 'Unknown', 'event_espresso' );
+		}
+		wp_mail( get_site_option( 'admin_email' ), sprintf( __( 'General error running multisite migration. Last ran blog was: %s', 'event_espresso' ), $blog_name), sprintf( __( 'Did not receive proper JSON response while running multisite migration. This was the response: %s', 'event_espresso' ), $this->_req_data[ 'message' ] ) );
 	}
 
 
