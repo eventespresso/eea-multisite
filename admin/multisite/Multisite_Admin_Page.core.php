@@ -42,6 +42,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 	protected function _ajax_hooks() {
 		add_action( 'wp_ajax_multisite_migration_assessment_step', array( $this, 'assessing_sites_needing_migration' ) );
 		add_action( 'wp_ajax_multisite_migration_step', array( $this, 'migrating' ) );
+		add_action( 'wp_ajax_multisite_migration_error', array( $this, 'migration_error' ) );
 	}
 
 
@@ -349,6 +350,20 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		$migration_status[ 'blogs_needing_migration' ] = EEM_Blog::instance()->count_blogs_needing_migration();
 		$this->_template_args[ 'data' ] = $migration_status;
 		$this->_return_json();
+	}
+
+	public function migration_error(){
+		//our last ajax response didn't send proper JSON
+		//probably because of a fatal error or something
+		//so update the last blog as borked
+		//and ask its data migration manager to log the error
+		$blog_migrating = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested();
+		$blog_migrating->set_STS_ID( EEM_Blog::status_borked );
+		$blog_migrating->save();
+		EED_Multisite::switch_to_blog($blog_migrating->ID());
+		EE_Data_Migration_Manager::instance()->add_error_to_migrations_ran( $this->_req_data[ 'message' ] );
+		EED_Multisite::restore_current_blog();
+		wp_mail( get_site_option( 'admin_email' ), sprintf( __( 'General error running multisite migration. Last ran blog was: %s', 'event_espresso' ), $blog_migrating->name() ), sprintf( __( 'Did not receive proper JSON response while running multisite migration. This was the response: %s', 'event_espresso' ), $this->_req_data[ 'message' ] ) );
 	}
 
 
