@@ -74,64 +74,85 @@ class EE_Multisite_Migration_Manager {
 		$num_migrated = 0;
 		$multisite_migration_message = '';
 		$current_script_names = array( );
-		while ( $num_migrated < $records_to_migrate && $blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested() ) {
-			EED_Multisite::switch_to_blog( $blog_to_migrate->ID() );
-			do {
-				$results = EE_Data_Migration_Manager::instance()->migration_step( $records_to_migrate - $num_migrated );
-				$num_migrated += $results[ 'records_migrated' ];
-				$multisite_migration_message .= "<br>" . $results[ 'message' ];
-				switch ( $results[ 'status' ] ) {
-					case EE_Data_Migration_Manager::status_completed:
-					case EE_Data_Migration_Manager::status_continue:
-						$status_indicates_continue = TRUE;
-						break;
-					case EE_Data_Migration_Manager::status_no_more_migration_scripts:
-					case EE_Data_Migration_Manager::status_fatal_error:
-					default:
-						$status_indicates_continue = FALSE;
+		try{
+			while ( $num_migrated < $records_to_migrate && $blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested() ) {
+				EED_Multisite::switch_to_blog( $blog_to_migrate->ID() );
+				do {
+					$results = EE_Data_Migration_Manager::instance()->migration_step( $records_to_migrate - $num_migrated );
+					$num_migrated += $results[ 'records_migrated' ];
+					$multisite_migration_message .= "<br>" . $results[ 'message' ];
+					switch ( $results[ 'status' ] ) {
+						case EE_Data_Migration_Manager::status_completed:
+						case EE_Data_Migration_Manager::status_continue:
+							$status_indicates_continue = TRUE;
+							break;
+						case EE_Data_Migration_Manager::status_no_more_migration_scripts:
+						case EE_Data_Migration_Manager::status_fatal_error:
+						default:
+							$status_indicates_continue = FALSE;
+					}
+				} while ( $num_migrated < $records_to_migrate &&
+				$status_indicates_continue );
+
+				//if we're done this migration step, grab the remaining scripts for this blog
+				//before we switch back to the network admin
+				if ( $num_migrated >= $records_to_migrate ) {
+					$current_script_names = $this->_get_applicable_dms_names();
 				}
-			} while ( $num_migrated < $records_to_migrate &&
-			$status_indicates_continue );
 
-			//if we're done this migration step, grab the remaining scripts for this blog
-			//before we switch back to the network admin
-			if ( $num_migrated >= $records_to_migrate ) {
-				$current_script_names = $this->_get_applicable_dms_names();
+
+				//if appropriate, update this blog's status
+				if ( $results[ 'status' ] == EE_Data_Migration_Manager::status_fatal_error ) {
+					$blog_to_migrate->set_STS_ID( EEM_Blog::status_borked );
+					$multisite_migration_message .= "<br>" . sprintf( __( 'Skipping migration of %s', 'event_espresso' ), $blog_to_migrate->name() );
+					$crash_email_subject = sprintf( __( 'Multisite Migration Error migrating %s', 'event_espresso' ), $blog_to_migrate->name());
+					$crash_email_body = sprintf( __( 'The blog at %s had a fatal error while migrating. Here is their system status info: %s', 'event_espresso' ), $blog_to_migrate->site_url(), print_r( EEM_System_Status::instance()->get_system_stati(), TRUE ) );
+					//swithc blog now so we email the network admin, not the blog admin
+					EED_Multisite::restore_current_blog();
+					$success = wp_mail( get_site_option( 'admin_email' ), $crash_email_subject, $crash_email_body );
+				} elseif ( $results[ 'status' ] == EE_Data_Migration_Manager::status_no_more_migration_scripts ) {
+					$blog_to_migrate->set_STS_ID( EEM_Blog::status_up_to_date );
+					$multisite_migration_message .= '<br>' . sprintf( __( 'Finished migrating %s', 'event_espresso' ), $blog_to_migrate->name() );
+					EED_Multisite::restore_current_blog();
+				} else {
+					$blog_to_migrate->set_STS_ID( EEM_Blog::status_migrating );EED_Multisite::restore_current_blog();
+				}
+
+				$blog_to_migrate->save();
 			}
-			EED_Multisite::restore_current_blog();
-
-			//if appropriate, update this blog's status
-			if ( $results[ 'status' ] == EE_Data_Migration_Manager::status_fatal_error ) {
-				$blog_to_migrate->set_STS_ID( EEM_Blog::status_borked );
-				$multisite_migration_message .= "<br>" . sprintf( __( 'Skipping migration of %s', 'event_espresso' ), $blog_to_migrate->name() );
-			} elseif ( $results[ 'status' ] == EE_Data_Migration_Manager::status_no_more_migration_scripts ) {
-				$blog_to_migrate->set_STS_ID( EEM_Blog::status_up_to_date );
-				$multisite_migration_message .= '<br>' . sprintf( __( 'Finished migrating %s', 'event_espresso' ), $blog_to_migrate->name() );
+			if ( $blog_to_migrate ) {
+				return array(
+					'current_blog_name' => $blog_to_migrate->name(),
+					'current_blog_script_names' => $current_script_names,
+					'current_dms' => $results,
+					'message' => $multisite_migration_message
+				);
 			} else {
-				$blog_to_migrate->set_STS_ID( EEM_Blog::status_migrating );
+				//theoreticlly we could receive another request like this when there are no
+				//more blogs that need to be migrated
+				return array(
+					'current_blog_name' => '',
+					'current_blog_script_names' => array( ),
+					'current_dms' => array(
+						'records_to_migrate' => 1,
+						'records_migrated' => 1,
+						'status' => EE_Data_Migration_Manager::status_no_more_migration_scripts,
+						'script' => __( "Data Migration Completed Successfully", "event_espresso" ),
+					),
+					'message' => __( 'All blogs up-to-date', 'event_espresso' )
+				);
 			}
-			$blog_to_migrate->save();
-		}
-		if ( $blog_to_migrate ) {
+		}catch(EE_Error $e){
 			return array(
-				'current_blog_name' => $blog_to_migrate->name(),
-				'current_blog_script_names' => $current_script_names,
-				'current_dms' => $results,
-				'message' => $multisite_migration_message
-			);
-		} else {
-			//theoreticlly we could receive another request like this when there are no
-			//more blogs that need to be migrated
-			return array(
-				'current_blog_name' => '',
-				'current_blog_script_names' => array( ),
+				'current_blog_name' => __( 'Unable to determine current blog', 'event_espresso' ),
+				'current_blog_script_names' => array(),
 				'current_dms' => array(
 					'records_to_migrate' => 1,
-					'records_migrated' => 1,
-					'status' => EE_Data_Migration_Manager::status_no_more_migration_scripts,
-					'script' => __( "Data Migration Completed Successfully", "event_espresso" ),
+					'records_migrated' => 0,
+					'status' => EE_Data_Migration_Manager::status_fatal_error,
+					'script' => __( 'Error finding current script to migrate', 'event_espresso' )
 				),
-				'message' => __( 'All blogs up-to-date', 'event_espresso' )
+				'message' => $e->getMessage() . ( WP_DEBUG ? $e->getTraceAsString() : '' )
 			);
 		}
 	}
