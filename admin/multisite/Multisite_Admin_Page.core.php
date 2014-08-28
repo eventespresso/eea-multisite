@@ -162,7 +162,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				'done_assessment' => __( 'Assessment Complete', 'event_espresso' ),
 				'network_needs_migration' => __( 'Network requires migration', 'event_espresso' ),
 				'no_migrations_required' => __( 'No migrations are required', 'event_espresso' ),
-				'ajax_error' => __( 'An error occurred communicating with the server. Please contact support', 'event_espresso' ),
+				'ajax_error' => __( 'An error occurred communicating with the server. Please contact support. An email report should have been sent to your network admin', 'event_espresso' ),
 				'all_done' => __( 'All done migrating network', 'event_espresso' )
 			) );
 			$this->display_admin_page_with_sidebar();
