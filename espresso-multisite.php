@@ -3,7 +3,7 @@
   Plugin Name: Event Espresso - Multisite
   Plugin URI: http://www.eventespresso.com
   Description: The Event Espresso Multisite adds NEW stuff to Event Espresso
-  Version: 1.0.0.dev.000
+  Version: 1.0.0.alpha.000
   Author: Event Espresso
   Author URI: http://www.eventespresso.com
   Copyright 2014 Event Espresso (email : support@eventespresso.com)
@@ -36,7 +36,7 @@
  *
  * ------------------------------------------------------------------------
  */
-define( 'EE_MULTISITE_VERSION', '0.0.1.dev.002' );
+define( 'EE_MULTISITE_VERSION', '1.0.0.alpha.000' );
 define( 'EE_MULTISITE_PLUGIN_FILE', __FILE__ );
 
 function load_espresso_multisite() {
