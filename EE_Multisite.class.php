@@ -35,7 +35,7 @@ Class EE_Multisite extends EE_Addon {
 		//add_filter( 'FHEE__EEM_Status__construct__status_types', array('EE_Multisite', 'add_blog_stati_types') );
 		$registration_params = array(
 			'version' => EE_MULTISITE_VERSION,
-			'min_core_version' => '4.5.0',
+			'min_core_version' => '4.5.0.dev.000',
 			'main_file_path' => EE_MULTISITE_PLUGIN_FILE,
 			'admin_path' => EE_MULTISITE_ADMIN,
 			'admin_callback' => 'additional_admin_hooks',
