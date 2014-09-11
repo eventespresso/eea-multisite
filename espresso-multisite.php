@@ -1,8 +1,8 @@
 <?php
 /*
-  Plugin Name: Event Espresso - Multisite
+  Plugin Name: Event Espresso - Multisite (EE4.5+)
   Plugin URI: http://www.eventespresso.com
-  Description: The Event Espresso Multisite adds NEW stuff to Event Espresso
+  Description: The Event Espresso Multisite addon helps network admins manage a network of Event Espresso-enabled blogs. Requires Event Espresso 4.5.0 or higher.
   Version: 1.0.0.alpha.000
   Author: Event Espresso
   Author URI: http://www.eventespresso.com
