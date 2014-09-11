@@ -196,9 +196,9 @@ class EE_Multisite_Migration_Manager {
 			} else {
 				$blog->set_STS_ID( EEM_Blog::status_up_to_date );
 			}
+			EED_Multisite::restore_current_blog();
 			$blog->save();
 		}
-		EED_Multisite::restore_current_blog();
 		return $blogs_needing_to_migrate;
 	}
 
