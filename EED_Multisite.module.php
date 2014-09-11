@@ -59,9 +59,9 @@ class EED_Multisite extends EED_Module {
 		self::set_hooks_both();
 
 		//true admin-only hooks
-		if( ! EE_Maintenance_Mode::instance()->models_can_query() ){
-			add_filter('FHEE__EE_Admin_Page_Loader___get_installed_pages__installed_refs', array('EED_Multisite','show_multisite_admin_in_mm'), 110 );
-		}
+//		if( ! EE_Maintenance_Mode::instance()->models_can_query() ){
+//			add_filter('FHEE__EE_Admin_Page_Loader___get_installed_pages__installed_refs', array('EED_Multisite','show_multisite_admin_in_mm'), 110 );
+//		}
 		add_action('network_admin_notices',array('EED_Multisite','check_network_maintenance_mode'));
 		add_action('admin_notices',array('EED_Multisite','check_network_maintenance_mode'));
 		add_action('network_admin_notices',array('EED_Multisite','check_main_blog_maintenance_mode'));
