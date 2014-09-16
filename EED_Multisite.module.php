@@ -127,7 +127,7 @@ class EED_Multisite extends EED_Module {
 	 * This is usually a good point to mark all blogs as status 'unsure'
 	 * in regards to their migration needs
 	 */
-	public function possible_maintenance_mode_change_detected() {
+	public static  function possible_maintenance_mode_change_detected() {
 		/* only mark blogs as unsure migration status when the main site has a possible
 		 * change to maintenance mode. Otherwise, as an example, when a new version of
 		 * EE is activated, this will occur again for EACH blog
@@ -161,7 +161,7 @@ class EED_Multisite extends EED_Module {
 	 */
 	public static function switch_to_blog( $new_blog_id ) {
 		switch_to_blog( $new_blog_id );
-		EE_Registry::reset( FALSE, FALSE );
+		EE_Registry::reset();
 	}
 
 
