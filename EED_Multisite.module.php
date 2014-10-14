@@ -162,6 +162,7 @@ class EED_Multisite extends EED_Module {
 	public static function switch_to_blog( $new_blog_id ) {
 		switch_to_blog( $new_blog_id );
 		EE_Registry::reset();
+		EE_System::reset();
 	}
 
 
@@ -173,6 +174,7 @@ class EED_Multisite extends EED_Module {
 	public static function restore_current_blog() {
 		restore_current_blog();
 		EE_Registry::reset();
+		EE_System::reset();
 	}
 
 

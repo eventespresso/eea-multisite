@@ -13,7 +13,9 @@ if ( !defined( 'EVENT_ESPRESSO_VERSION' ) ) {
  *
  */
 class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
-
+/**
+ * @group problem
+ */
 	public function test_assess_sites_needing_migration() {
 		//pretend multisite with 2 blogs
 		$blog1 = $this->_create_a_blog_with_ee();
@@ -91,27 +93,6 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 		$this->assertEquals( array( 'Multisite Mock Migration' ), $step_5_results[ 'current_blog_script_names' ] );
 		$this->assertEquals( __( 'Multisite Mock Migration', 'event_espresso' ), $step_5_results[ 'current_dms' ][ 'script' ] );
 		$this->assertEquals( $step_size, $step_5_results[ 'current_dms' ][ 'records_migrated' ] );
-	}
-
-
-
-	/**
-	 * to pretend EE had an upgrade, we just register a core DMS that applies.
-	 * It should be removed during tearDown()
-	 */
-	private function _pretend_ee_upgraded() {
-		$this->_pretend_addon_hook_time();
-		EE_Register_Data_Migration_Scripts::register( 'Monkey', array(
-			'dms_paths' => array( EE_MULTISITE_PATH . 'tests/mocks/data_migration_scripts/' )
-		) );
-		$all_dmss = EE_Data_Migration_Manager::reset()->get_all_data_migration_scripts_available();
-		$this->assertArrayHasKey( 'EE_DMS_Core_9_9_9', $all_dmss );
-		$this->assertArrayHasKey( 'EE_DMS_Core_9_9_10', $all_dmss );
-		$applicable_dmss = EE_Data_Migration_Manager::reset()->check_for_applicable_data_migration_scripts();
-		$this->assertArrayHasKey( 'EE_DMS_Core_9_9_9', $applicable_dmss );
-		EE_Registry::instance()->load_helper('Activation');
-		$latest_dms = EE_Registry::instance()->load_dms( 'EE_DMS_Core_9_9_9' );
-		EE_Data_Migration_Manager::instance()->update_current_database_state_to( $latest_dms->migrates_to_version());
 	}
 
 

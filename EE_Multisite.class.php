@@ -76,7 +76,7 @@ Class EE_Multisite extends EE_Addon {
 		}
 		// register addon via Plugin API
 		EE_Register_Addon::register( 'Multisite', $registration_params );
-	}
+}
 
 
 
@@ -119,6 +119,8 @@ Class EE_Multisite extends EE_Addon {
 	 */
 	public function plugin_actions( $links, $file ) {
 		if ( $file == EE_MULTISITE_BASENAME ) {
+
+
 			// before other links
 			array_unshift( $links, '<a href="admin.php?page=espresso_multisite">' . __( 'Settings' ) . '</a>' );
 		}

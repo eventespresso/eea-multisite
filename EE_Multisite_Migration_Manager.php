@@ -189,7 +189,6 @@ class EE_Multisite_Migration_Manager {
 			//switch to that blog and assess whether or not it needs to be migrated
 			EED_Multisite::switch_to_blog( $blog->ID() );
 			$needs_migrating = EE_Maintenance_Mode::instance()->set_maintenance_mode_if_db_old();
-			restore_current_blog();
 			if ( $needs_migrating ) {
 				$blog->set_STS_ID( EEM_Blog::status_out_of_date );
 				$blogs_needing_to_migrate++;
@@ -201,7 +200,6 @@ class EE_Multisite_Migration_Manager {
 		}
 		return $blogs_needing_to_migrate;
 	}
-
 
 
 }
