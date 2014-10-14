@@ -59,7 +59,7 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 	 */
 	protected function _pretend_ee_upgraded() {
 		$this->_pretend_addon_hook_time();
-		EE_Register_Data_Migration_Scripts::register( 'Monkey', array(
+		EE_Register_Data_Migration_Scripts::register( 'Pretend_Upgrade', array(
 			'dms_paths' => array( EE_MULTISITE_PATH . 'tests/mocks/data_migration_scripts/' )
 		) );
 		$all_dmss = EE_Data_Migration_Manager::reset()->get_all_data_migration_scripts_available();
@@ -75,6 +75,14 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 		$all_dmss = EE_Data_Migration_Manager::reset()->check_for_applicable_data_migration_scripts();
 		$this->assertEquals( array(), $all_dmss );
 	}
+
+	public function tearDown(){
+		//in case we called _pretend_ee_upgraded(), which added some DMSs, deregister them
+		EE_Register_Data_Migration_Scripts::deregister('Pretend_Upgrade');
+		parent::tearDown();
+	}
+
+
 
 
 
