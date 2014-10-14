@@ -112,6 +112,7 @@ function EE_Multisite_DMS_Driver(){
 			}
 		}else{
 			alert( ee_i18n_text.ajax_error );
+			driver.report_general_migration_error( response );
 		}
 
 	}

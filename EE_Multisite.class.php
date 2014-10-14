@@ -35,7 +35,7 @@ Class EE_Multisite extends EE_Addon {
 		//add_filter( 'FHEE__EEM_Status__construct__status_types', array('EE_Multisite', 'add_blog_stati_types') );
 		$registration_params = array(
 			'version' => EE_MULTISITE_VERSION,
-			'min_core_version' => '4.5.0',
+			'min_core_version' => '4.5.0.dev.000',
 			'main_file_path' => EE_MULTISITE_PLUGIN_FILE,
 			'admin_path' => EE_MULTISITE_ADMIN,
 			'admin_callback' => 'additional_admin_hooks',
@@ -76,7 +76,7 @@ Class EE_Multisite extends EE_Addon {
 		}
 		// register addon via Plugin API
 		EE_Register_Addon::register( 'Multisite', $registration_params );
-	}
+}
 
 
 
@@ -119,6 +119,8 @@ Class EE_Multisite extends EE_Addon {
 	 */
 	public function plugin_actions( $links, $file ) {
 		if ( $file == EE_MULTISITE_BASENAME ) {
+
+
 			// before other links
 			array_unshift( $links, '<a href="admin.php?page=espresso_multisite">' . __( 'Settings' ) . '</a>' );
 		}

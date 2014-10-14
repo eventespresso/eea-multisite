@@ -106,7 +106,7 @@ class EE_Multisite_Migration_Manager {
 					$blog_to_migrate->set_STS_ID( EEM_Blog::status_borked );
 					$multisite_migration_message = sprintf( __( '%1$sSkipping migration of %2$s%3$s', 'event_espresso' ),'<del>', $blog_to_migrate->name(),  '</del>' ) . '<br>' . $multisite_migration_message;
 					$crash_email_subject = sprintf( __( 'Multisite Migration Error migrating %s', 'event_espresso' ), $blog_to_migrate->name());
-					$crash_email_body = sprintf( __( 'The blog at %s had a fatal error while migrating. Here is their system status info: %s', 'event_espresso' ), $blog_to_migrate->site_url(), print_r( EEM_System_Status::instance()->get_system_stati(), TRUE ) );
+					$crash_email_body = sprintf( __( 'The blog at %s had a fatal error while migrating. Here is their migration history: %s', 'event_espresso' ), $blog_to_migrate->site_url(), print_r( EEM_System_Status::instance()->get_ee_migration_history(), TRUE ) );
 					//swithc blog now so we email the network admin, not the blog admin
 					EED_Multisite::restore_current_blog();
 					$success = wp_mail( get_site_option( 'admin_email' ), $crash_email_subject, $crash_email_body );
@@ -189,19 +189,17 @@ class EE_Multisite_Migration_Manager {
 			//switch to that blog and assess whether or not it needs to be migrated
 			EED_Multisite::switch_to_blog( $blog->ID() );
 			$needs_migrating = EE_Maintenance_Mode::instance()->set_maintenance_mode_if_db_old();
-			restore_current_blog();
 			if ( $needs_migrating ) {
 				$blog->set_STS_ID( EEM_Blog::status_out_of_date );
 				$blogs_needing_to_migrate++;
 			} else {
 				$blog->set_STS_ID( EEM_Blog::status_up_to_date );
 			}
+			EED_Multisite::restore_current_blog();
 			$blog->save();
 		}
-		EED_Multisite::restore_current_blog();
 		return $blogs_needing_to_migrate;
 	}
-
 
 
 }

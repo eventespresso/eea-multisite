@@ -26,12 +26,16 @@ class EE_DMS_Core_9_9_9 extends EE_Data_Migration_Script_Base {
 
 
 	/**
-	 * This one just always needs to migrate
+	 * This one just always needs to migrate, so long as core is less than it
 	 * @param type $version_string
 	 * @return boolean
 	 */
 	public function can_migrate_from_version( $version_string ) {
-		return TRUE;
+		if( isset( $version_string[ $this->slug() ] ) && version_compare( $version_string[ $this->slug() ], '9.9.9', '<' ) ){
+			return TRUE;
+		}else{
+			return FALSE;
+		}
 	}
 
 

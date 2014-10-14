@@ -71,6 +71,7 @@ class Multisite_Admin_Page_Init extends EE_Admin_Page_Init {
 					'menu_slug' => MULTISITE_PG_SLUG,
 					'menu_label' => MULTISITE_LABEL,
 					'capability' => 'administrator',
+					'maintenance_mode_parent' => MULTISITE_PG_SLUG,
 					'admin_init_page' => $this
 						) );
 	}

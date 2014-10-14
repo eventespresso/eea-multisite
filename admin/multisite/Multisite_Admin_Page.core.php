@@ -363,12 +363,18 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			$blog_migrating->save();
 			EED_Multisite::switch_to_blog($blog_migrating->ID());
 			EE_Data_Migration_Manager::instance()->add_error_to_migrations_ran( $this->_req_data[ 'message' ] );
-			EED_Multisite::restore_current_blog();
+			global $wpdb;
+			$last_migration_script_option = $wpdb->get_row("SELECT * FROM ".$wpdb->options." WHERE option_name like '".EE_Data_Migration_Manager::data_migration_script_option_prefix."%' ORDER BY option_id DESC LIMIT 1",ARRAY_A);
 			$blog_name = $blog_migrating->name();
+			$blog_id = $blog_migrating->ID();
+			EED_Multisite::restore_current_blog();
+
 		}else{
 			$blog_name = __( 'Unknown', 'event_espresso' );
+			$blog_id = __( 'Unknown', 'event_espresso' );
+			$last_migration_script_option = array();
 		}
-		wp_mail( get_site_option( 'admin_email' ), sprintf( __( 'General error running multisite migration. Last ran blog was: %s', 'event_espresso' ), $blog_name), sprintf( __( 'Did not receive proper JSON response while running multisite migration. This was the response: %s', 'event_espresso' ), $this->_req_data[ 'message' ] ) );
+		wp_mail( get_site_option( 'admin_email' ), sprintf( __( 'General error running multisite migration. Last ran blog was: %s', 'event_espresso' ), $blog_name), sprintf( __( 'Did not receive proper JSON response while running multisite migration. This was the response: \'%1$s\' while migrating blog %2$s (ID %3$d). The last ran migration script had data: %4$s', 'event_espresso' ), $this->_req_data[ 'message' ], $blog_name, $blog_id, print_r( $last_migration_script_option, TRUE ) ) );
 	}
 
 

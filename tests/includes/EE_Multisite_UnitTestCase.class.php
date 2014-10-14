@@ -52,6 +52,30 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 		return EEM_Blog::instance()->get_one_by_ID( $blog->blog_id );
 	}
 
+	/**
+	 * to pretend EE had an upgrade, we just register a core DMS that applies.
+	 * It should be removed during tearDown() by resetting EE_Data_Migration_Manager
+	 * and resetting hooks (which are done by EE_UnitTestCase)
+	 */
+	protected function _pretend_ee_upgraded() {
+		$this->_pretend_addon_hook_time();
+		EE_Register_Data_Migration_Scripts::register( 'Monkey', array(
+			'dms_paths' => array( EE_MULTISITE_PATH . 'tests/mocks/data_migration_scripts/' )
+		) );
+		$all_dmss = EE_Data_Migration_Manager::reset()->get_all_data_migration_scripts_available();
+		$this->assertArrayHasKey( 'EE_DMS_Core_9_9_9', $all_dmss );
+		$this->assertArrayHasKey( 'EE_DMS_Core_9_9_10', $all_dmss );
+		$applicable_dmss = EE_Data_Migration_Manager::reset()->check_for_applicable_data_migration_scripts();
+		$this->assertArrayHasKey( 'EE_DMS_Core_9_9_9', $applicable_dmss );
+		EE_Registry::instance()->load_helper('Activation');
+		$latest_dms = EE_Registry::instance()->load_dms( 'EE_DMS_Core_9_9_9' );
+		EE_Data_Migration_Manager::instance()->update_current_database_state_to( $latest_dms->migrates_to_version());
+
+		//now double-check that NO DMSs apply to the main blog because we upgraded
+		$all_dmss = EE_Data_Migration_Manager::reset()->check_for_applicable_data_migration_scripts();
+		$this->assertEquals( array(), $all_dmss );
+	}
+
 
 
 }
