@@ -95,7 +95,7 @@ class EED_Multisite extends EED_Module {
 			add_action( $action_name, array( 'EED_Multisite', 'possible_maintenance_mode_change_detected' ) );
 		}
 		//a very specific hook for when running the EE_DMS_Core_4_5_0
-		add_filter( 'FHEE__EE_DMS_Core_4_5_0__get_default_creator_id', array( 'EED_Multisite', 'filter_get_default_creator_id' ) );
+		add_filter( 'FHEE__EEH_Activation__get_default_creator_id__pre_filtered_id', array( 'EED_Multisite', 'filter_get_default_creator_id' ) );
 	}
 
 	/**
