@@ -22,14 +22,6 @@ define( 'EE_MULTISITE_ADMIN', EE_MULTISITE_PATH . 'admin' . DS . 'multisite' . D
 
 Class EE_Multisite extends EE_Addon {
 
-	/**
-	 * class constructor
-	 */
-	public function __construct() {
-
-	}
-
-
 
 	public static function register_addon() {
 		//add_filter( 'FHEE__EEM_Status__construct__status_types', array('EE_Multisite', 'add_blog_stati_types') );
@@ -58,17 +50,9 @@ Class EE_Multisite extends EE_Addon {
 				'checkPeriod' => '24',
 				'use_wp_update' => FALSE,
 			),
-			'capabilities' => array(
-				'administrator' => array(
-					'read_addon', 'edit_addon', 'edit_others_addon', 'edit_private_addon'
-				),
-			),
 			'model_paths' => array( EE_MULTISITE_PATH . 'core/db_models' ),
 			'class_paths' => array( EE_MULTISITE_PATH . 'core/db_classes' ),
 		);
-		if ( class_exists( 'EE_Meta_Capability_Map_Edit' ) ) {
-			$registration_params[ 'capability_map' ] = new EE_Meta_Capability_Map_Edit( 'edit_addon', array( 'Event', '', 'edit_others_addon', 'edit_private_addon' ) );
-		}
 		//only register the DMS if on the main site. This way we avoid adding tables, and trying to remove tables,
 		//from blogs which aren't the main one
 		if ( is_main_site() ) {
@@ -76,7 +60,7 @@ Class EE_Multisite extends EE_Addon {
 		}
 		// register addon via Plugin API
 		EE_Register_Addon::register( 'Multisite', $registration_params );
-}
+	}
 
 
 

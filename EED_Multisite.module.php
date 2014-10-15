@@ -43,6 +43,7 @@ class EED_Multisite extends EED_Module {
 	public static function set_hooks() {
 		EE_Config::register_route( 'multisite', 'EED_Multisite', 'run' );
 		add_action( 'wp_loaded', array( 'EED_Multisite', 'update_last_requested' ) );
+
 		self::set_hooks_both();
 	}
 
@@ -63,8 +64,10 @@ class EED_Multisite extends EED_Module {
 //			add_filter('FHEE__EE_Admin_Page_Loader___get_installed_pages__installed_refs', array('EED_Multisite','show_multisite_admin_in_mm'), 110 );
 //		}
 		add_action('network_admin_notices',array('EED_Multisite','check_network_maintenance_mode'));
-		add_action('admin_notices',array('EED_Multisite','check_network_maintenance_mode'));
 		add_action('network_admin_notices',array('EED_Multisite','check_main_blog_maintenance_mode'));
+
+		//filter the existing maintenance mode messages in EE core
+		add_filter( 'FHEE__Maintenance_Admin_Page_Init__check_maintenance_mode__notice', array( 'EED_Multisite', 'check_main_blog_maintenance_mode' ), 10 );
 	}
 
 	public static function show_multisite_admin_in_mm( $admin_page_folder_names){
@@ -99,23 +102,46 @@ class EED_Multisite extends EED_Module {
 	 * Checks if we're in maintenance mode, and if so we notify the admin adn tell them how to take the site OUT of maintenance mode
 	 */
 	public static function check_network_maintenance_mode(){
-		if( is_main_site() && EE_Maintenance_Mode::instance()->level() != EE_Maintenance_Mode::level_2_complete_maintenance ){
-			//check that all the blogs are up-to-date
-			$blogs_needing_migration = EEM_Blog::instance()->count_blogs_maybe_needing_migration();
-			if( $blogs_needing_migration ){
-				$network = EE_Admin_Page::add_query_args_and_nonce(array(), EE_MULTISITE_ADMIN_URL);
-					echo '<div class="error">
-					<p>'. sprintf(__('A change has been detected to your Event Espresso plugin or addons. Blogs on your network may require migration. %1$sClick here to check%2$s', "event_espresso"),"<a href='$network'>","</a>").
-				'</div>';
+		if( EE_Maintenance_Mode::instance()->level() != EE_Maintenance_Mode::level_2_complete_maintenance ){
+			if ( is_network_admin() ) {
+				//check that all the blogs are up-to-date
+				$blogs_needing_migration = EEM_Blog::instance()->count_blogs_maybe_needing_migration();
+				if( $blogs_needing_migration ){
+					$network = EE_Admin_Page::add_query_args_and_nonce(array(), EE_MULTISITE_ADMIN_URL);
+						echo '<div class="error">
+						<p>'. sprintf(__('A change has been detected to your Event Espresso plugin or addons. Blogs on your network may require migration. %1$sClick here to check%2$s', "event_espresso"),"<a href='$network'>","</a>").
+					'</div>';
+				}
 			}
 		}
 	}
-	public static function check_main_blog_maintenance_mode(){
+
+
+
+
+
+
+	public static function check_main_blog_maintenance_mode( $notice = ''){
+		$new_notice = '';
 		if( EE_Maintenance_Mode::instance()->level() == EE_Maintenance_Mode::level_2_complete_maintenance ){
 			$maintenance_page_url = EE_Admin_Page::add_query_args_and_nonce(array(), EE_MAINTENANCE_ADMIN_URL);
-					echo '<div class="error">
+			if ( is_main_site() ) {
+					$new_notice = '<div class="error">
 					<p>'. sprintf(__('Your main site\'s Event Espresso data is out of date %1$sand needs to be migrated.%2$s After doing this, you should check that the other blogs on your network are up-to-date.', "event_espresso"),"<a href='$maintenance_page_url'>","</a>").
 				'</div>';
+			 } else {
+				$new_notice = '<div class="error">
+				<p>' . __('Your event site is in the process of being updated and is currently in maintainance mode.  It has been bumped to the front of the queue and you should be able to have full access again in about 5 minutes.', 'event_espresso' ) . '</p>' .
+				'</div>';
+			}
+		}
+
+		if ( ! empty( $notice ) ) {
+			$notice = $new_notice;
+			return $new_notice;
+		} else {
+			$notice = $new_notice;
+			echo $notice;
 		}
 	}
 
