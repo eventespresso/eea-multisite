@@ -29,6 +29,14 @@ if ( !defined( 'EVENT_ESPRESSO_VERSION' ) ) {
 class EED_Multisite extends EED_Module {
 
 	/**
+	 * Cache for _default_creator_id.
+	 * Gets reset on switch/reset blog.
+	 *
+	 * @var int
+	 */
+	protected static $_default_creator_id = null;
+
+	/**
 	 * @var 		bool
 	 * @access 	public
 	 */
@@ -189,6 +197,7 @@ class EED_Multisite extends EED_Module {
 		switch_to_blog( $new_blog_id );
 		EE_Registry::reset();
 		EE_System::reset();
+		self::$_default_creator_id = null;
 	}
 
 
@@ -201,6 +210,7 @@ class EED_Multisite extends EED_Module {
 		restore_current_blog();
 		EE_Registry::reset();
 		EE_System::reset();
+		self::$_default_creator_id = null;
 	}
 
 
@@ -284,6 +294,10 @@ class EED_Multisite extends EED_Module {
 	 * @return int WP_User ID
 	 */
 	public static function get_default_creator_id() {
+		if ( !empty( self::$_default_creator_id ) ) {
+			return self::$_default_creator_id;
+		}
+
 		//find the earliest admin id for the current blog
 		global $wpdb;
 		$offset = 0;
@@ -296,7 +310,8 @@ class EED_Multisite extends EED_Module {
 
 		$user_id = apply_filters( 'FHEE__EED_Multisite__get_default_creator_id__user_id', $user_id );
 		if ( $user_id && intval( $user_id ) ) {
-			return intval( $user_id );
+			self::$_default_creator_id =  intval( $user_id );
+			return self::$_default_creator_id;
 		} else {
 			return NULL;
 		}
