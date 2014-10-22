@@ -13,9 +13,6 @@ if ( !defined( 'EVENT_ESPRESSO_VERSION' ) ) {
  *
  */
 class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
-/**
- * @group problem
- */
 	public function test_assess_sites_needing_migration() {
 		//pretend multisite with 2 blogs
 		$blog1 = $this->_create_a_blog_with_ee();
@@ -29,6 +26,50 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 		$this->assertEquals( 2, $needing_migration );
 	}
 
+	/**
+	 * Integration testing to verify that while assessing sites needing migration that
+	 * we also upgrade sites that don't need to be migrated (ie, their data is old, but
+	 * doesn't need migrating, just updating directly). Theoretically just EED_MUltisite_Test::test_switch_to_blog__no_ee()
+	 * should have tested it enough but ticket https://events.codebasehq.com/projects/event-espresso/tickets/6904
+	 * showed serious doubt on that
+	 * @group current
+	 */
+	public function test_assess_sites_needing_migration__auto_upgrade() {
+		global $wp_actions;
+		//pretend multisite with 2 blogs
+		$blog1 = $this->factory->blog->create_and_get();
+		$blog2 = $this->factory->blog->create_and_get();
+
+		//verify these blogs don't have the EE table yet
+		switch_to_blog( $blog1->blog_id );
+		$this->assertTableDoesNotExist( "esp_attendee_meta" );
+		restore_current_blog();
+		switch_to_blog( $blog2->blog_id );
+		$this->assertTableDoesNotExist( "esp_attendee_meta" );
+		restore_current_blog();
+		$activation_hook_fired = $wp_actions[ 'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation' ];
+		//allow the creation of these tables, because we know they're temporary
+		remove_all_filters( 'FHEE__EEH_Activation__create_table__short_circuit' );
+		$needing_migration = EE_Multisite_Migration_Manager::instance()->assess_sites_needing_migration( 10 );
+		//and put the filters back in place
+		add_filter( 'FHEE__EEH_Activation__create_table__short_circuit', '__return_true' );
+
+		//site shouldn't need migration. It should have just been upgraded automatically
+		$this->assertEquals( 0, $needing_migration );
+		$this->assertEquals( $activation_hook_fired + 2, $wp_actions[ 'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation' ] );
+		switch_to_blog( $blog1->blog_id );
+		global $wpdb;
+		$this->assertEquals( 'wptests_' . $blog1->blog_id . '_', $wpdb->prefix );
+		$this->assertTableExists( $wpdb->prefix . "esp_attendee_meta" );
+		restore_current_blog();
+		switch_to_blog( $blog2->blog_id );
+		global $wpdb;
+		$this->assertEquals( 'wptests_' . $blog2->blog_id . '_', $wpdb->prefix );
+		$this->assertTableExists( $wpdb->prefix . "esp_attendee_meta" );
+		restore_current_blog();
+	}
+
+
 
 
 	public function test_migration_step() {
@@ -37,6 +78,8 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 		//pretend multisite with 2 blogs
 		$blog1 = $this->_create_a_blog_with_ee();
 		$blog2 = $this->_create_a_blog_with_ee();
+		//make blog2 last-requested a long time ago, so it will be migrated 2nd
+		$blog2->set_last_requested( current_time( 'timestamp' ) - DAY_IN_SECONDS * 10 );
 
 		//pretend there was an upgrade that has a DMS that needs to run
 		$this->_pretend_ee_upgraded();

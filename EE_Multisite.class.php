@@ -22,9 +22,16 @@ define( 'EE_MULTISITE_ADMIN', EE_MULTISITE_PATH . 'admin' . DS . 'multisite' . D
 
 Class EE_Multisite extends EE_Addon {
 
+	/**
+	 * Cache for _default_creator_id.
+	 * Gets reset on switch/reset blog.
+	 *
+	 * @var int
+	 */
+	protected static $_default_creator_id = null;
+
 
 	public static function register_addon() {
-		//add_filter( 'FHEE__EEM_Status__construct__status_types', array('EE_Multisite', 'add_blog_stati_types') );
 		$registration_params = array(
 			'version' => EE_MULTISITE_VERSION,
 			'min_core_version' => '4.6.0.dev.000',
@@ -60,20 +67,7 @@ Class EE_Multisite extends EE_Addon {
 		}
 		// register addon via Plugin API
 		EE_Register_Addon::register( 'Multisite', $registration_params );
-	}
-
-
-
-	/**
-	 * Adds 'blog' as a valid status on the EEM_Status's field 'STS_type'.
-	 * However, we'd also need to modify the database column to allow 'blog' in the set
-	 * in order for this to properly work. For now this isn't used.
-	 * @param array $valid_stati_types
-	 * @return array
-	 */
-	public static function add_blog_stati_types( $valid_stati_types ) {
-		$valid_stati_types[ 'blog' ] = __( 'Blog', 'event_espresso' );
-		return $valid_stati_types;
+		self::set_early_hooks();
 	}
 
 
@@ -109,6 +103,102 @@ Class EE_Multisite extends EE_Addon {
 			array_unshift( $links, '<a href="admin.php?page=espresso_multisite">' . __( 'Settings' ) . '</a>' );
 		}
 		return $links;
+	}
+
+	/**
+	 * sets hooks that need to be set quite early, before modules are initialized (so couldn't be placed
+	 * in a module).
+	 * Mostly these hooks are used when EE_System::detect_if_activation_or_upgrade() is ran
+	 */
+	public static  function set_early_hooks(){
+		//set hooks for detecting an upgrade to EE or an addon
+		$actions_that_could_change_mm = array(
+			'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation',
+			'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation_but_not_installed',
+			'AHEE__EE_System__detect_if_activation_or_upgrade__reactivation',
+			'AHEE__EE_System__detect_if_activation_or_upgrade__upgrade',
+			'AHEE__EE_System__detect_if_activation_or_upgrade__downgrade',
+			"AHEE__EE_Addon__detect_activations_or_upgrades__new_activation",
+			"AHEE__EE_Addon__detect_activations_or_upgrades__new_activation_but_not_installed",
+			"AHEE__EE_Addon__detect_activations_or_upgrades__reactivation",
+			"AHEE__EE_Addon__detect_activations_or_upgrades__upgrade",
+			"AHEE__EE_Addon__detect_activations_or_upgrades__downgrade"
+		);
+		foreach ( $actions_that_could_change_mm as $action_name ) {
+			add_action( $action_name, array( 'EE_Multisite', 'possible_maintenance_mode_change_detected' ) );
+		}
+
+		//a very specific hook for when running the EE_DMS_Core_4_5_0
+		add_filter( 'FHEE__EEH_Activation__get_default_creator_id__pre_filtered_id', array( 'EE_Multisite', 'filter_get_default_creator_id' ) );
+	}
+
+	/**
+	 * Called when maintenance mode made have been set or unset
+	 *
+	 * This is usually a good point to mark all blogs as status 'unsure'
+	 * in regards to their migration needs
+	 */
+	public static  function possible_maintenance_mode_change_detected() {
+		/* only mark blogs as unsure migration status when the main site has a possible
+		 * change to maintenance mode. Otherwise, as an example, when a new version of
+		 * EE is activated, this will occur again for EACH blog
+		 */
+		if ( is_main_site() ) {
+			EEM_Blog::instance()->mark_all_blogs_migration_status_as_unsure();
+		}
+	}
+
+	/**
+	 * resets whatever state was stored on EED_Multisite
+	 */
+	public static function reset(){
+		self::$_default_creator_id = NULL;
+	}
+
+	/**
+	 * When running the EE_DMS_Core_4_5_0 migration, user each blog admin's ID,
+	 * not the network admin's
+	 * @global type $wpdb
+	 * @param type $network_admin_id
+	 * @return int
+	 */
+	public static function filter_get_default_creator_id( $network_admin_id ) {
+
+		if ( $user_id = self::get_default_creator_id() ) {
+			return $user_id;
+		} else {
+			return $network_admin_id;
+		}
+	}
+	/**
+	 * Tries to find the oldest admin for this blog. If there are no admins for this blog,
+	 * then we return NULL
+	 * @global type $wpdb
+	 * @return int WP_User ID
+	 */
+	public static function get_default_creator_id() {
+		if ( !empty( self::$_default_creator_id ) ) {
+			return self::$_default_creator_id;
+		}
+
+		//find the earliest admin id for the current blog
+		global $wpdb;
+		$offset = 0;
+
+		$role_to_check = apply_filters( 'FHEE__EE_Multisite__get_default_creator_id__role_to_check', 'administrator' );
+		do{
+			$query = $wpdb->prepare( "SELECT user_id from {$wpdb->usermeta} WHERE meta_key='primary_blog' AND meta_value=%s ORDER BY user_id ASC LIMIT %d, 1", get_current_blog_id(), $offset++ );
+
+			$user_id = $wpdb->get_var( $query );
+		}while( $user_id && ! user_can( $user_id, $role_to_check ) );
+
+		$user_id = apply_filters( 'FHEE__EE_Multisite__get_default_creator_id__user_id', $user_id );
+		if ( $user_id && intval( $user_id ) ) {
+			self::$_default_creator_id =  intval( $user_id );
+			return self::$_default_creator_id;
+		} else {
+			return NULL;
+		}
 	}
 
 
