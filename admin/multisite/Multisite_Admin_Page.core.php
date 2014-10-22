@@ -82,7 +82,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 					'label' => __( 'Settings', 'event_espresso' ),
 					'order' => 10
 				),
-				'metaboxes' => array_merge( $this->_default_espresso_metaboxes, array( '_publish_post_box' ) ),
+				'metaboxes' => array_merge( $this->_default_espresso_metaboxes ),
 				'require_nonce' => FALSE
 			),
 			'usage' => array(
@@ -93,6 +93,10 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				'require_nonce' => FALSE
 			)
 		);
+
+		if ( EE_Maintenance_Mode::instance()->models_can_query() ) {
+			$this->_page_config['default']['metaboxes'][] = '_publish_post_box';
+		}
 	}
 
 
