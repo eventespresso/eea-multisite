@@ -26,12 +26,12 @@ class EEM_Site extends EEM_Base {
 	 * 		@access public
 	 * 		@return EEM_Blog
 	 */
-	public static function instance() {
+	public static function instance( $timezone = NULL ) {
 
 		// check if instance of EEM_Answer already exists
 		if ( !self::$_instance instanceof EEM_Site ) {
 			// instantiate Espresso_model
-			self::$_instance = new self();
+			self::$_instance = new self( $timezone );
 		}
 		return self::$_instance;
 	}
@@ -42,9 +42,9 @@ class EEM_Site extends EEM_Base {
 	 * resets the model and returns it
 	 * @return EEM_Site
 	 */
-	public static function reset() {
+	public static function reset( $timezone = NULL ) {
 		self::$_instance = NULL;
-		return self::instance();
+		return self::instance( $timezone );
 	}
 
 
@@ -52,7 +52,7 @@ class EEM_Site extends EEM_Base {
 	/**
 	 * 	constructor
 	 */
-	protected function __construct() {
+	protected function __construct( $timezone = NULL ) {
 		$this->singular_item = __( 'Site', 'event_espresso' );
 		$this->plural_item = __( 'Sites', 'event_espresso' );
 		$this->_tables = array(
