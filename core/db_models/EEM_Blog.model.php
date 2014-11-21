@@ -42,41 +42,14 @@ class EEM_Blog extends EEM_Soft_Delete_Base {
 	 * private instance of the EEM_Answer object
 	 * @type EEM_Blog
 	 */
-	private static $_instance = NULL;
-
-	/**
-	 * 		This function is a singleton method used to instantiate the EEM_Answer object
-	 *
-	 * 		@access public
-	 * 		@return EEM_Blog
-	 */
-	public static function instance() {
-
-		// check if instance of EEM_Answer already exists
-		if ( !self::$_instance instanceof EEM_Blog ) {
-			// instantiate Espresso_model
-			self::$_instance = new self();
-		}
-		return self::$_instance;
-	}
-
-
-
-	/**
-	 * resets the model and returns it
-	 * @return EEM_Blog
-	 */
-	public static function reset() {
-		self::$_instance = NULL;
-		return self::instance();
-	}
+	protected static $_instance = NULL;
 
 
 
 	/**
 	 * 	constructor
 	 */
-	protected function __construct() {
+	protected function __construct( $timezone ) {
 		$this->singular_item = __( 'Blog', 'event_espresso' );
 		$this->plural_item = __( 'Blogs', 'event_espresso' );
 		$this->_tables = array(
