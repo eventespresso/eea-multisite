@@ -18,35 +18,7 @@ class EEM_Site extends EEM_Base {
 	 * private instance of the EEM_Answer object
 	 * @type EEM_Answer
 	 */
-	private static $_instance = NULL;
-
-	/**
-	 * 		This function is a singleton method used to instantiate the EEM_Answer object
-	 *
-	 * 		@access public
-	 * 		@return EEM_Blog
-	 */
-	public static function instance( $timezone = NULL ) {
-
-		// check if instance of EEM_Answer already exists
-		if ( !self::$_instance instanceof EEM_Site ) {
-			// instantiate Espresso_model
-			self::$_instance = new self( $timezone );
-		}
-		return self::$_instance;
-	}
-
-
-
-	/**
-	 * resets the model and returns it
-	 * @return EEM_Site
-	 */
-	public static function reset( $timezone = NULL ) {
-		self::$_instance = NULL;
-		return self::instance( $timezone );
-	}
-
+	protected static $_instance = NULL;
 
 
 	/**
