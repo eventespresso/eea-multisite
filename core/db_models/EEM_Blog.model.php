@@ -50,12 +50,12 @@ class EEM_Blog extends EEM_Soft_Delete_Base {
 	 * 		@access public
 	 * 		@return EEM_Blog
 	 */
-	public static function instance() {
+	public static function instance( $timezone = NULL ) {
 
 		// check if instance of EEM_Answer already exists
 		if ( !self::$_instance instanceof EEM_Blog ) {
 			// instantiate Espresso_model
-			self::$_instance = new self();
+			self::$_instance = new self( $timezone );
 		}
 		return self::$_instance;
 	}
@@ -66,9 +66,9 @@ class EEM_Blog extends EEM_Soft_Delete_Base {
 	 * resets the model and returns it
 	 * @return EEM_Blog
 	 */
-	public static function reset() {
+	public static function reset( $timezone = NULL ) {
 		self::$_instance = NULL;
-		return self::instance();
+		return self::instance( $timezone );
 	}
 
 
@@ -76,7 +76,7 @@ class EEM_Blog extends EEM_Soft_Delete_Base {
 	/**
 	 * 	constructor
 	 */
-	protected function __construct() {
+	protected function __construct( $timezone ) {
 		$this->singular_item = __( 'Blog', 'event_espresso' );
 		$this->plural_item = __( 'Blogs', 'event_espresso' );
 		$this->_tables = array(
