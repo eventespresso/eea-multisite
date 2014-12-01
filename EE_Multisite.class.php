@@ -47,7 +47,10 @@ Class EE_Multisite extends EE_Addon {
 				'Multisite_Admin_Page_Init' => EE_MULTISITE_ADMIN . 'Multisite_Admin_Page_Init.core.php',
 				'EE_Multisite_Migration_Manager' => EE_MULTISITE_PATH . 'EE_Multisite_Migration_Manager.php',
 			),
-			'module_paths' => array( EE_MULTISITE_PATH . 'EED_Multisite.module.php' ),
+			'module_paths' => array(
+				EE_MULTISITE_PATH . 'EED_Multisite.module.php',
+				EE_MULTISITE_PATH . 'EED_Multisite_Site_List_Table.module.php'
+			),
 //			'shortcode_paths' => array( EE_MULTISITE_PATH . 'EES_Multisite.shortcode.php' ),
 //			'widget_paths' => array( EE_MULTISITE_PATH . 'EEW_Multisite.widget.php' ),
 			// if plugin update engine is being used for auto-updates. not needed if PUE is not being used.

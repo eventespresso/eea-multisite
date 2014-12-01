@@ -159,6 +159,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			$this->_template_path = EE_MULTISITE_ADMIN_TEMPLATE_PATH . 'multisite_migration.template.php';
 
 			$this->_template_args[ 'reassess_url' ] = EE_Admin_Page::add_query_args_and_nonce( array( 'action' => 'force_reassess' ), EE_MULTISITE_ADMIN_URL );
+			$this->_template_args[ 'borked_sites_url' ] = add_query_arg( array( 'orderby' => 'STS_ID' ), network_admin_url('sites.php') );
 			$this->_set_add_edit_form_tags( 'update_settings' );
 			$this->_set_publish_post_box_vars( NULL, FALSE, FALSE, NULL, FALSE );
 			$this->_template_args[ 'admin_page_content' ] = EEH_Template::display_template( $this->_template_path, $this->_template_args, TRUE );

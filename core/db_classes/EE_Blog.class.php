@@ -252,6 +252,27 @@ class EE_Blog extends EE_Soft_Delete_Base_Class {
 		restore_current_blog();
 	}
 
+	/**
+	 * return an i18n string of the blog's EE status
+	 * @return string
+	 */
+	public function pretty_status(){
+		switch( $this->STS_ID() ) {
+			case 'BRK':
+				return __( 'Broken', 'event_espresso' );
+			case 'BOD':
+				return __( 'Out-of-Date', 'event_espresso' );
+			case 'BUN':
+				return __( 'Unsure', 'event_espresso' );
+			case 'BCM':
+				return __( 'Currently Migrating', 'event_espresso' );
+			case 'BUD':
+				return __( 'Up-to-Date', 'event_espresso' );
+			default:
+				return __( 'Invalid State', 'event_espresso' );
+		}
+	}
+
 
 
 }

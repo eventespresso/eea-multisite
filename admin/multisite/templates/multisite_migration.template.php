@@ -10,7 +10,7 @@
 			<tr><th><?php _e( 'Total:', 'event_espresso' ) ?></th><td id="migration-assessment-total">1</td></tr>
 			<tr><th><?php _e( 'Up-to-date:', 'event_espresso' ); ?></th><td id="migration-assessment-up-to-date">0</td></tr>
 			<tr><th><?php _e( 'Out-of-date:', 'event_espresso' ); ?></th><td id="migration-asssment-out-of-date">0</td></tr>
-			<tr><th><?php _e( 'Broken', 'event_espresso' ); ?></th><td> <span id="migration-assessment-borked">0</span> <span class="small-text"><?php printf( __( '(If a site is broken during a network migration, an email should be sent to %s regarding it. You should restore those sites to a backup or manually repair them, then re-attempt migrating.)', 'event_espresso' ),  get_site_option( 'admin_email' ) );?></span></td></tr>
+			<tr><th><a href='<?php echo $borked_sites_url;?>'><?php _e( 'Broken', 'event_espresso' ); ?></a></th><td> <span id="migration-assessment-borked">0</span> <span class="small-text"><?php printf( __( '(If a site is broken during a network migration, an email should be sent to %s regarding it. You should restore those sites to a backup or manually repair them, then re-attempt migrating.)', 'event_espresso' ),  get_site_option( 'admin_email' ) );?></span></td></tr>
 		</table>
 		<a id="begin-multisite-migration" class="button button-primary" style='display:none'><?php _e( 'Migrate Network', 'event_espresso' ); ?></a>
 		<p><?php _e( 'Think there are other sites that need migrating? You may want to force a reassessment of which blogs need to be migrated', 'event_espresso' ) ?></p>

@@ -14,15 +14,20 @@ if ( !defined( 'EVENT_ESPRESSO_VERSION' ) ) {
  */
 class EEM_Blog extends EEM_Soft_Delete_Base {
 	/**
+	 * The blog is borked. Probably because a migration script died on it.
+	 * We can't migrate it, but we don't want to claim it's 'up-to-date' either
+	 */
+	const status_borked = 'BRK';
+	/**
+	 * This blog is definetely out of date and should be migrated
+	 */
+	const status_out_of_date = 'BOD';
+	/**
 	 * The blog might be out of date. EE core or an addon has been upgraded
 	 * and we havent checked if it needs to be migrated
 	 */
 
 	const status_unsure = 'BUN';
-	/**
-	 * This blog is definetely out of date and should be migrated
-	 */
-	const status_out_of_date = 'BOD';
 	/**
 	 * this blog is currently being migrated by the EE multisite addon
 	 * (others may be getting migrated without the EE multisite addon)
@@ -32,11 +37,7 @@ class EEM_Blog extends EEM_Soft_Delete_Base {
 	 * The blog has been updated and EE core and its addons havent been updated since
 	 */
 	const status_up_to_date = 'BUD';
-	/**
-	 * The blog is borked. Probably because a migration script died on it.
-	 * We can't migrate it, but we don't want to claim it's 'up-to-date' either
-	 */
-	const status_borked = 'BRK';
+
 
 	/**
 	 * private instance of the EEM_Answer object
