@@ -55,12 +55,12 @@ class EED_Multisite_Site_List_Table extends EED_Module {
 		add_filter( 'query', array( 'EED_Multisite_Site_List_Table', 'join_to_blog_meta_table' ) );
 	}
 
-	public function columns( $columns ) {
+	public static function columns( $columns ) {
 		$columns[ 'ee_status' ] = __( 'Event Espresso Status', 'event_espresso' );
 
 		return $columns;
 	}
-	public function cell_content( $column_name, $blog_id ) {
+	public static function cell_content( $column_name, $blog_id ) {
 		if( $column_name == 'ee_status' ) {
 			$blog = EEM_Blog::instance()->get_one_by_ID( $blog_id );
 			if( $blog instanceof EE_Blog ) {
@@ -68,19 +68,19 @@ class EED_Multisite_Site_List_Table extends EED_Module {
 			}
 		}
 	}
-	public function sortable_columns( $sortable_columns ) {
+	public static function sortable_columns( $sortable_columns ) {
 		//we tell it to sort on  a column tthat doens't yet exist... but we'll change the
 		//databse query to join to the esp_blog_meta table where it DOES exist
 		$sortable_columns[ 'ee_status'] = 'STS_ID';
 		return $sortable_columns;
 	}
-	public function join_to_blog_meta_table( $query ){
+	public static function join_to_blog_meta_table( $query ){
 		global $wpdb;
 		if( function_exists( 'get_current_screen' ) ) {
 			$screen = get_current_screen();
 	//		var_dump( $screen) ;
 			$from_blogs_sql = "FROM {$wpdb->blogs}";
-			if( $screen->base == 'sites-network' && strpos( $query, $from_blogs_sql ) !== FALSE ) {
+			if( isset( $screen->base ) && $screen->base == 'sites-network' && strpos( $query, $from_blogs_sql ) !== FALSE ) {
 
 				$from_blogs_join_blogmeta_sql = $from_blogs_sql . " INNER JOIN {$wpdb->prefix}esp_blog_meta ON {$wpdb->blogs}.blog_id = {$wpdb->prefix}esp_blog_meta.blog_id_fk";
 				$query = str_replace( $from_blogs_sql, $from_blogs_join_blogmeta_sql, $query  );
