@@ -1,4 +1,8 @@
-<?php if ( ! defined( 'EVENT_ESPRESSO_VERSION' )) { exit('NO direct script access allowed'); }
+<?php
+if ( !defined( 'EVENT_ESPRESSO_VERSION' ) ) {
+	exit( 'NO direct script access allowed' );
+}
+
 /**
  * Event Espresso
  *
@@ -27,13 +31,24 @@
 class espresso_events_Multisite_Hooks extends EE_Admin_Hooks {
 
 	protected function _set_hooks_properties() {
-        $this->_name = 'multisite';
-    }
+		$this->_name = 'multisite';
+	}
 
-	public function _redirect_action_early_update_category( $redirection_query_args ) { }
 
-	public function _redirect_action_early_insert_category( $redirection_query_args ) { }
+
+	public function _redirect_action_early_update_category( $redirection_query_args ) {
+
+	}
+
+
+
+	public function _redirect_action_early_insert_category( $redirection_query_args ) {
+
+	}
+
+
 
 }
+
 // End of file espresso_events_Multisite_Hooks.class.php
 // Location: /wp-content/plugins/espresso-multisite/admin/multisite/espresso_events_Multisite_Hooks.class.php

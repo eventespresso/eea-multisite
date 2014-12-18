@@ -1,4 +1,7 @@
-<?php if ( ! defined('EVENT_ESPRESSO_VERSION')) { exit('No direct script access allowed'); }
+<?php
+if ( !defined( 'EVENT_ESPRESSO_VERSION' ) ) {
+	exit( 'No direct script access allowed' );
+}
 /**
  * Event Espresso
  *
@@ -13,7 +16,8 @@
  *
  * ------------------------------------------------------------------------
  */
- /**
+
+/**
  *
  * Class EE_Multisite_Config
  *
@@ -25,14 +29,9 @@
  * @since		 	   $VID:$
  *
  */
-
 class EE_Multisite_Config extends EE_Config_Base {
 
-
-
 }
-
-
 
 // End of file EE_Multisite_Config.php
 // Location: /wp-content/plugins/espresso-multisite/EE_Multisite_Config.php

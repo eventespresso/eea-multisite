@@ -2,8 +2,8 @@
 /*
   Plugin Name: Event Espresso - Multisite (EE4.5+)
   Plugin URI: http://www.eventespresso.com
-  Description: Helps Network admins manage a Network running Event Espresso
-  Version: 0.0.1.dev.002
+  Description: The Event Espresso Multisite addon helps network admins manage a network of Event Espresso-enabled blogs. Requires Event Espresso 4.5.0 or higher.
+  Version: 1.0.0.p.000
   Author: Event Espresso
   Author URI: http://www.eventespresso.com
   Copyright 2014 Event Espresso (email : support@eventespresso.com)
@@ -36,16 +36,19 @@
  *
  * ------------------------------------------------------------------------
  */
-define( 'EE_MULTISITE_VERSION', '0.0.1.dev.002' );
-define( 'EE_MULTISITE_PLUGIN_FILE',  __FILE__ );
-function load_espresso_multisite() {
-if ( class_exists( 'EE_Addon' )) {
-	// multisite version
-	require_once ( plugin_dir_path( __FILE__ ) . 'EE_Multisite.class.php' );
-	EE_Multisite::register_addon();
-}
-}
-add_action( 'AHEE__EE_System__load_espresso_addons', 'load_espresso_multisite' );
+define( 'EE_MULTISITE_VERSION', '1.0.0.p.000' );
+define( 'EE_MULTISITE_PLUGIN_FILE', __FILE__ );
 
+function load_espresso_multisite() {
+	if ( class_exists( 'EE_Addon' ) ) {
+		// multisite version
+		require_once ( plugin_dir_path( __FILE__ ) . 'EE_Multisite.class.php' );
+		EE_Multisite::register_addon();
+	}
+}
+
+
+
+add_action( 'AHEE__EE_System__load_espresso_addons', 'load_espresso_multisite' );
 // End of file espresso_multisite.php
 // Location: wp-content/plugins/espresso-multisite/espresso_multisite.php

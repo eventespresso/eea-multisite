@@ -6,6 +6,5 @@
  * @package 		EE4 Addon Skeleton
  * @subpackage 	tests
  */
-
 // Bootstrap EE4 Addon
 require EEADDON_PLUGIN_DIR . 'espresso-multisite.php';
