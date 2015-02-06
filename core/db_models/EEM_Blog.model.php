@@ -207,11 +207,31 @@ class EEM_Blog extends EEM_Soft_Delete_Base {
 	 * or not they need to be migrated. This should probably be done
 	 * anytime a new version of EE is installed or an addon is activated or upgraded.
 	 *
-	 * @param array $query_params @see EEM_Base::get_all()
+	 * This method needs to be runnable while in maintenance mode, so it can't use the normal model methods
+	 * (because they throw an exception if called in maintenance mode, because the table might not exist.
+	 * This method has special logic for when the table doesn't yet exist)
+	 *
 	 * @return int how many blog were marked as unsure
 	 */
-	public function mark_all_blogs_migration_status_as_unsure( $query_params = array( ) ) {
-		return $this->update( array( 'STS_ID' => self::status_unsure ), $query_params );
+	public function mark_all_blogs_migration_status_as_unsure() {
+		EE_Registry::instance()->load_helper('Activation');
+		if( EEH_Activation::table_exists(  $this->second_table() ) ){
+			global $wpdb;
+			$query = 'UPDATE ' . $this->second_table() . ' SET STS_ID = "' . self::status_unsure . '" WHERE 1=1';
+			$rows_affected = $wpdb->query( $query );
+			return $rows_affected;
+		} else {
+			//don't do anything. the table doesn't exist, and its default value for STS_ID is self::status_unsure anyways
+			//so there is nothing to do to mark it as status unsure
+			return 0;
+		}
+	}
+
+	public function mark_current_blog_as_up_to_date() {
+		$current_blog_id = get_current_blog_id();
+		EED_Multisite::switch_to_blog( 1 );
+		EEM_Blog::instance()->update_by_ID( array( 'STS_ID' => self::status_up_to_date), $current_blog_id );
+		EED_Multisite::restore_current_blog();
 	}
 
 
