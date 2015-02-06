@@ -227,10 +227,19 @@ class EEM_Blog extends EEM_Soft_Delete_Base {
 		}
 	}
 
+	/**
+	 * Marks the current blog's status in the esp_blog_meta table as being up-to-date.
+	 * Can be called from any blog and automatically does the blog switching magic.
+	 * If the main site is itself in mainteannce mode, then this is skipped. Oh well,
+	 * the blog will just be marked as unsure or out-of-date until the next multisite migration
+	 * manager assesses which blogs need to be migrated or this blog later noticies it has to nothing to migrate
+	 */
 	public function mark_current_blog_as_up_to_date() {
 		$current_blog_id = get_current_blog_id();
 		EED_Multisite::switch_to_blog( 1 );
-		EEM_Blog::instance()->update_by_ID( array( 'STS_ID' => self::status_up_to_date), $current_blog_id );
+		if( EE_Maintenance_Mode::instance()->models_can_query() ) {
+			EEM_Blog::instance()->update_by_ID( array( 'STS_ID' => self::status_up_to_date), $current_blog_id );
+		}
 		EED_Multisite::restore_current_blog();
 	}
 
