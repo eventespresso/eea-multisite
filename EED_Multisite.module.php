@@ -42,7 +42,10 @@ class EED_Multisite extends EED_Module {
 	 */
 	public static function set_hooks() {
 		EE_Config::register_route( 'multisite', 'EED_Multisite', 'run' );
-		add_action( 'wp_loaded', array( 'EED_Multisite', 'update_last_requested' ) );
+		//don't do multisite stuff if multisite isn't enabled
+		if( is_multisite() ) {
+			add_action( 'wp_loaded', array( 'EED_Multisite', 'update_last_requested' ) );
+		}
 
 		self::set_hooks_both();
 	}
@@ -59,15 +62,14 @@ class EED_Multisite extends EED_Module {
 
 		self::set_hooks_both();
 
-		//true admin-only hooks
-//		if( ! EE_Maintenance_Mode::instance()->models_can_query() ){
-//			add_filter('FHEE__EE_Admin_Page_Loader___get_installed_pages__installed_refs', array('EED_Multisite','show_multisite_admin_in_mm'), 110 );
-//		}
-		add_action('network_admin_notices',array('EED_Multisite','check_network_maintenance_mode'));
-		add_action('network_admin_notices',array('EED_Multisite','check_main_blog_maintenance_mode'));
+		//don't do multisite stuff if multisite isn't enabled
+		if( is_multisite() ) {
+			add_action('network_admin_notices',array('EED_Multisite','check_network_maintenance_mode'));
+			add_action('network_admin_notices',array('EED_Multisite','check_main_blog_maintenance_mode'));
 
-		//filter the existing maintenance mode messages in EE core
-		add_filter( 'FHEE__Maintenance_Admin_Page_Init__check_maintenance_mode__notice', array( 'EED_Multisite', 'check_main_blog_maintenance_mode' ), 10 );
+			//filter the existing maintenance mode messages in EE core
+			add_filter( 'FHEE__Maintenance_Admin_Page_Init__check_maintenance_mode__notice', array( 'EED_Multisite', 'check_main_blog_maintenance_mode' ), 10 );
+		}
 	}
 
 	public static function show_multisite_admin_in_mm( $admin_page_folder_names){
@@ -78,7 +80,10 @@ class EED_Multisite extends EED_Module {
 
 
 	protected static function set_hooks_both() {
-		add_action( 'AHEE__EE_Data_Migration_Manager__check_for_applicable_data_migration_scripts__scripts_that_should_run', array( 'EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ), 10, 1 );
+		//don't do multisite stuff if multisite isn't enabled
+		if( is_multisite() ) {
+			add_action( 'AHEE__EE_Data_Migration_Manager__check_for_applicable_data_migration_scripts__scripts_that_should_run', array( 'EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ), 10, 1 );
+		}
 	}
 
 	/**
