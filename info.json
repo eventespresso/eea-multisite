@@ -1,0 +1,18 @@
+{
+	"versionFile" : "eea-multisite.php",
+	"slug" : "eea-multisite",
+	"name" : "EE4 Multisite Addon",
+	"archiveBaseUrl" : "http://build.eventespresso.com/",
+	"archiveBasePath" : "~/www/build/",
+	"releaseFilesRemove" : [
+		"src/tests/**",
+		"src/info.json",
+		"src/circle.yml",
+		"src/readme.txt"
+	],
+	"github" : false,
+	"awsbucket" : "",
+	"awsregion" : "",
+	"srcBuildFolderName" : "eea-multisite",
+	"textDomain" : "event_espresso"
+}
