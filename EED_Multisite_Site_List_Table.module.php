@@ -2,27 +2,12 @@
 if ( !defined( 'EVENT_ESPRESSO_VERSION' ) ) {
 	exit( 'No direct script access allowed' );
 }
-/*
- * Event Espresso
- *
- * Event Registration and Management Plugin for WordPress
- *
- * @ package		Event Espresso
- * @ author			Event Espresso
- * @ copyright	(c) 2008-2014 Event Espresso  All Rights Reserved.
- * @ license		http://eventespresso.com/support/terms-conditions/   * see Plugin Licensing *
- * @ link				http://www.eventespresso.com
- * @ version		$VID:$
- *
- * ------------------------------------------------------------------------
- */
-
 /**
  * Class  EED_Multisite
  *
  * @package			Event Espresso
  * @subpackage		espresso-multisite
- * @author 				Brent Christensen
+ * @author 				Mike Nelson
  *
  * ------------------------------------------------------------------------
  */
@@ -69,8 +54,8 @@ class EED_Multisite_Site_List_Table extends EED_Module {
 		}
 	}
 	public static function sortable_columns( $sortable_columns ) {
-		//we tell it to sort on  a column tthat doens't yet exist... but we'll change the
-		//databse query to join to the esp_blog_meta table where it DOES exist
+		//we tell it to sort on  a column that doesn't yet exist... but we'll change the
+		//database query to join to the esp_blog_meta table where it DOES exist
 		$sortable_columns[ 'ee_status'] = 'STS_ID';
 		return $sortable_columns;
 	}
@@ -82,12 +67,14 @@ class EED_Multisite_Site_List_Table extends EED_Module {
 			$from_blogs_sql = "FROM {$wpdb->blogs}";
 			if( isset( $screen->base ) && $screen->base == 'sites-network' && strpos( $query, $from_blogs_sql ) !== FALSE ) {
 
-				$from_blogs_join_blogmeta_sql = $from_blogs_sql . " INNER JOIN {$wpdb->prefix}esp_blog_meta ON {$wpdb->blogs}.blog_id = {$wpdb->prefix}esp_blog_meta.blog_id_fk";
-				$query = str_replace( $from_blogs_sql, $from_blogs_join_blogmeta_sql, $query  );
-				if( strpos( $query, 'ORDER BY' ) === FALSE && isset( $_REQUEST[ 'orderby' ] ) && $_REQUEST[ 'orderby' ] == 'STS_ID' ) {
+				$from_blogs_join_blog_meta_sql = $from_blogs_sql . " INNER JOIN {$wpdb->prefix}esp_blog_meta ON {$wpdb->blogs}.blog_id = {$wpdb->prefix}esp_blog_meta.blog_id_fk";
+				$query = str_replace( $from_blogs_sql, $from_blogs_join_blog_meta_sql, $query  );
+				// sanitize incoming request vars
+				$orderby = isset( $_REQUEST[ 'orderby' ] ) ? sanitize_sql_orderby( $_REQUEST[ 'orderby' ] ) : '';
+				if( strpos( $query, 'ORDER BY' ) === FALSE && $orderby == 'STS_ID' ) {
 					$limit_sql_only = ' LIMIT';
-					$order = isset( $_REQUEST[ 'order' ] ) ? $_REQUEST[ 'order' ] : 'asc';
-					$order_by_and_limit_sql = "ORDER BY FIELD( STS_ID, 'BRK','BOD','BUN','BCM','BUD') {$order}" . $limit_sql_only;
+					$order = isset( $_REQUEST[ 'order' ] ) ? sanitize_text_field( $_REQUEST[ 'order' ] ) : 'asc';
+					$order_by_and_limit_sql = "ORDER BY FIELD( STS_ID, 'BRK','BOD','BUN','BCM','BUD' ) {$order}" . $limit_sql_only;
 					$query = str_replace($limit_sql_only, $order_by_and_limit_sql, $query );
 				}
 //				echo "new query: $query<br>";
