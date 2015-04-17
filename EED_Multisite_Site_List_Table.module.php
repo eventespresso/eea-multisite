@@ -73,7 +73,7 @@ class EED_Multisite_Site_List_Table extends EED_Module {
 				$orderby = isset( $_REQUEST[ 'orderby' ] ) ? sanitize_sql_orderby( $_REQUEST[ 'orderby' ] ) : '';
 				if( strpos( $query, 'ORDER BY' ) === FALSE && $orderby == 'STS_ID' ) {
 					$limit_sql_only = ' LIMIT';
-					$order = isset( $_REQUEST[ 'order' ] ) ? sanitize_text_field( $_REQUEST[ 'order' ] ) : 'asc';
+					$order = isset( $_REQUEST[ 'order' ] ) && strtolower( $_REQUEST[ 'order' ] ) == 'asc' ? 'asc' : 'desc';
 					$order_by_and_limit_sql = "ORDER BY FIELD( STS_ID, 'BRK','BOD','BUN','BCM','BUD' ) {$order}" . $limit_sql_only;
 					$query = str_replace($limit_sql_only, $order_by_and_limit_sql, $query );
 				}
