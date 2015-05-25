@@ -11,6 +11,7 @@
 		"src/readme.txt"
 	],
 	"github" : false,
+	"demoee" : true,
 	"awsbucket" : "",
 	"awsregion" : "",
 	"srcBuildFolderName" : "eea-multisite",
