@@ -7,4 +7,4 @@
  * @subpackage 	tests
  */
 // Bootstrap EE4 Addon
-require EEADDON_PLUGIN_DIR . 'espresso-multisite.php';
+require EEADDON_PLUGIN_DIR . 'eea-multisite.php';
