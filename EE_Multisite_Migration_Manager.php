@@ -74,9 +74,17 @@ class EE_Multisite_Migration_Manager {
 		$num_migrated = 0;
 		$multisite_migration_message = '';
 		$current_script_names = array( );
+		//in addition to limiting the number of records we migrate during each step,
+		//see https://events.codebasehq.com/projects/event-espresso/tickets/8332
+		$max_sites_to_migrate = max( 1, defined( 'EE_MIGRATION_STEP_SIZE_SITES' )? EE_MIGRATION_STEP_SIZE_SITES : $records_to_migrate / 10 );
+		$sites_migrated = 0;
 		try{
-			while ( $num_migrated < $records_to_migrate && $blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested() ) {
+			//while we have more records and blogs to migrate, step through each blog
+			while ( $sites_migrated++ < $max_sites_to_migrate &&
+					$num_migrated < $records_to_migrate &&
+					$blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested() ) {
 				EED_Multisite::switch_to_blog( $blog_to_migrate->ID() );
+				//and keep hammering that blog so long as it has stuff to migrate
 				do {
 					$results = EE_Data_Migration_Manager::instance()->migration_step( $records_to_migrate - $num_migrated );
 					$num_migrated += $results[ 'records_migrated' ];
