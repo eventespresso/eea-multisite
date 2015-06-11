@@ -320,7 +320,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		if ( $original_unknown_status_blog_count ) {
 			//ok we still don't even know how many need to be migrated
 			$step_size = max( 1, defined( 'EE_MIGRATION_STEP_SIZE' ) ? EE_MIGRATION_STEP_SIZE / 10 : 5  );
-			$newly_found_needing_migration_count = EE_Multisite_Migration_Manager::instance()->assess_sites_needing_migration( $step_size );
+			$newly_found_needing_migration_count = max( 1, defined( 'EE_MIGRATION_STEP_SIZE_SITES' )? EE_MIGRATION_STEP_SIZE_SITES : 5 );
 		}
 		$this->_template_args[ 'data' ] = array(
 			'total_blogs' => EEM_Blog::instance()->count(),
@@ -343,7 +343,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 	 */
 	public function migrating() {
 		//we know how many need to be migrated. so let's do that
-		$step_size = defined( 'EE_MIGRATION_STEP_SIZE' ) ? EE_MIGRATION_STEP_SIZE * 10 : 500;
+		$step_size = defined( 'EE_MIGRATION_STEP_SIZE_FOR_MULTISITE' ) ? EE_MIGRATION_STEP_SIZE_FOR_MULTISITE : 100;
 		$migration_status = EE_Multisite_Migration_Manager::instance()->migration_step( $step_size );
 		$blogs_left = EEM_Blog::instance()->count();
 		if( $blogs_left == 0 ){
