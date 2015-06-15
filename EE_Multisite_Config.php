@@ -30,7 +30,13 @@ if ( !defined( 'EVENT_ESPRESSO_VERSION' ) ) {
  *
  */
 class EE_Multisite_Config extends EE_Config_Base {
+	public $delete_site_threshold;
+	public $delete_site_excludes;
 
+	public function __construct() {
+		$this->delete_site_threshold = 30;
+		$this->delete_site_excludes = array( 1 );
+	}
 }
 
 // End of file EE_Multisite_Config.php

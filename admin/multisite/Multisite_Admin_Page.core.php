@@ -68,6 +68,17 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				'func' => '_force_reassess',
 				'noheader' => TRUE
 			),
+			'site_management' => array(
+				'func' => '_site_management'
+			),
+			'update_site_management_settings' => array(
+				'func' => '_update_site_management_settings',
+				'noheader' => true
+			),
+			'delete_sites_range' => array(
+				'func' => '_delete_sites_range',
+				'noheader' => true
+			),
 			'usage' => '_usage'
 		);
 	}
@@ -91,11 +102,19 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 					'order' => 30
 				),
 				'require_nonce' => FALSE
+			),
+			'site_management' => array(
+				'nav' => array(
+					'label' => __( 'Site Management', 'event_espresso' ),
+					'order' => 20
+				),
+				'require_nonce' => false
 			)
 		);
 
 		if ( EE_Maintenance_Mode::instance()->models_can_query() ) {
 			$this->_page_config['default']['metaboxes'][] = '_publish_post_box';
+			$this->_page_config['site_management']['metaboxes'][] = '_publish_post_box';
 		}
 	}
 
@@ -380,6 +399,120 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			$last_migration_script_option = array();
 		}
 		wp_mail( get_site_option( 'admin_email' ), sprintf( __( 'General error running multisite migration. Last ran blog was: %s', 'event_espresso' ), $blog_name), sprintf( __( 'Did not receive proper JSON response while running multisite migration. This was the response: \'%1$s\' while migrating blog %2$s (ID %3$d). The last ran migration script had data: %4$s', 'event_espresso' ), $this->_req_data[ 'message' ], $blog_name, $blog_id, print_r( $last_migration_script_option, TRUE ) ) );
+	}
+
+
+	/**
+	 * Callback for the site management page.
+	 */
+	protected function _site_management() {
+		$this->_template_args['admin_page_content'] = $this->_site_management_delete_form()->get_html_and_js();
+		$this->_set_add_edit_form_tags( 'update_site_management_settings' );
+		$this->_set_publish_post_box_vars( null, false, false, null, false );
+		$this->display_admin_page_with_sidebar();
+	}
+
+
+
+
+	protected function _site_management_delete_form() {
+		EE_Registry::instance()->load_helper( 'HTML' );
+		$delete_url = add_query_arg(
+			array( 'action' => 'delete_sites_range' ),
+			EE_MULTISITE_ADMIN_URL
+		);
+
+		return new EE_Form_Section_Proper(
+			array(
+				'name' => 'ee_multisite_site_management_form',
+				'html_id' => 'ee_multisite_site_management_form',
+				'layout_strategy' => new EE_Div_Per_Section_Layout(),
+				'subsections' => array(
+					'delete_sites_hdr' => new EE_Form_Section_HTML( EEH_HTML::h3( __( 'Prune Old Sites', 'event_espresso' ) ) ),
+					'delete_sites_settings' => $this->_delete_settings_form_settings(),
+					'delete_sites_button' => new EE_Form_Section_HTML(
+						'<a href="' . $delete_url . '" class="button button-secondary">'
+						. __( 'Prune Sites', 'event_espresso' )
+						. '</a>'
+					)
+				)
+			)
+		);
+	}
+
+
+
+
+	protected function _delete_settings_form_settings() {
+
+		return new EE_Form_Section_Proper(
+			array(
+				'name' => 'ee_multisite_site_management_settings',
+				'html_id' => 'ee_multisite_site_management_settings',
+				'layout_strategy' => new EE_Div_Per_Section_Layout(),
+				'subsections' => array(
+					'delete_threshold' => new EE_Text_Input(
+						array(
+							'html_label_text' => __( 'Delete Sites that have not been updated in the last given number of days', 'event_espresso' ),
+							'html_help_text' => '',
+							'default' => isset( EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_threshold ) ? EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_threshold : 30,
+							'display_html_label_text' => false
+						)
+					),
+					'delete_excludes' => new EE_Text_Input(
+						array(
+							'html_label_text' => __( 'Excluded sites', 'event_espresso' ),
+							'html_help_text' => __( 'Enter a comma delimited list of site_ids to exclude from the delete query', 'event_espresso' ),
+							'default' => isset( EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_excludes ) ? implode( ',', EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_excludes ) : 1
+						)
+					)
+				)
+			)
+		);
+	}
+
+
+	/**
+	 * callback for  update_site_management_settings action.
+	 */
+	protected function _update_site_management_settings() {
+		$config = EE_Registry::instance()->CFG->addons->ee_multisite;
+
+		try {
+			$form = $this->_site_management_delete_form();
+			if ( $form->was_submitted() ) {
+				//capture form data
+				$form->receive_form_submission();
+
+				//validate_form_data
+				if ( $form->is_valid() ) {
+					$valid_data = $form->valid_data();
+					$config->delete_site_threshold = $valid_data['delete_sites_settings']['delete_threshold'];
+					$config->delete_site_excludes = explode( ',', $valid_data['delete_sites_settings']['delete_excludes'] );
+				} else {
+					if ( $form->submission_error_message() != '' ) {
+						EE_Error::add_error( $form->submission_error_message(), __FILE__, __FUNCTION__, __LINE__ );
+					}
+				}
+			}
+		} catch( EE_Error $e ) {
+			$e->get_error();
+		}
+
+		EE_Error::add_success( __( 'Settings updated.', 'event_espresso' ) );
+		EE_Registry::instance()->CFG->update_config( 'addons', 'ee_multisite', $config );
+		$this->redirect_after_action( false, '', '', array( 'action' => 'site_management' ), true );
+	}
+
+
+
+
+	/**
+	 * callback for the delete_sites_range action.
+	 * This handles deleting sites matching the current config (in batches).
+	 */
+	protected function _delete_sites_range() {
+
 	}
 
 
