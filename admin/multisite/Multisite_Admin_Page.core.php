@@ -556,8 +556,11 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		$excludes[] = 1;
 		$excludes = array_map( 'absint', $excludes );
 
+		//use appropriate call for current_time depending on what version of EE core is active.
+		$current_time = method_exists( EEM_Blog::instance(), 'current_time_for_query' ) ? time() : current_time( 'timestamp' );
+
 		$delete_where_conditions = array(
-			'last_updated' => array( '<', strtotime( $range, current_time('timestamp' ) ) ),
+			'last_updated' => array( '<', strtotime( $range, $current_time ) ),
 			'blog_id' => array( 'NOT_IN', $excludes )
 		);
 
