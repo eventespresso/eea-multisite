@@ -516,8 +516,9 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			$e->get_error();
 		}
 
-		EE_Error::add_success( __( 'Settings updated.', 'event_espresso' ) );
-		EE_Registry::instance()->CFG->update_config( 'addons', 'ee_multisite', $config );
+		if ( EE_Registry::instance()->CFG->update_config( 'addons', 'ee_multisite', $config ) ) {
+			EE_Error::add_success( __( 'Settings updated.', 'event_espresso' ) );
+		}
 		$this->redirect_after_action( false, '', '', array( 'action' => 'site_management' ), true );
 	}
 
