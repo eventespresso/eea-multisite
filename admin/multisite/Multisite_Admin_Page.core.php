@@ -416,8 +416,10 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 	}
 
 
-
-
+	/**
+	 * Returns the main form for deleting sites.
+	 * @return EE_Form_Section_Proper
+	 */
 	protected function _site_management_delete_form() {
 		EE_Registry::instance()->load_helper( 'HTML' );
 		$delete_url = add_query_arg(
@@ -446,8 +448,11 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 	}
 
 
-
-
+	/**
+	 * Returns the specific settings field that are assembled as a part of the main delete sites form.
+	 * 
+	 * @return EE_Form_Section_Proper
+	 */
 	protected function _delete_settings_form_settings() {
 
 		return new EE_Form_Section_Proper(
