@@ -450,7 +450,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 	/**
 	 * Returns the specific settings field that are assembled as a part of the main delete sites form.
-	 * 
+	 *
 	 * @return EE_Form_Section_Proper
 	 */
 	protected function _delete_settings_form_settings() {
@@ -478,7 +478,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 					),
 					'delete_non_super_admin_users' => new EE_Yes_No_Input(
 						array(
-							'html_label_text' => __( 'Delete non super admin users that are a part of the delete sites?', 'event_espresso' ),
+							'html_label_text' => __( 'Delete non super admin users that belong to the deleted sites?', 'event_espresso' ),
 							'default' => isset( EE_Registry::instance()->CFG->addons->ee_multisite->delete_non_super_admin_users ) ? EE_Registry::instance()->CFG->addons->ee_multisite->delete_non_super_admin_users : false
 						)
 					)
