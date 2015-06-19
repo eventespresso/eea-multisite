@@ -153,7 +153,9 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			'no_migrations_required' => __( 'No migrations are required', 'event_espresso' ),
 			'ajax_error' => __( 'An error occurred communicating with the server. Please contact support. An email report should have been sent to your network admin', 'event_espresso' ),
 			'all_done' => __( 'All done migrating network', 'event_espresso' ),
-			'all_done_deleting' => __( 'All done deleting sites.', 'event_espresso' )
+			'all_done_deleting' => __( 'All done deleting sites.', 'event_espresso' ),
+			'error_occured' => __( 'An error occurred', 'event_espresso' ),
+			'no_progress_assessing' => __( 'It appears we are not making any progress assessing the sites needing migration. Something is wrong', 'event_espresso' ),
 		) );
 
 

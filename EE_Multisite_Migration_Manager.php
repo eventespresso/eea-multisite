@@ -84,6 +84,7 @@ class EE_Multisite_Migration_Manager {
 			while ( $blogs_migrated++ < $max_blogs_to_migrate &&
 					$num_migrated < $records_to_migrate &&
 					$blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested() ) {
+				echo "\r\nblosg migrated $blogs_migrated";
 				EED_Multisite::switch_to_blog( $blog_to_migrate->ID() );
 				//and keep hammering that blog so long as it has stuff to migrate
 				do {
