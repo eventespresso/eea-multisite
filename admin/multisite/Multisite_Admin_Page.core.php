@@ -145,7 +145,6 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		wp_enqueue_script( 'espresso_multisite_admin' );
 
 		EE_Registry::$i18n_js_strings[ 'confirm_reset' ] = __( 'Are you sure you want to reset ALL your Event Espresso Multisite Information? This cannot be undone.', 'event_espresso' );
-		wp_localize_script( 'espresso_multisite_admin', 'eei18n', EE_Registry::$i18n_js_strings );
 
 		wp_localize_script( 'espresso_multisite_admin', 'ee_i18n_text', array(
 			'done_assessment' => __( 'Assessment Complete', 'event_espresso' ),
