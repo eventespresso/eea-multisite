@@ -599,11 +599,12 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			}
 
 			//next need to delete all Event Espresso data on the site.
-			switch_to_blog( $blog_id );
+			//seeing how we're using the models, we ought to make sure the models are reset too
+			EED_Multisite::switch_to_blog( $blog_id );
 			EE_Registry::instance()->load_helper('Activation');
 			EE_Maintenance_Mode::instance()->set_maintenance_level(EE_Maintenance_Mode::level_0_not_in_maintenance);
 			EEH_Activation::delete_all_espresso_tables_and_data();
-			restore_current_blog();
+			EED_Multisite::restore_current_blog();
 
 			//now delete core blog tables/data
 			wpmu_delete_blog( $blog_id, true );
@@ -616,8 +617,9 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				//clean up blog_meta table
 				$tables = EEM_Blog::instance()->get_tables();
 				if ( isset( $tables['Blog_Meta'] ) && $tables['Blog_Meta'] instanceof EE_Secondary_Table ) {
+					//the main blog entry is already deleted, let's clean up the entry in the secondary table
 					global $wpdb;
-					$wpdb->delete( $tables['Blog_Meta']->get_table_name(), array( 'blog_id_fk', $blog_id ) );
+					$wpdb->delete( $tables['Blog_Meta']->get_table_name(), array( 'blog_id_fk' => $blog_id ) );
 
 					//delete all non super_admin users that were attached to that blog if configured to drop them
 					if ( EE_Registry::instance()->CFG->addons->ee_multisite->delete_non_super_admin_users && $users ) {
