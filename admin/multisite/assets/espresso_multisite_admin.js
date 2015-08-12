@@ -214,7 +214,12 @@ function EE_Progress_Bar( containing_div ){
 jQuery(function() {
 	//	alert("jquery a go");
 	driver = new EE_Multisite_DMS_Driver();
-	driver.assessment_step();
+//	driver.assessment_step();
+	jQuery('#begin-multisite-assessment').click(function(){
+		jQuery('#assessment-pane').toggle('slow');
+		jQuery('#intro-pane').toggle('slow');
+		driver.assessment_step();
+	});
 	jQuery('#begin-multisite-migration').click(function(){
 		jQuery('#migration-pane').toggle('slow');
 		jQuery('#assessment-pane').toggle('slow');
