@@ -15,6 +15,7 @@ function EE_Multisite_DMS_Driver(){
 	this.migration_scripts_div_content;
 	this.current_dms_records_migrated = 0;
 	this.current_dms_records_to_migrate = 1;
+	this.current_blogs_assessed = -1;
 	this.assessment_pg = new EE_Progress_Bar(jQuery('#sites-needing-migration-progress-bar'));
 	this.sites_pg = new EE_Progress_Bar(jQuery('#sites-migrated-progress-bar'));
 	this.current_dms_pg = new EE_Progress_Bar(jQuery('#current-migration-progress-bar'));
@@ -106,10 +107,15 @@ function EE_Multisite_DMS_Driver(){
 				jQuery('#main-title').html(ee_i18n_text.done_assessment);
 				jQuery('#sub-title').html(ee_i18n_text.network_needs_migration);
 				jQuery('#begin-multisite-migration').show();
+			}else if( driver.current_blogs_assessed == ( total - u ) ) {//we've stopped makign progress
+				jQuery('#main-title').html(ee_i18n_text.error_occured);
+				jQuery('#sub-title').html(ee_i18n_text.no_progress_assessing);
+				alert( ee_i18n_text.no_progress_assessing );
 			}else{
 				//still not done assessing
 				driver.assessment_step();
 			}
+			driver.current_blogs_assessed = total - u;
 		}else{
 			alert( ee_i18n_text.ajax_error );
 			driver.report_general_migration_error( response );
