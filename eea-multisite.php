@@ -36,7 +36,7 @@
  *
  * ------------------------------------------------------------------------
  */
-define( 'EE_MULTISITE_CORE_VERSION_REQUIRED', '4.8.0.rc.0000' );
+define( 'EE_MULTISITE_CORE_VERSION_REQUIRED', '4.7.0.rc.0000' );
 define( 'EE_MULTISITE_VERSION', '1.0.0.rc.004' );
 define( 'EE_MULTISITE_PLUGIN_FILE', __FILE__ );
 
