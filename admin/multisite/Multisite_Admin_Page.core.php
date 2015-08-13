@@ -80,7 +80,8 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				'func' => '_delete_sites_range',
 				'noheader' => true
 			),
-			'usage' => '_usage'
+			'usage' => '_usage',
+			'cleanup_partially_deleted_sites' => 'cleanup_partially_deleted_sites',
 		);
 	}
 
@@ -110,6 +111,9 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 					'order' => 20
 				),
 				'require_nonce' => false
+			),
+			'cleanup_partially_deleted_sites' => array(
+				'require_nonce' => FALSE
 			)
 		);
 
@@ -636,6 +640,59 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 		//all done, return the total blogs deleted.
 		return $total_deleted;
+	}
+
+	/**
+	 * For deleting tables for blogs that were deleted except for the EE tables
+	 * @global type $wpdb
+	 * @return type
+	 */
+	function cleanup_partially_deleted_sites() {
+		//		return;
+		$deleted_sites = get_option( 'pruner_cleanup', false );
+		global $wpdb;
+		if( $deleted_sites === false ) {
+			//get the highest blog id
+			$max = max( $wpdb->get_var( 'SELECT max(blog_id) FROM ' . $wpdb->blogs ), 5 );
+			//create an array with all ids up to taht number
+			$all_possible_blog_ids = range( 1, $max );
+			//select all blog ids
+			$existing_blog_ids = $wpdb->get_col( 'SELECT blog_id FROM ' . $wpdb->blogs );
+			//remove all existing blog IDs from all blog IDs.
+			$deleted_sites = array_values( array_diff( $all_possible_blog_ids, $existing_blog_ids ) );
+			//save the result
+			update_option( 'pruner_cleanup', $deleted_sites );
+		}
+		$offset = get_option( 'pruner_cleanup_index', 0 );
+		for( $i=$offset; $i < $offset + 1; $i++ ) {
+			if( ! isset( $deleted_sites[ $i ] ) ) {
+				delete_option( 'pruner_cleanup');
+				delete_option( 'pruner_cleanup_offset' );
+				return;
+			}
+			$blog_id_to_cleanup = $deleted_sites[ $i ];
+			$this_blog_prefix = $blog_id_to_cleanup . '_';
+			$sql =  'SHOW TABLES LIKE "' . $wpdb->base_prefix . $this_blog_prefix . '%";';
+			echo $sql;
+			$table_names = $wpdb->get_col( $sql );
+			var_dump( $table_names );
+			foreach( $table_names as $table_name ) {
+				$success = EEH_Activation::delete_unused_db_table( $table_name );
+				echo "<br/>delete table $table_name. success? " . $success;
+			}
+
+		}
+		if( ! isset( $deleted_sites[ $i ] ) ) {
+			echo "<hr>We seem to be all done";
+			delete_option( 'pruner_cleanup');
+			delete_option( 'pruner_cleanup_offset' );
+		} else {
+			echo "<hr>Next up:" . $deleted_sites[ $i ];
+			update_option ( 'pruner_cleanup_index', $i );
+			echo '<a href="">Proceed</a>';
+		}
+
+
 	}
 
 
