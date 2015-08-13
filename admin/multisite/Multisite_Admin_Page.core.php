@@ -663,16 +663,18 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			//save the result
 			update_option( 'pruner_cleanup', $deleted_sites );
 		}
+// 		echo "deleted sites:";var_dump($deleted_sites);die;
 		$offset = get_option( 'pruner_cleanup_index', 0 );
-		for( $i=$offset; $i < $offset + 1; $i++ ) {
+		for( $i=$offset; $i < $offset + 10; $i++ ) {
 			if( ! isset( $deleted_sites[ $i ] ) ) {
 				delete_option( 'pruner_cleanup');
 				delete_option( 'pruner_cleanup_offset' );
 				return;
 			}
 			$blog_id_to_cleanup = $deleted_sites[ $i ];
-			$this_blog_prefix = $blog_id_to_cleanup . '_';
-			$sql =  'SHOW TABLES LIKE "' . $wpdb->base_prefix . $this_blog_prefix . '%";';
+			//remember underscores are WILDCARDS in SQL like queries! so escape them
+			$this_blog_prefix = str_replace( '_', '\_', $wpdb->base_prefix . $blog_id_to_cleanup . '_' );
+			$sql =  'SHOW TABLES LIKE "' . $this_blog_prefix . '%";';
 			echo $sql;
 			$table_names = $wpdb->get_col( $sql );
 			var_dump( $table_names );
