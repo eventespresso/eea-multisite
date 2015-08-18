@@ -80,7 +80,8 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				'func' => '_delete_sites_range',
 				'noheader' => true
 			),
-			'usage' => '_usage'
+			'usage' => '_usage',
+			'cleanup_partially_deleted_sites' => 'cleanup_partially_deleted_sites',
 		);
 	}
 
@@ -110,6 +111,9 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 					'order' => 20
 				),
 				'require_nonce' => false
+			),
+			'cleanup_partially_deleted_sites' => array(
+				'require_nonce' => FALSE
 			)
 		);
 
@@ -144,8 +148,6 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		wp_register_script( 'espresso_multisite_admin', EE_MULTISITE_ADMIN_ASSETS_URL . 'espresso_multisite_admin.js', array( 'espresso_core', 'ee-dialog', ), EE_MULTISITE_VERSION, TRUE );
 		wp_enqueue_script( 'espresso_multisite_admin' );
 
-		EE_Registry::$i18n_js_strings[ 'confirm_reset' ] = __( 'Are you sure you want to reset ALL your Event Espresso Multisite Information? This cannot be undone.', 'event_espresso' );
-		wp_localize_script( 'espresso_multisite_admin', 'eei18n', EE_Registry::$i18n_js_strings );
 
 		wp_localize_script( 'espresso_multisite_admin', 'ee_i18n_text', array(
 			'done_assessment' => __( 'Assessment Complete', 'event_espresso' ),
@@ -153,7 +155,9 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			'no_migrations_required' => __( 'No migrations are required', 'event_espresso' ),
 			'ajax_error' => __( 'An error occurred communicating with the server. Please contact support. An email report should have been sent to your network admin', 'event_espresso' ),
 			'all_done' => __( 'All done migrating network', 'event_espresso' ),
-			'all_done_deleting' => __( 'All done deleting sites.', 'event_espresso' )
+			'all_done_deleting' => __( 'All done deleting sites.', 'event_espresso' ),
+			'error_occured' => __( 'An error occurred', 'event_espresso' ),
+			'no_progress_assessing' => __( 'It appears we are not making any progress assessing the sites needing migration. Something is wrong', 'event_espresso' ),
 		) );
 
 
@@ -165,7 +169,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 
 	public function admin_init() {
-
+		EE_Registry::$i18n_js_strings[ 'confirm_reset' ] = __( 'Are you sure you want to reset ALL your Event Espresso Multisite Information? This cannot be undone.', 'event_espresso' );
 	}
 
 
@@ -341,7 +345,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		$original_unknown_status_blog_count = EEM_Blog::instance()->count_blogs_maybe_needing_migration();
 		if ( $original_unknown_status_blog_count ) {
 			//ok we still don't even know how many need to be migrated
-			$step_size = max( 1, defined( 'EE_MIGRATION_STEP_SIZE' ) ? EE_MIGRATION_STEP_SIZE / 10 : 5  );
+			$step_size = max( 1, defined( 'EE_MIGRATION_ASSESSMENT_SIZE' )? EE_MIGRATION_ASSESSMENT_SIZE : 5 );
 			$newly_found_needing_migration_count = EE_Multisite_Migration_Manager::instance()->assess_sites_needing_migration( $step_size );
 		}
 		$this->_template_args[ 'data' ] = array(
@@ -365,7 +369,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 	 */
 	public function migrating() {
 		//we know how many need to be migrated. so let's do that
-		$step_size = defined( 'EE_MIGRATION_STEP_SIZE' ) ? EE_MIGRATION_STEP_SIZE * 10 : 500;
+		$step_size = defined( 'EE_MIGRATION_STEP_SIZE_FOR_MULTISITE' ) ? EE_MIGRATION_STEP_SIZE_FOR_MULTISITE : 100;
 		$migration_status = EE_Multisite_Migration_Manager::instance()->migration_step( $step_size );
 		$blogs_left = EEM_Blog::instance()->count();
 		if( $blogs_left == 0 ){
@@ -599,11 +603,12 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			}
 
 			//next need to delete all Event Espresso data on the site.
-			switch_to_blog( $blog_id );
+			//seeing how we're using the models, we ought to make sure the models are reset too
+			EED_Multisite::switch_to_blog( $blog_id );
 			EE_Registry::instance()->load_helper('Activation');
 			EE_Maintenance_Mode::instance()->set_maintenance_level(EE_Maintenance_Mode::level_0_not_in_maintenance);
 			EEH_Activation::delete_all_espresso_tables_and_data();
-			restore_current_blog();
+			EED_Multisite::restore_current_blog();
 
 			//now delete core blog tables/data
 			wpmu_delete_blog( $blog_id, true );
@@ -616,8 +621,9 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				//clean up blog_meta table
 				$tables = EEM_Blog::instance()->get_tables();
 				if ( isset( $tables['Blog_Meta'] ) && $tables['Blog_Meta'] instanceof EE_Secondary_Table ) {
+					//the main blog entry is already deleted, let's clean up the entry in the secondary table
 					global $wpdb;
-					$wpdb->delete( $tables['Blog_Meta']->get_table_name(), array( 'blog_id_fk', $blog_id ) );
+					$wpdb->delete( $tables['Blog_Meta']->get_table_name(), array( 'blog_id_fk' => $blog_id ) );
 
 					//delete all non super_admin users that were attached to that blog if configured to drop them
 					if ( EE_Registry::instance()->CFG->addons->ee_multisite->delete_non_super_admin_users && $users ) {
@@ -634,6 +640,59 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 		//all done, return the total blogs deleted.
 		return $total_deleted;
+	}
+
+	/**
+	 * For deleting tables for blogs that were deleted except for the EE tables
+	 * @global type $wpdb
+	 * @return type
+	 */
+	function cleanup_partially_deleted_sites() {
+		//		return;
+		$deleted_sites = get_option( 'pruner_cleanup', false );
+		global $wpdb;
+		if( $deleted_sites === false ) {
+			//get the highest blog id
+			$max = max( $wpdb->get_var( 'SELECT max(blog_id) FROM ' . $wpdb->blogs ), 5 );
+			//create an array with all ids up to taht number
+			$all_possible_blog_ids = range( 1, $max );
+			//select all blog ids
+			$existing_blog_ids = $wpdb->get_col( 'SELECT blog_id FROM ' . $wpdb->blogs );
+			//remove all existing blog IDs from all blog IDs.
+			$deleted_sites = array_values( array_diff( $all_possible_blog_ids, $existing_blog_ids ) );
+			//save the result
+			update_option( 'pruner_cleanup', $deleted_sites );
+		}
+		$offset = get_option( 'pruner_cleanup_index', 0 );
+		for( $i=$offset; $i < $offset + 1; $i++ ) {
+			if( ! isset( $deleted_sites[ $i ] ) ) {
+				delete_option( 'pruner_cleanup');
+				delete_option( 'pruner_cleanup_offset' );
+				return;
+			}
+			$blog_id_to_cleanup = $deleted_sites[ $i ];
+			$this_blog_prefix = $blog_id_to_cleanup . '_';
+			$sql =  'SHOW TABLES LIKE "' . $wpdb->base_prefix . $this_blog_prefix . '%";';
+			echo $sql;
+			$table_names = $wpdb->get_col( $sql );
+			var_dump( $table_names );
+			foreach( $table_names as $table_name ) {
+				$success = EEH_Activation::delete_unused_db_table( $table_name );
+				echo "<br/>delete table $table_name. success? " . $success;
+			}
+
+		}
+		if( ! isset( $deleted_sites[ $i ] ) ) {
+			echo "<hr>We seem to be all done";
+			delete_option( 'pruner_cleanup');
+			delete_option( 'pruner_cleanup_offset' );
+		} else {
+			echo "<hr>Next up:" . $deleted_sites[ $i ];
+			update_option ( 'pruner_cleanup_index', $i );
+			echo '<a href="">Proceed</a>';
+		}
+
+
 	}
 
 

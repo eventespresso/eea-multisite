@@ -46,11 +46,15 @@ class EED_Multisite_Site_List_Table extends EED_Module {
 		return $columns;
 	}
 	public static function cell_content( $column_name, $blog_id ) {
-		if( $column_name == 'ee_status' ) {
-			$blog = EEM_Blog::instance()->get_one_by_ID( $blog_id );
-			if( $blog instanceof EE_Blog ) {
-				echo $blog->pretty_status();
+		if( EE_Maintenance_Mode::instance()->models_can_query() ) {
+			if( $column_name == 'ee_status' ) {
+				$blog = EEM_Blog::instance()->get_one_by_ID( $blog_id );
+				if( $blog instanceof EE_Blog ) {
+					echo $blog->pretty_status();
+				}
 			}
+		} else {
+			echo __( 'Unsure', 'event_espresso' );
 		}
 	}
 	public static function sortable_columns( $sortable_columns ) {
@@ -67,7 +71,7 @@ class EED_Multisite_Site_List_Table extends EED_Module {
 			$from_blogs_sql = "FROM {$wpdb->blogs}";
 			if( isset( $screen->base ) && $screen->base == 'sites-network' && strpos( $query, $from_blogs_sql ) !== FALSE ) {
 
-				$from_blogs_join_blog_meta_sql = $from_blogs_sql . " INNER JOIN {$wpdb->prefix}esp_blog_meta ON {$wpdb->blogs}.blog_id = {$wpdb->prefix}esp_blog_meta.blog_id_fk";
+				$from_blogs_join_blog_meta_sql = $from_blogs_sql . " LEFT JOIN {$wpdb->prefix}esp_blog_meta ON {$wpdb->blogs}.blog_id = {$wpdb->prefix}esp_blog_meta.blog_id_fk";
 				$query = str_replace( $from_blogs_sql, $from_blogs_join_blog_meta_sql, $query  );
 				// sanitize incoming request vars
 				$orderby = isset( $_REQUEST[ 'orderby' ] ) ? sanitize_sql_orderby( $_REQUEST[ 'orderby' ] ) : '';

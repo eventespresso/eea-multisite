@@ -34,7 +34,7 @@ Class EE_Multisite extends EE_Addon {
 	public static function register_addon() {
 		$registration_params = array(
 			'version' => EE_MULTISITE_VERSION,
-			'min_core_version' => '4.6.0.dev.000',
+			'min_core_version' => EE_MULTISITE_CORE_VERSION_REQUIRED,
 			'main_file_path' => EE_MULTISITE_PLUGIN_FILE,
 			'admin_path' => EE_MULTISITE_ADMIN,
 			'admin_callback' => 'additional_admin_hooks',
