@@ -691,7 +691,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		} else {
 			echo "<hr>Next up:" . $deleted_sites[ $i ];
 			update_option ( 'pruner_cleanup_index', $i );
-			echo '<a href="">Proceed</a>';
+			echo '<a href="">Proceed</a><script>location.reload();</script>';
 		}
 
 
