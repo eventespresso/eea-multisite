@@ -87,7 +87,9 @@ class EE_Multisite_Migration_Manager {
 				EED_Multisite::switch_to_blog( $blog_to_migrate->ID() );
 				//and keep hammering that blog so long as it has stuff to migrate
 				do {
-					$results = EE_Data_Migration_Manager::instance()->migration_step( $records_to_migrate - $num_migrated );
+					//pretend each call is a separaye request
+
+					$results = EE_Data_Migration_Manager::reset()->migration_step( $records_to_migrate - $num_migrated );
 					$num_migrated += $results[ 'records_migrated' ];
 					$multisite_migration_message .= "<br>" . $results[ 'message' ];
 					switch ( $results[ 'status' ] ) {
