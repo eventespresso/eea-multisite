@@ -568,11 +568,11 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			'blog_id' => array( 'NOT_IN', $excludes )
 		);
 
-		//get the original count of blogs to delete.  If that's empty then this is the initial request.
-		if ( ! $this->_req_data['total_sites_to_be_deleted'] ) {
-			$response['total_sites_to_be_deleted'] = EEM_Blog::instance()->count( array( $delete_where_conditions, 'default_where_conditions' => 'none' ) );
-		}
 		$sites_to_delete_total = EEM_Blog::instance()->count( array( $delete_where_conditions, 'default_where_conditions' => 'none' ) );
+                //get the original count of blogs to delete.  If that's empty then this is the initial request.
+		if ( ! $this->_req_data['total_sites_to_be_deleted'] ) {
+			$response['total_sites_to_be_deleted'] = $sites_to_delete_total;
+		}
 		$response['sites_deleted'] = $sites_to_delete_total ? $this->_delete_sites( $delete_where_conditions, $batch_size ) : 0;
 		$this->_template_args['data'] = $response;
 		$this->_return_json();
@@ -602,13 +602,27 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				$users = get_users( array( 'blog_id' => $blog_id, 'fields' => 'ids' ) );
 			}
 
-			//next need to delete all Event Espresso data on the site.
-			//seeing how we're using the models, we ought to make sure the models are reset too
-			EED_Multisite::switch_to_blog( $blog_id );
-			EE_Registry::instance()->load_helper('Activation');
-			EE_Maintenance_Mode::instance()->set_maintenance_level(EE_Maintenance_Mode::level_0_not_in_maintenance);
-			EEH_Activation::delete_all_espresso_tables_and_data();
-			EED_Multisite::restore_current_blog();
+			
+                        //next need to delete all Event Espresso data on the site.
+                        //seeing how we're using the models, we ought to make sure the models are reset too
+                        switch_to_blog( $blog_id );
+                        $registry = EE_Registry::instance();
+                        $registry->LIB = new stdClass();
+                        foreach( array_keys( $registry->non_abstract_db_models ) as $model_name ){
+                                $registry->reset_model( $model_name );
+                        }
+                        //alright we've switched blogs and reset needed stuff (except EE_System, because we'd rather not waste
+                        //time detecting if the site has been upgraded etc when we intend to delete it anyways
+                        EE_Registry::instance()->load_helper('Activation');
+                        EE_Maintenance_Mode::instance()->set_maintenance_level(EE_Maintenance_Mode::level_0_not_in_maintenance);
+                        EEH_Activation::delete_all_espresso_tables_and_data();
+                        //ok all done the work on this site, return to main site
+                        restore_current_blog();
+                        $registry = EE_Registry::instance();
+                        $registry->LIB = new stdClass();
+                        foreach( array_keys( $registry->non_abstract_db_models ) as $model_name ){
+                                $registry->reset_model( $model_name );
+                        }
 
 			//now delete core blog tables/data
 			wpmu_delete_blog( $blog_id, true );
