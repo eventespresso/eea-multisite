@@ -28,7 +28,7 @@ class EEM_Site extends EEM_Base {
 		$this->singular_item = __( 'Site', 'event_espresso' );
 		$this->plural_item = __( 'Sites', 'event_espresso' );
 		$this->_tables = array(
-			'Sites' => new EE_Primary_Table( 'site', 'id' )
+			'Sites' => new EE_Primary_Table( 'site', 'id', true )
 		);
 		$this->_fields = array(
 			'Sites' => array(

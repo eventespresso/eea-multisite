@@ -29,7 +29,7 @@ class EEM_Site_Meta extends EEM_Soft_Delete_Base {
 		$this->singular_item = __( 'Site Meta', 'event_espresso' );
 		$this->plural_item = __( 'Site Metas', 'event_espresso' );
 		$this->_tables = array(
-			'Site_Meta' => new EE_Primary_Table( 'sitemeta', 'blog_id' )
+			'Site_Meta' => new EE_Primary_Table( 'sitemeta', 'blog_id', true )
 		);
 		$this->_fields = array(
 			'Site_Meta' => array(
