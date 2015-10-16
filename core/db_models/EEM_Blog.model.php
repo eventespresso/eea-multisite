@@ -55,7 +55,7 @@ class EEM_Blog extends EEM_Soft_Delete_Base {
 		$this->plural_item = __( 'Blogs', 'event_espresso' );
 		$this->_tables = array(
 			'Blog' => new EE_Primary_Table( 'blogs', 'blog_id', true ),
-			'Blog_Meta' => new EE_Secondary_Table( 'esp_blog_meta', 'BLM_ID', 'blog_id_fk', true )
+			'Blog_Meta' => new EE_Secondary_Table( 'esp_blog_meta', 'BLM_ID', 'blog_id_fk', null, true )
 		);
 		$this->_fields = array(
 			'Blog' => array(
