@@ -118,6 +118,7 @@ class EEM_Blog extends EEM_Soft_Delete_Base {
 			'STS_ID*unsure' => self::status_unsure,
 			'STS_ID*null' => array( 'IS NULL' )
 		);
+		$query_params[ 'order_by' ] = array( 'BLG_last_requested' => 'DESC' );
 		return $query_params;
 	}
 

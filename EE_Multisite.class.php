@@ -46,6 +46,7 @@ Class EE_Multisite extends EE_Addon {
 				'Multisite_Admin_Page' => EE_MULTISITE_ADMIN . 'Multisite_Admin_Page.core.php',
 				'Multisite_Admin_Page_Init' => EE_MULTISITE_ADMIN . 'Multisite_Admin_Page_Init.core.php',
 				'EE_Multisite_Migration_Manager' => EE_MULTISITE_PATH . 'EE_Multisite_Migration_Manager.php',
+				'EventEspressoBatchRequest\JobHandlers\MultisiteMigration' => EE_MULTISITE_PATH . 'job_handlers' . DS . 'MultisiteMigration.php'
 			),
 			'module_paths' => array(
 				EE_MULTISITE_PATH . 'EED_Multisite.module.php',

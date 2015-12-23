@@ -1,6 +1,5 @@
 <div id="intro-pane">
-	<p><?php _e( 'Before we can migrate the network, we need to first assess which sites are out-of-date and need to be migrated.', 'event_espresso' );?></p>
-	<a id="begin-multisite-assessment"class="button button-primary"><?php _e( 'Begin Assessment', 'event_espresso' );?></a>
+	<a href='<?php echo $assess_and_migrate_url;?>'><?php _e( 'Assess and Migrate Network Sites', 'event_espresso' );?></a>
 </div>
 <div id="assessment-pane" style="display:none">
 	<h1 id="main-title"><?php _e( 'Assessing what sites need Migrating...', 'event_espresso' ) ?></h1>
