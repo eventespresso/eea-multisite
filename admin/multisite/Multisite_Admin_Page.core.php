@@ -40,8 +40,6 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 
 	protected function _ajax_hooks() {
-		add_action( 'wp_ajax_multisite_migration_assessment_step', array( $this, 'assessing_sites_needing_migration' ) );
-		add_action( 'wp_ajax_multisite_migration_step', array( $this, 'migrating' ) );
 		add_action( 'wp_ajax_multisite_migration_error', array( $this, 'migration_error' ) );
 		add_action( 'wp_ajax_delete_sites_range', array( $this, 'delete_sites_range' ) );
 	}
@@ -344,52 +342,6 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		$this->_redirect_after_action( $count, 'Blogs', 'migration status updated', array( 'action' => 'default' ) );
 	}
 
-
-
-	/**
-	 * receives AJAX request to assess how many sites need to be migrated
-	 */
-	public function assessing_sites_needing_migration() {
-		$original_unknown_status_blog_count = EEM_Blog::instance()->count_blogs_maybe_needing_migration();
-		if ( $original_unknown_status_blog_count ) {
-			//ok we still don't even know how many need to be migrated
-			$step_size = max( 1, defined( 'EE_MIGRATION_ASSESSMENT_SIZE' )? EE_MIGRATION_ASSESSMENT_SIZE : 5 );
-			$newly_found_needing_migration_count = EE_Multisite_Migration_Manager::instance()->assess_sites_needing_migration( $step_size );
-		}
-		$this->_template_args[ 'data' ] = array(
-			'total_blogs' => EEM_Blog::instance()->count(),
-			'up_to_date_blogs' => EEM_Blog::instance()->count_blogs_up_to_date(),
-			'unknown_status_blogs' => EEM_Blog::instance()->count_blogs_maybe_needing_migration(),
-			'out_of_date_blogs' => EEM_Blog::instance()->count_blogs_needing_migration(),
-			'borked_blogs' => EEM_Blog::instance()->count_borked_blogs(),
-		);
-		$this->_return_json();
-	}
-
-
-
-	/**
-	 * Receives AJAX requests from client, which first:
-	 * assesses how many blogs are out of date, (by switching to them then checking for migration scripts)
-	 * THEN grabs one of those blogs needing migration and migrates it (by swithcing to it and doing the normal migration step).
-	 * Both of these tasks are done in small units in order to avoid timeouts
-	 *
-	 */
-	public function migrating() {
-		//we know how many need to be migrated. so let's do that
-		$step_size = defined( 'EE_MIGRATION_STEP_SIZE_FOR_MULTISITE' ) ? EE_MIGRATION_STEP_SIZE_FOR_MULTISITE : 100;
-		$migration_status = EE_Multisite_Migration_Manager::instance()->migration_step( $step_size );
-		$blogs_left = EEM_Blog::instance()->count();
-		if( $blogs_left == 0 ){
-			$migration_status[ 'current_blog_name' ] = '';
-			$migration_status[ 'current_blog_script_names' ] = array();
-			$migration_status[ 'message' ] = __( 'All blogs up-to-date', 'event_espresso' );
-		}
-		$migration_status[ 'blogs_total' ] = $blogs_left;
-		$migration_status[ 'blogs_needing_migration' ] = EEM_Blog::instance()->count_blogs_needing_migration();
-		$this->_template_args[ 'data' ] = $migration_status;
-		$this->_return_json();
-	}
 
 	public function migration_error(){
 		//our last ajax response didn't send proper JSON
