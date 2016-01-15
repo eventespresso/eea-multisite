@@ -194,10 +194,11 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			$this->_template_args[ 'assess_and_migrate_url' ] = EE_Admin_Page::add_query_args_and_nonce( 
 				array(
 					'page' => 'espresso_batch',
-					'batch' => 'file',
+					'batch' => 'job',
 					'job_handler' => urlencode( 'EventEspressoBatchRequest\JobHandlers\MultisiteMigration' ),
 					'return_url' => urlencode( "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" ),
-				)
+				),
+				admin_url()
 			);
 			$this->_set_add_edit_form_tags( 'update_settings' );
 			$this->_set_publish_post_box_vars( NULL, FALSE, FALSE, NULL, FALSE );
