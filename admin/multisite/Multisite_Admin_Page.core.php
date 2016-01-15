@@ -193,10 +193,10 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			$this->_template_args[ 'borked_sites_url' ] = add_query_arg( array( 'orderby' => 'STS_ID' ), network_admin_url('sites.php') );
 			$this->_template_args[ 'assess_and_migrate_url' ] = EE_Admin_Page::add_query_args_and_nonce( 
 				array(
-					'page' => 'espresso_support',
-					'action' => 'batch_create',
+					'page' => 'espresso_batch',
+					'batch' => 'file',
 					'job_handler' => urlencode( 'EventEspressoBatchRequest\JobHandlers\MultisiteMigration' ),
-					'redirect_url' => urlencode( "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" ),
+					'return_url' => urlencode( "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" ),
 				)
 			);
 			$this->_set_add_edit_form_tags( 'update_settings' );
