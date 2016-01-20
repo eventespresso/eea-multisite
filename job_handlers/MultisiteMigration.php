@@ -61,7 +61,7 @@ class MultisiteMigration extends JobHandler {
 			}
 		} while ( $steps_taken < $step_size
 			&& $job_parameters->status() === JobParameters::status_continue );
-		$job_parameters->mark_processed( $blogs_assessed_and_migrated );
+		$job_parameters->set_units_processed( \EEM_Blog::instance()->count_blogs_up_to_date() );
 		return new JobStepResponse( 
 			$job_parameters, 
 			implode( 
