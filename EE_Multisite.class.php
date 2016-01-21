@@ -69,6 +69,8 @@ Class EE_Multisite extends EE_Addon {
 		if ( is_main_site() ) {
 			$registration_params[ 'dms_paths' ] = array( EE_MULTISITE_PATH . 'core' . DS . 'data_migration_scripts' . DS );
 		}
+		//autoload device detector
+		EE_Psr4AutoloaderInit::psr4_loader()->addNamespace( 'DeviceDetector', EE_MULTISITE_PATH . 'core' . DS . 'libraries' . DS . 'device-detector-master' );
 		// register addon via Plugin API
 		EE_Register_Addon::register( 'Multisite', $registration_params );
 		self::set_early_hooks();

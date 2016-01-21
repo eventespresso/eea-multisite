@@ -149,11 +149,23 @@ class EED_Multisite extends EED_Module {
 	 * Run on frontend requests to update when the blog was last updated
 	 */
 	public static function update_last_requested() {
-		global $current_site;
-		$current_blog_id = get_current_blog_id();
-		switch_to_blog( $current_site->blog_id );
-		EEM_Blog::instance()->update_last_requested( $current_blog_id );
-		restore_current_blog();
+		//only record visits by non-bots
+		if( ! EED_Multisite::is_bot( $_SERVER[ 'HTTP_USER_AGENT' ] ) ) {
+			$current_blog_id = get_current_blog_id();
+			EEM_Blog::instance()->update_last_requested( $current_blog_id );
+		}
+	}
+	
+	/**
+	 * Detects if the current user is a bot or what
+	 * @param type $user_agent_string
+	 * @return boolean
+	 */
+	public static function is_bot( $user_agent_string ) {
+		$dd = new DeviceDetector\DeviceDetector( $user_agent_string );
+		$dd->discardBotInformation();
+		$dd->parse();
+		return $dd->isBot();
 	}
 
 
