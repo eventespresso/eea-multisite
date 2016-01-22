@@ -80,6 +80,13 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			),
 			'usage' => '_usage',
 			'cleanup_partially_deleted_sites' => 'cleanup_partially_deleted_sites',
+			'multisite_queryer' => '_multisite_queryer',
+			'run_multisite_query' => array(
+				'func' => '_run_multisite_query', 
+				'noheader' => true,
+				'headers_sent_route'=>'multisite_queryer',
+				'capability' => 'manage_options'
+			)
 		);
 	}
 
@@ -96,9 +103,9 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				'metaboxes' => array_merge( $this->_default_espresso_metaboxes ),
 				'require_nonce' => FALSE
 			),
-			'usage' => array(
+			'multisite_queryer' => array(
 				'nav' => array(
-					'label' => __( 'Multisite Usage', 'event_espresso' ),
+					'label' => __( 'Queryer', 'event_espresso' ),
 					'order' => 30
 				),
 				'require_nonce' => FALSE
@@ -200,6 +207,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				),
 				admin_url()
 			);
+			$this->_template_args[ 'queryer_url' ] = EE_Admin_Page::add_query_args_and_nonce( array( 'action' => 'multisite_queryer' ), EE_MULTISITE_ADMIN_URL );
 			$this->_set_add_edit_form_tags( 'update_settings' );
 			$this->_set_publish_post_box_vars( NULL, FALSE, FALSE, NULL, FALSE );
 			$this->_template_args[ 'admin_page_content' ] = EEH_Template::display_template( $this->_template_path, $this->_template_args, TRUE );
@@ -220,6 +228,78 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 	protected function _basic_settings() {
 		$this->_settings_page( 'multisite_basic_settings.template.php' );
+	}
+	protected function _multisite_queryer() {
+		$this->_template_args[ 'form_action' ] =  EE_Admin_Page::add_query_args_and_nonce( array( 'action' => 'run_multisite_query', 'return_action' => $this->_req_action ), EE_MULTISITE_ADMIN_URL );
+		$this->_template_args[ 'form' ] = $this->_get_multisite_queryer_form();
+		echo EEH_Template::locate_template( EE_MULTISITE_ADMIN_TEMPLATE_PATH . 'multisite_queryer.template.php', $this->_template_args );
+	}
+	
+	/**
+	 * handles mulsite queryer form submission. If invalid re-renders the form
+	 * by allowing _multisiet_queryer method to handle it
+	 */
+	protected function _run_multisite_query() {
+		if( $_SERVER[ 'REQUEST_METHOD' ] == 'POST' ) {
+			$form = $this->_get_multisite_queryer_form();
+			$form->receive_form_submission( $this->_req_data );
+			if( $form->is_valid() ) {
+				//redirect
+				wp_redirect( 
+					EE_Admin_Page::add_query_args_and_nonce( 
+						array(
+							'page' => 'espresso_batch',
+							'batch' => 'file',
+							'wpdb_method' => $form->get_input_value( 'wpdb_method' ),
+							'sql_query' => urlencode( $form->get_input_value( 'sql_query' ) ),
+							'job_handler' => urlencode( 'EventEspressoBatchRequest\JobHandlers\MultisiteQueryer' ),
+							'return_url' => urlencode( "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" ),
+						),
+						admin_url()
+					)
+				);
+				exit;
+			}
+			
+		}
+	}
+	
+	protected $_multisite_queryer_form = null;
+	
+	/**
+	 * 
+	 * @return \EE_Form_Section_Proper
+	 */
+	protected function _get_multisite_queryer_form() {
+		if( ! $this->_multisite_queryer_form instanceof EE_Form_Section_Proper ){
+			$this->_multisite_queryer_form = new EE_Form_Section_Proper( 
+				array(
+					'name' => 'multisite_queryer',
+					'layout_strategy' => new EE_Admin_Two_Column_Layout(),
+					'subsections' => array(
+						'header' => new EE_Form_Section_HTML( EEH_HTML::h1(__( 'Multisite Queryer', 'event_espresso' ) ) ),
+						'explanation' => new EE_Form_Section_HTML( EEH_HTML::p( __( 'Will execute a query on every site in the network and generate a CSV file of the results', 'event_espresso' ) ) ),
+						'wpdb_method' => new EE_Radio_Button_Input( 
+							array(
+								'get_results' => __( 'get_results (for selects)', 'event_espresso' ),
+								'query' => __( 'query (for inserts, updates, or deletes)', 'event_espresso' )
+							),
+							array(
+								'default' => 'get_results',
+							)),
+						'sql_query' => new EE_Text_Area_Input(
+							array(
+								'html_help_text' => __( 'Use the string "{$wpdb->prefix}" and "{$wpdb->base_prefix}" as you would normally. These strings will be replaced appropriately when querying each blog.',
+									'event_espresso' )
+							)),
+						'submit' => new EE_Submit_Input(
+							array(
+								'default' => __( 'Run Query', 'event_espresso' )
+							))
+					)
+				));
+		}
+		return $this->_multisite_queryer_form;
 	}
 
 
@@ -644,6 +724,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			if( ! isset( $deleted_sites[ $i ] ) ) {
 				delete_option( 'pruner_cleanup');
 				delete_option( 'pruner_cleanup_offset' );
+				delete_option( 'pruner_cleanup_index' );
 				return;
 			}
 			$blog_id_to_cleanup = $deleted_sites[ $i ];
@@ -663,6 +744,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			echo "<hr>We seem to be all done";
 			delete_option( 'pruner_cleanup');
 			delete_option( 'pruner_cleanup_offset' );
+			delete_option( 'pruner_cleanup_index' );
 		} else {
 			echo "<hr>Next up:" . $deleted_sites[ $i ];
 			update_option ( 'pruner_cleanup_index', $i );
