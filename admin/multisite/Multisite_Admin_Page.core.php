@@ -250,6 +250,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 						array(
 							'page' => 'espresso_batch',
 							'batch' => 'file',
+							'label' => $form->get_input_value( 'label' ),
 							'wpdb_method' => $form->get_input_value( 'wpdb_method' ),
 							'sql_query' => urlencode( $form->get_input_value( 'sql_query' ) ),
 							'job_handler' => urlencode( 'EventEspressoBatchRequest\JobHandlers\MultisiteQueryer' ),
@@ -278,6 +279,11 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 					'layout_strategy' => new EE_Admin_Two_Column_Layout(),
 					'subsections' => array(
 						'header' => new EE_Form_Section_HTML( EEH_HTML::h1(__( 'Multisite Queryer', 'event_espresso' ) ) ),
+						'label' => new EE_Text_Input( 
+							array(
+								'required' => true
+							)
+						),
 						'explanation' => new EE_Form_Section_HTML( EEH_HTML::p( __( 'Will execute a query on every site in the network and generate a CSV file of the results', 'event_espresso' ) ) ),
 						'wpdb_method' => new EE_Radio_Button_Input( 
 							array(
@@ -289,8 +295,8 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 							)),
 						'sql_query' => new EE_Text_Area_Input(
 							array(
-								'html_help_text' => __( 'Use the string "{$wpdb->prefix}" and "{$wpdb->base_prefix}" as you would normally. These strings will be replaced appropriately when querying each blog.',
-									'event_espresso' )
+								'html_help_text' => __( 'Use the string "{$wpdb->prefix}" and "{$wpdb->base_prefix}" as you would normally. These strings will be replaced appropriately when querying each blog.',	'event_espresso' ),
+								'required' => true,
 							)),
 						'submit' => new EE_Submit_Input(
 							array(

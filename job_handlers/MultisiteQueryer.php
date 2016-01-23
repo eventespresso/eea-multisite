@@ -26,9 +26,9 @@ class MultisiteQueryer extends JobHandlerFile {
 		$filepath = $this->create_file_from_job_with_name(
 			$job_parameters->job_id(),
 			$job_parameters->request_datum( 
-				'query_name', 
-				__( 'Query', 'event_espresso' ) . '.csv' 
-			) 
+				'label', 
+				__( 'Query', 'event_espresso' )  
+			) . '.csv'
 		);
 		$job_parameters->add_extra_data( 'filepath', $filepath );
 		return new JobStepResponse( $job_parameters, __( 'Counted blogs and wrote header row', 'event_espresso' ));
