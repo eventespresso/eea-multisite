@@ -42,11 +42,6 @@ class EED_Multisite extends EED_Module {
 	 */
 	public static function set_hooks() {
 		EE_Config::register_route( 'multisite', 'EED_Multisite', 'run' );
-		//don't do multisite stuff if multisite isn't enabled
-		if( is_multisite() ) {
-			add_action( 'wp_loaded', array( 'EED_Multisite', 'update_last_requested' ) );
-		}
-
 		self::set_hooks_both();
 	}
 
@@ -84,6 +79,7 @@ class EED_Multisite extends EED_Module {
 		if( is_multisite() ) {
 			add_action( 'AHEE__EE_Data_Migration_Manager__check_for_applicable_data_migration_scripts__scripts_that_should_run', array( 'EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ), 10, 1 );
 			add_action( 'wpmu_new_blog', array( 'EED_Multisite', 'new_blog_created' ), 10, 1 );
+			add_action( 'wp_loaded', array( 'EED_Multisite', 'update_last_requested' ) );
 		}
 	}
 
