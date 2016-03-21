@@ -83,6 +83,7 @@ class EED_Multisite extends EED_Module {
 		//don't do multisite stuff if multisite isn't enabled
 		if( is_multisite() ) {
 			add_action( 'AHEE__EE_Data_Migration_Manager__check_for_applicable_data_migration_scripts__scripts_that_should_run', array( 'EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ), 10, 1 );
+			add_action( 'wpmu_new_blog', array( 'EED_Multisite', 'new_blog_created' ), 10, 1 );
 		}
 	}
 
@@ -250,6 +251,22 @@ class EED_Multisite extends EED_Module {
 			wp_enqueue_style( 'espresso_multisite' );
 			wp_enqueue_script( 'espresso_multisite' );
 		}
+	}
+	
+	/**
+	 * A blog was just created; let's immediately create its row in the blog meta table and
+	 * set its last updated time and status
+	 * (otherwise, if we wait, it's possible to get multiple simultenous requests
+	 * which will cause duplicate entries in the blog meta table)
+	 */
+	public static function new_blog_created( $blog_id ) {
+		EEM_Blog::instance()->update_by_ID( 
+			array( 
+				'BLG_last_requested' => current_time( 'mysql', true ), 
+				'STS_ID' => EEM_Blog::status_up_to_date 
+			),
+			$blog_id 
+		);
 	}
 
 
