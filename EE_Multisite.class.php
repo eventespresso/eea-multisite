@@ -137,6 +137,7 @@ Class EE_Multisite extends EE_Addon {
 
 		//a very specific hook for when running the EE_DMS_Core_4_5_0
 		add_filter( 'FHEE__EEH_Activation__get_default_creator_id__pre_filtered_id', array( 'EE_Multisite', 'filter_get_default_creator_id' ) );
+		add_action( 'AHEE__EE_Data_Migration_Manager__check_for_applicable_data_migration_scripts__scripts_that_should_run', array( 'EE_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ), 10, 1 );
 	}
 
 	/**
@@ -208,6 +209,15 @@ Class EE_Multisite extends EE_Addon {
 		}
 	}
 
+	/**
+	 * Checks if there are no migrations needed on a particular site, then we can mark it as being up-to-date right?
+	 * @param EE_Data_Migration_Script_Base[] $migration_scripts_needed
+	 */
+	public static function mark_blog_as_up_to_date_if_no_migrations_needed( $migration_scripts_needed) {
+		if( empty( $migration_scripts_needed ) ){
+			EEM_Blog::instance()->mark_current_blog_as_up_to_date();
+		}
+	}
 
 
 }

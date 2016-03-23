@@ -243,7 +243,7 @@ class EEM_Blog extends EEM_Soft_Delete_Base {
 		EE_Registry::instance()->load_helper('Activation');
 		if( EEH_Activation::table_exists(  $this->second_table() ) ){
 			global $wpdb;
-			$query = $wpdb->prepare( 'UPDATE ' . $this->second_table() . ' SET STS_ID = "' . self::status_unsure . '" WHERE blog_id_fk = %d', $current_blog_id );
+			$query = $wpdb->prepare( 'UPDATE ' . $this->second_table() . ' SET STS_ID = "' . self::status_up_to_date . '" WHERE blog_id_fk = %d', $current_blog_id );
 			$rows_affected = $wpdb->query( $query );
 		}else{
 			//dang can't update it because the esp_blog_meta doesn't yet exist. Oh well, we'll just need to check it again
