@@ -49,6 +49,7 @@ Class EE_Multisite extends EE_Addon {
 				'EventEspressoBatchRequest\JobHandlers\MultisiteMigration' => EE_MULTISITE_PATH . 'job_handlers' . DS . 'MultisiteMigration.php',
 				'EventEspressoBatchRequest\JobHandlers\MultisiteQueryer' => EE_MULTISITE_PATH . 'job_handlers' . DS . 'MultisiteQueryer.php',
 //				'Spyc' => EE_MULTISITE_PATH . 'core' . DS . 'libraries' . DS . 'Spyc.php',
+				'EE_Multisite_Queryer_Form' => EE_MULTISITE_ADMIN . 'forms' . DS . 'EE_Multisite_Queryer_Form.form.php'
 			),
 			'module_paths' => array(
 				EE_MULTISITE_PATH . 'EED_Multisite.module.php',

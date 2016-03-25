@@ -273,37 +273,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 	 */
 	protected function _get_multisite_queryer_form() {
 		if( ! $this->_multisite_queryer_form instanceof EE_Form_Section_Proper ){
-			$this->_multisite_queryer_form = new EE_Form_Section_Proper( 
-				array(
-					'name' => 'multisite_queryer',
-					'layout_strategy' => new EE_Admin_Two_Column_Layout(),
-					'subsections' => array(
-						'header' => new EE_Form_Section_HTML( EEH_HTML::h1(__( 'Multisite Queryer', 'event_espresso' ) ) ),
-						'label' => new EE_Text_Input( 
-							array(
-								'required' => true
-							)
-						),
-						'explanation' => new EE_Form_Section_HTML( EEH_HTML::p( __( 'Will execute a query on every site in the network and generate a CSV file of the results', 'event_espresso' ) ) ),
-						'wpdb_method' => new EE_Radio_Button_Input( 
-							array(
-								'get_results' => __( 'get_results (for selects)', 'event_espresso' ),
-								'query' => __( 'query (for inserts, updates, or deletes)', 'event_espresso' )
-							),
-							array(
-								'default' => 'get_results',
-							)),
-						'sql_query' => new EE_Text_Area_Input(
-							array(
-								'html_help_text' => __( 'Use the string "{$wpdb->prefix}" and "{$wpdb->base_prefix}" as you would normally. These strings will be replaced appropriately when querying each blog.',	'event_espresso' ),
-								'required' => true,
-							)),
-						'submit' => new EE_Submit_Input(
-							array(
-								'default' => __( 'Run Query', 'event_espresso' )
-							))
-					)
-				));
+			$this->_multisite_queryer_form = new EE_Multisite_Queryer_Form();
 		}
 		return $this->_multisite_queryer_form;
 	}
