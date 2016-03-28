@@ -92,7 +92,7 @@ class EED_Multisite extends EED_Module {
 	 */ 
 	public static function mark_blog_as_up_to_date_if_no_migrations_needed( $migration_scripts_needed) { 
 		if( empty( $migration_scripts_needed ) ){ 
-			EEM_Blog::instance()->mark_current_blog_as_up_to_date(); 
+			EEM_Blog::instance()->mark_current_blog_as( EEM_Blog::status_up_to_date ); 
 		}
 	}
 

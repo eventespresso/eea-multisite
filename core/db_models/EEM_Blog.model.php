@@ -234,17 +234,23 @@ class EEM_Blog extends EEM_Soft_Delete_Base {
 	 * If the main site is itself in mainteannce mode, then this is skipped. Oh well,
 	 * the blog will just be marked as unsure or out-of-date until the next multisite migration
 	 * manager assesses which blogs need to be migrated or this blog later noticies it has to nothing to migrate
+	 * @param string $new_status the status you want to update the blog to
 	 */
-	public function mark_current_blog_as_up_to_date() {
+	public function mark_current_blog_as( $new_status = EEM_Blog::status_up_to_date ) {
 		$current_blog_id = get_current_blog_id();
 		//needs to use WP's core switch_to_blog() instead of EED_Multisite::switch_to_blog()
 		//instead ot avoid an infinite loop.
 		switch_to_blog( 1 );
 		EE_Registry::instance()->load_helper('Activation');
 		if( EEH_Activation::table_exists(  $this->second_table() ) ){
-			global $wpdb;
-			$query = $wpdb->prepare( 'UPDATE ' . $this->second_table() . ' SET STS_ID = "' . self::status_up_to_date . '" WHERE blog_id_fk = %d', $current_blog_id );
-			$rows_affected = $wpdb->query( $query );
+			global $wpdb;			
+			//first check the current blog isn't ALREADY marked as up-to-date
+			$verify_query = $wpdb->prepare( 'SELECT STS_ID FROM ' . $this->second_table() . ' WHERE blog_id_fk=%d LIMIT 1', $current_blog_id );
+			$current_status = $wpdb->get_var( $verify_query );
+			if( $current_status !== $new_status ) {
+				$query = $wpdb->prepare( 'UPDATE ' . $this->second_table() . ' SET STS_ID = %s WHERE blog_id_fk = %d LIMIT 1', $new_status, $current_blog_id );
+				$wpdb->query( $query );
+			}
 		}else{
 			//dang can't update it because the esp_blog_meta doesn't yet exist. Oh well, we'll just need to check it again
 			//later when either the site's maintenance page is visited or the multisite migrator checks it.
