@@ -146,8 +146,10 @@ class EED_Multisite extends EED_Module {
 	 * Run on frontend requests to update when the blog was last updated
 	 */
 	public static function update_last_requested() {
-		//only record visits by non-bots
-		if( ! EED_Multisite::is_bot( $_SERVER[ 'HTTP_USER_AGENT' ] ) ) {
+		//only record visits by non-bots, and non-cron
+		if( ! EED_Multisite::is_bot( $_SERVER[ 'HTTP_USER_AGENT' ] )
+			&& ! defined( 'DOING_CRON' ) 
+		) {
 			$current_blog_id = get_current_blog_id();
 			EEM_Blog::instance()->update_last_requested( $current_blog_id );
 		}
