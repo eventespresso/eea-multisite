@@ -48,7 +48,7 @@ class MultisiteQueryer extends JobHandlerFile {
 				) 
 			), 
 			ARRAY_A,
-			'blog_id, domain'
+			'blog_id, concat(domain, path) as blog'
 		);
 		$rows_generated_this_step = array();
 		foreach( $blogs as $blog ) {
