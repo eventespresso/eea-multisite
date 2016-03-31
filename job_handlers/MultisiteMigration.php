@@ -27,7 +27,7 @@ class MultisiteMigration extends JobHandler {
 		$blogs_assessed_and_migrated = 0;
 		do {
 			if( \EEM_Blog::instance()->count_blogs_needing_migration() ) {
-				$migration_step_response = $this->migration_step( $step_size );
+				$migration_step_response = \EE_Multisite_Migration_Manager::instance()->migration_step( $step_size );
 				$steps_taken += $migration_step_response[ 'num_migrated' ];
 				$response_messages = sprintf( 
 						__( 'Migrated %1$s records from %2$s during migration step %3$s.', 'event_espresso'), 
@@ -61,7 +61,7 @@ class MultisiteMigration extends JobHandler {
 			}
 		} while ( $steps_taken < $step_size
 			&& $job_parameters->status() === JobParameters::status_continue );
-		$job_parameters->mark_processed( $blogs_assessed_and_migrated );
+		$job_parameters->set_units_processed( \EEM_Blog::instance()->count_blogs_up_to_date() );
 		return new JobStepResponse( 
 			$job_parameters, 
 			implode( 

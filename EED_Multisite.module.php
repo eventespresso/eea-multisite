@@ -42,11 +42,6 @@ class EED_Multisite extends EED_Module {
 	 */
 	public static function set_hooks() {
 		EE_Config::register_route( 'multisite', 'EED_Multisite', 'run' );
-		//don't do multisite stuff if multisite isn't enabled
-		if( is_multisite() ) {
-			add_action( 'wp_loaded', array( 'EED_Multisite', 'update_last_requested' ) );
-		}
-
 		self::set_hooks_both();
 	}
 
@@ -82,17 +77,19 @@ class EED_Multisite extends EED_Module {
 	protected static function set_hooks_both() {
 		//don't do multisite stuff if multisite isn't enabled
 		if( is_multisite() ) {
-			add_action( 'AHEE__EE_Data_Migration_Manager__check_for_applicable_data_migration_scripts__scripts_that_should_run', array( 'EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ), 10, 1 );
-		}
-	}
-
-	/**
-	 * Checks if there are no migrations needed on a particular site, then we can mark it as being up-to-date right?
-	 * @param EE_Data_Migration_Script_Base[] $migration_scripts_needed
-	 */
-	public static function mark_blog_as_up_to_date_if_no_migrations_needed( $migration_scripts_needed) {
-		if( empty( $migration_scripts_needed ) ){
-			EEM_Blog::instance()->mark_current_blog_as_up_to_date();
+			add_action( 'AHEE__EE_Data_Migration_Manager__check_for_applicable_data_migration_scripts__scripts_that_should_run', array( 'EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ), 10, 1 ); 
+			add_action( 'wpmu_new_blog', array( 'EED_Multisite', 'new_blog_created' ), 10, 1 );
+			add_action( 'wp_loaded', array( 'EED_Multisite', 'update_last_requested' ) );
+		} 
+	} 
+		 
+	/** 
+	 * Checks if there are no migrations needed on a particular site, then we can mark it as being up-to-date right? 
+	 * @param EE_Data_Migration_Script_Base[] $migration_scripts_needed 
+	 */ 
+	public static function mark_blog_as_up_to_date_if_no_migrations_needed( $migration_scripts_needed) { 
+		if( empty( $migration_scripts_needed ) ){ 
+			EEM_Blog::instance()->mark_current_blog_as( EEM_Blog::status_up_to_date ); 
 		}
 	}
 
@@ -149,11 +146,25 @@ class EED_Multisite extends EED_Module {
 	 * Run on frontend requests to update when the blog was last updated
 	 */
 	public static function update_last_requested() {
-		global $current_site;
-		$current_blog_id = get_current_blog_id();
-		switch_to_blog( $current_site->blog_id );
-		EEM_Blog::instance()->update_last_requested( $current_blog_id );
-		restore_current_blog();
+		//only record visits by non-bots, and non-cron
+		if( ! EED_Multisite::is_bot( $_SERVER[ 'HTTP_USER_AGENT' ] )
+			&& ! defined( 'DOING_CRON' ) 
+		) {
+			$current_blog_id = get_current_blog_id();
+			EEM_Blog::instance()->update_last_requested( $current_blog_id );
+		}
+	}
+	
+	/**
+	 * Detects if the current user is a bot or what
+	 * @param type $user_agent_string
+	 * @return boolean
+	 */
+	public static function is_bot( $user_agent_string ) {
+		$dd = new DeviceDetector\DeviceDetector( $user_agent_string );
+		$dd->discardBotInformation();
+		$dd->parse();
+		return $dd->isBot();
 	}
 
 
@@ -238,6 +249,22 @@ class EED_Multisite extends EED_Module {
 			wp_enqueue_style( 'espresso_multisite' );
 			wp_enqueue_script( 'espresso_multisite' );
 		}
+	}
+	
+	/**
+	 * A blog was just created; let's immediately create its row in the blog meta table and
+	 * set its last updated time and status
+	 * (otherwise, if we wait, it's possible to get multiple simultenous requests
+	 * which will cause duplicate entries in the blog meta table)
+	 */
+	public static function new_blog_created( $blog_id ) {
+		EEM_Blog::instance()->update_by_ID( 
+			array( 
+				'BLG_last_requested' => current_time( 'mysql', true ), 
+				'STS_ID' => EEM_Blog::status_up_to_date 
+			),
+			$blog_id 
+		);
 	}
 
 

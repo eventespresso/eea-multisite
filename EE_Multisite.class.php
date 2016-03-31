@@ -48,7 +48,7 @@ Class EE_Multisite extends EE_Addon {
 				'EE_Multisite_Migration_Manager' => EE_MULTISITE_PATH . 'EE_Multisite_Migration_Manager.php',
 				'EventEspressoBatchRequest\JobHandlers\MultisiteMigration' => EE_MULTISITE_PATH . 'job_handlers' . DS . 'MultisiteMigration.php',
 				'EventEspressoBatchRequest\JobHandlers\MultisiteQueryer' => EE_MULTISITE_PATH . 'job_handlers' . DS . 'MultisiteQueryer.php',
-//				'Spyc' => EE_MULTISITE_PATH . 'core' . DS . 'libraries' . DS . 'Spyc.php',
+				'Spyc' => EE_MULTISITE_PATH . 'core' . DS . 'libraries' . DS . 'Spyc.php',
 				'EE_Multisite_Queryer_Form' => EE_MULTISITE_ADMIN . 'forms' . DS . 'EE_Multisite_Queryer_Form.form.php'
 			),
 			'module_paths' => array(
@@ -72,6 +72,8 @@ Class EE_Multisite extends EE_Addon {
 		if ( is_main_site() ) {
 			$registration_params[ 'dms_paths' ] = array( EE_MULTISITE_PATH . 'core' . DS . 'data_migration_scripts' . DS );
 		}
+		//autoload device detector
+		EE_Psr4AutoloaderInit::psr4_loader()->addNamespace( 'DeviceDetector', EE_MULTISITE_PATH . 'core' . DS . 'libraries' . DS . 'device-detector-master' );
 		// register addon via Plugin API
 		EE_Register_Addon::register( 'Multisite', $registration_params );
 		self::set_early_hooks();
@@ -137,6 +139,7 @@ Class EE_Multisite extends EE_Addon {
 
 		//a very specific hook for when running the EE_DMS_Core_4_5_0
 		add_filter( 'FHEE__EEH_Activation__get_default_creator_id__pre_filtered_id', array( 'EE_Multisite', 'filter_get_default_creator_id' ) );
+		add_action( 'AHEE__EE_System__initialize', array( 'EE_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ) );
 	}
 
 	/**
@@ -208,6 +211,26 @@ Class EE_Multisite extends EE_Addon {
 		}
 	}
 
+	/**
+	 * Checks if the blog is, in fact, in maintenance mode. If it isn't, obviously no migrations are needed;
+	 * and we can just mark this blog as up-to-date.
+	 */
+	public static function mark_blog_as_up_to_date_if_no_migrations_needed() {
+		//in order to optimize frontend requests, let's just do this check during cron tasks
+		//or admin requests
+		if( (
+				defined( 'DOING_CRON' ) || is_admin()
+			) 
+			&& ! defined( 'DOING_AJAX' ) 
+		) {
+			$maintenance_level = EE_Maintenance_Mode::instance()->real_level();
+			if( intval( $maintenance_level ) == EE_Maintenance_Mode::level_2_complete_maintenance ) {
+				EEM_Blog::instance()->mark_current_blog_as( EEM_Blog::status_out_of_date );
+			} else {
+				EEM_Blog::instance()->mark_current_blog_as( EEM_Blog::status_up_to_date );
+			}
+		}
+	}
 
 
 }
