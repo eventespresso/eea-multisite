@@ -214,11 +214,19 @@ Class EE_Multisite extends EE_Addon {
 	 * and we can just mark this blog as up-to-date.
 	 */
 	public static function mark_blog_as_up_to_date_if_no_migrations_needed() {
-		$maintenance_level = EE_Maintenance_Mode::instance()->real_level();
-		if( intval( $maintenance_level ) == EE_Maintenance_Mode::level_2_complete_maintenance ) {
-			EEM_Blog::instance()->mark_current_blog_as( EEM_Blog::status_out_of_date );
-		} else {
-			EEM_Blog::instance()->mark_current_blog_as( EEM_Blog::status_up_to_date );
+		//in order to optimize frontend requests, let's just do this check during cron tasks
+		//or admin requests
+		if( (
+				defined( 'DOING_CRON' ) || is_admin()
+			) 
+			&& ! defined( 'DOING_AJAX' ) 
+		) {
+			$maintenance_level = EE_Maintenance_Mode::instance()->real_level();
+			if( intval( $maintenance_level ) == EE_Maintenance_Mode::level_2_complete_maintenance ) {
+				EEM_Blog::instance()->mark_current_blog_as( EEM_Blog::status_out_of_date );
+			} else {
+				EEM_Blog::instance()->mark_current_blog_as( EEM_Blog::status_up_to_date );
+			}
 		}
 	}
 

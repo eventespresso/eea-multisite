@@ -80,7 +80,6 @@ class EED_Multisite extends EED_Module {
 			add_action( 'AHEE__EE_Data_Migration_Manager__check_for_applicable_data_migration_scripts__scripts_that_should_run', array( 'EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ), 10, 1 ); 
 			add_action( 'wpmu_new_blog', array( 'EED_Multisite', 'new_blog_created' ), 10, 1 );
 			add_action( 'wp_loaded', array( 'EED_Multisite', 'update_last_requested' ) );
-		
 		} 
 	} 
 		 
