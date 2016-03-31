@@ -39,7 +39,6 @@ class MultisiteQueryer extends JobHandlerFile {
 		
 		$wpdb_method = $job_parameters->request_datum( 'wpdb_method', 'get_results' );
 		$sql_query = $job_parameters->request_datum( 'sql_query' );
-		global $wpdb;
 		//get next blog
 		$blogs = \EEM_Blog::instance()->get_all_wpdb_results( 
 			array( 
@@ -53,7 +52,7 @@ class MultisiteQueryer extends JobHandlerFile {
 		);
 		$rows_generated_this_step = array();
 		foreach( $blogs as $blog ) {
-			$rows = $this->_query_blog( $blog['blog_id'], $wpdb_method, $sql_query );
+			$rows = $this->_query_blog( $blog['blog_id'], $wpdb_method, $sql_query, $job_parameters->request_datum( 'stop_on_error' ) );
 			foreach( $rows as $row ) {
 				$row = array_merge(
 					$blog,
@@ -80,9 +79,10 @@ class MultisiteQueryer extends JobHandlerFile {
 	 * @param int $blog_id
 	 * @param string $wpdb_method the method on WPDB to call
 	 * @param string $sql_query the SQL, but with no wpdb prefixes. Instead use the extract string "{$wpdb->prefix}"
+	 * @param boolean $stop_on_error
 	 * @return array for writing to a CSV file
 	 */
-	protected function _query_blog( $blog_id, $wpdb_method, $sql_query ) {
+	protected function _query_blog( $blog_id, $wpdb_method, $sql_query, $stop_on_error = false ) {
 		global $wpdb;
 		switch_to_blog( $blog_id );
 		$parsed_query = str_replace( 
@@ -110,13 +110,17 @@ class MultisiteQueryer extends JobHandlerFile {
 		restore_current_blog();
 		//if there's an error just blow up
 		if ( ( $results === false || $results === null || ! empty( $wpdb->last_error ) ) ) {
-			throw new \EE_Error( 
-				sprintf( 
-					__( 'WPDB Error: "%1$s" while running query "%2$s"', 'event_espresso'), 
-					$wpdb->last_error, 
-					$parsed_query 
-				) 
-			);
+			if( $stop_on_error ) {
+				throw new \EE_Error( 
+					sprintf( 
+						__( 'WPDB Error: "%1$s" while running query "%2$s"', 'event_espresso'), 
+						$wpdb->last_error, 
+						$parsed_query 
+					) 
+				);
+			} else {
+				$results = array( array( $wpdb->last_error ) );
+			}
 		}
 		
 		if( ! is_array( $results ) ) {

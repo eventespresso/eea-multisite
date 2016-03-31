@@ -253,6 +253,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 							'label' => $form->get_input_value( 'label' ),
 							'wpdb_method' => $form->get_input_value( 'wpdb_method' ),
 							'sql_query' => urlencode( $form->get_input_value( 'sql_query' ) ),
+							'stop_on_error' => urlencode( $form->get_input_value( 'stop_on_error' ) ),
 							'job_handler' => urlencode( 'EventEspressoBatchRequest\JobHandlers\MultisiteQueryer' ),
 							'return_url' => urlencode( "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}" ),
 						),

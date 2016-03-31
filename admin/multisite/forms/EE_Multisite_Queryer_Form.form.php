@@ -40,10 +40,15 @@ class EE_Multisite_Queryer_Form extends EE_Form_Section_Proper {
 							)),
 						'sql_query' => new EE_Text_Area_Input(
 							array(
-								'html_help_text' => __( 'Only SELECT quereis allowed (for now). Use the string "{$wpdb->prefix}" and "{$wpdb->base_prefix}" as you would normally. These strings will be replaced appropriately when querying each blog.',	'event_espresso' ),
+								'html_help_text' => __( 'Only SELECT queries allowed (for now). Use the string "{$wpdb->prefix}" and "{$wpdb->base_prefix}" as you would normally. These strings will be replaced appropriately when querying each blog.',	'event_espresso' ),
 								'required' => true,
 								'default' => 'SELECT'
 							)),
+						'stop_on_error' => new EE_Yes_No_Input(
+							array(
+								'html_help_text' => __( 'Whether to stop everything on exception, or just skip', 'event_espresso' )
+							)
+						),
 						'submit' => new EE_Submit_Input(
 							array(
 								'default' => __( 'Run Query', 'event_espresso' )
