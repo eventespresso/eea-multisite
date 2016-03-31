@@ -31,10 +31,11 @@ class MultisiteQueryer extends JobHandlerFile {
 			) . '.csv'
 		);
 		$job_parameters->add_extra_data( 'filepath', $filepath );
+		$this->_query_and_write_to_file( $job_parameters, 1, true );
 		return new JobStepResponse( $job_parameters, __( 'Counted blogs and wrote header row', 'event_espresso' ));
 	}
 	
-	protected function _query_and_write_to_file( JobParameters $job_parameters, $num_to_do = 1 ) {
+	protected function _query_and_write_to_file( JobParameters $job_parameters, $num_to_do = 1, $write_headers = false ) {
 		
 		$wpdb_method = $job_parameters->request_datum( 'wpdb_method', 'get_results' );
 		$sql_query = $job_parameters->request_datum( 'sql_query' );
@@ -63,7 +64,7 @@ class MultisiteQueryer extends JobHandlerFile {
 		}
 		
 		\EE_Registry::instance()->load_helper( 'Export' );
-		\EEH_Export::write_data_array_to_csv( $job_parameters->extra_datum( 'filepath' ), $rows_generated_this_step, $job_parameters->extra_datum( 'need_to_write_headers', true ) );
+		\EEH_Export::write_data_array_to_csv( $job_parameters->extra_datum( 'filepath' ), $rows_generated_this_step, $job_parameters->extra_datum( 'need_to_write_headers', $write_headers ) );
 		$units_processed = count( $blogs );
 		//if we just wrote the headers, we don't need to do it anymore now do we?
 		if( $units_processed > 0 ) {
@@ -84,8 +85,7 @@ class MultisiteQueryer extends JobHandlerFile {
 	protected function _query_blog( $blog_id, $wpdb_method, $sql_query ) {
 		global $wpdb;
 		switch_to_blog( $blog_id );
-		$args = array();
-		$args[] = str_replace( 
+		$parsed_query = str_replace( 
 			array(
 				'{$wpdb->prefix}',
 				'{$wpdb->base_prefix}'
@@ -94,8 +94,9 @@ class MultisiteQueryer extends JobHandlerFile {
 				$wpdb->prefix,
 				$wpdb->base_prefix
 			), 
-			$sql_query
+			stripslashes( $sql_query )
 		);
+		$args = array( $parsed_query );
 		if( $wpdb_method == 'get_results' ) {
 			$args[] = ARRAY_A;
 		}
@@ -113,7 +114,7 @@ class MultisiteQueryer extends JobHandlerFile {
 				sprintf( 
 					__( 'WPDB Error: "%1$s" while running query "%2$s"', 'event_espresso'), 
 					$wpdb->last_error, 
-					$sql_query 
+					$parsed_query 
 				) 
 			);
 		}
