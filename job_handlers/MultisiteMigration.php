@@ -29,12 +29,12 @@ class MultisiteMigration extends JobHandler {
 			if( \EEM_Blog::instance()->count_blogs_needing_migration() ) {
 				$migration_step_response = \EE_Multisite_Migration_Manager::instance()->migration_step( $step_size );
 				$steps_taken += $migration_step_response[ 'num_migrated' ];
-				$response_messages = sprintf( 
-						__( 'Migrated %1$s records from %2$s during migration step %3$s.', 'event_espresso'), 
-						$migration_step_response[ 'num_migrated' ],
-						$migration_step_response[ 'current_blog_name' ],
-						$migration_step_response[ 'current_dms'][ 'script' ]
-					);
+				$response_messages[] = sprintf(
+					__( 'Migrated %1$s records from %2$s during migration step %3$s.', 'event_espresso'),
+					$migration_step_response[ 'num_migrated' ],
+					$migration_step_response[ 'current_blog_name' ],
+					$migration_step_response[ 'current_dms'][ 'script' ]
+				);
 				if( isset( $migration_step_response[ 'current_dms' ][ 'status' ] )
 					&& $migration_step_response[ 'current_dms' ][ 'status' ] !== \EE_Data_Migration_Manager::status_continue) {
 					$blogs_assessed_and_migrated++;
