@@ -76,7 +76,10 @@ class EE_Multisite_Migration_Manager {
 		$current_script_names = array( );
 		//in addition to limiting the number of records we migrate during each step,
 		//see https://events.codebasehq.com/projects/event-espresso/tickets/8332
-		$max_blogs_to_migrate = max( 1, defined( 'EE_MIGRATION_STEP_SIZE_BLOGS' )? EE_MIGRATION_STEP_SIZE_BLOGS : 5 );
+		$max_blogs_to_migrate = max( 
+			1,
+			defined( 'EE_MIGRATION_STEP_SIZE_BLOGS' ) ? EE_MIGRATION_STEP_SIZE_BLOGS : 5
+		);
 		$blogs_migrated = 0;
 		$blog_to_migrate = null;
 		try{

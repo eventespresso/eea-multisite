@@ -37,7 +37,11 @@ class MultisiteMigration extends JobHandler {
 				);
 				if( isset( $migration_step_response[ 'current_dms' ][ 'status' ] )
 					&& $migration_step_response[ 'current_dms' ][ 'status' ] !== \EE_Data_Migration_Manager::status_continue) {
+					//ok so we've finished the last migration script of that site.
+					//we should count that as an assessment step (the wrap-up from
+					//a migration is quite expensive but isn't a "step" per say)
 					$blogs_assessed_and_migrated++;
+					$steps_taken += $assess_step_size_value;
 				}
 			} else {
 				//no blogs need to be migrated right now.
