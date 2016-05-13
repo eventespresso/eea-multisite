@@ -32,7 +32,6 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 	 * doesn't need migrating, just updating directly). Theoretically just EED_MUltisite_Test::test_switch_to_blog__no_ee()
 	 * should have tested it enough but ticket https://events.codebasehq.com/projects/event-espresso/tickets/6904
 	 * showed serious doubt on that
-	 * @group current
 	 */
 	public function test_assess_sites_needing_migration__auto_upgrade() {
 		global $wp_actions;
