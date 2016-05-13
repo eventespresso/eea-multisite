@@ -49,11 +49,9 @@ class EEM_Blog_Test extends EE_Multisite_UnitTestCase {
 	}
 
 
-	/**
-	 * @group current
-	 */
 	public function test_count_blogs_up_to_date() {
-		//these two MIGHT need migrating, so MIGHT the main site
+		//the main site starts off unsure of whether it needs to be migrated or not. 
+		//but these two new sites start off as up-to-date.
 		$this->factory->blog->create_many( 2 );
 		$this->assertEquals( 2, EEM_Blog::instance()->count_blogs_up_to_date() );
 		$blog_needing_migration = $this->new_model_obj_with_dependencies( 'Blog', array( 'STS_ID' => EEM_Blog::status_out_of_date ) );

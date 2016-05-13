@@ -32,13 +32,25 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 	 * doesn't need migrating, just updating directly). Theoretically just EED_MUltisite_Test::test_switch_to_blog__no_ee()
 	 * should have tested it enough but ticket https://events.codebasehq.com/projects/event-espresso/tickets/6904
 	 * showed serious doubt on that
+	 * @group current
 	 */
 	public function test_assess_sites_needing_migration__auto_upgrade() {
 		global $wp_actions;
 		//pretend multisite with 2 blogs
 		$blog1 = $this->factory->blog->create_and_get();
 		$blog2 = $this->factory->blog->create_and_get();
-
+		//mark them as possibly being out of date (normally when sites are first created 
+		//their DBs are instantiated as soon as they're visited. We changed them to start off as up-to-date)
+		EEM_Blog::instance()->update( 
+			array(
+				'STS_ID' => EEM_Blog::status_unsure
+			), 
+			array(
+				array(
+					'blog_id' => array( 'IN', array( $blog1->blog_id, $blog2->blog_id ) ) 
+				)
+			)
+		);
 		//verify these blogs don't have the EE table yet
 		switch_to_blog( $blog1->blog_id );
 		$this->assertTableDoesNotExist( "esp_attendee_meta" );
