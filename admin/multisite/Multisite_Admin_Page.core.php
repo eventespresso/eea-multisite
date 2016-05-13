@@ -410,13 +410,13 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		if( $blog_migrating ){
 			$blog_migrating->set_STS_ID( EEM_Blog::status_borked );
 			$blog_migrating->save();
-			switch_to_blog($blog_migrating->ID());
+			EED_Multisite::switch_to_blog($blog_migrating->ID());
 			EE_Data_Migration_Manager::instance()->add_error_to_migrations_ran( $this->_req_data[ 'message' ] );
 			global $wpdb;
 			$last_migration_script_option = $wpdb->get_row("SELECT * FROM ".$wpdb->options." WHERE option_name like '".EE_Data_Migration_Manager::data_migration_script_option_prefix."%' ORDER BY option_id DESC LIMIT 1",ARRAY_A);
 			$blog_name = $blog_migrating->name();
 			$blog_id = $blog_migrating->ID();
-			restore_current_blog();
+			EED_Multisite::restore_current_blog();
 
 		}else{
 			$blog_name = __( 'Unknown', 'event_espresso' );
@@ -626,9 +626,9 @@ class Multisite_Admin_Page extends EE_Admin_Page {
                         switch_to_blog( $blog_id );
                         $registry = EE_Registry::instance();
                         $registry->LIB = new stdClass();
-						//just ensure we're on the current site for the models
-						EEM_Base::set_model_query_blog_id( $blog_id );
-
+                        foreach( array_keys( $registry->non_abstract_db_models ) as $model_name ){
+                                $registry->reset_model( $model_name );
+                        }
                         //alright we've switched blogs and reset needed stuff (except EE_System, because we'd rather not waste
                         //time detecting if the site has been upgraded etc when we intend to delete it anyways
                         EE_Registry::instance()->load_helper('Activation');
@@ -638,7 +638,9 @@ class Multisite_Admin_Page extends EE_Admin_Page {
                         restore_current_blog();
                         $registry = EE_Registry::instance();
                         $registry->LIB = new stdClass();
-						EEM_Base::set_model_query_blog_id( $blog_id );
+                        foreach( array_keys( $registry->non_abstract_db_models ) as $model_name ){
+                                $registry->reset_model( $model_name );
+                        }
 
 			//now delete core blog tables/data
 			wpmu_delete_blog( $blog_id, true );

@@ -87,7 +87,7 @@ class EE_Multisite_Migration_Manager {
 			while ( $blogs_migrated++ < $max_blogs_to_migrate &&
 					$num_migrated < $records_to_migrate &&
 					$blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested() ) {
-				switch_to_blog( $blog_to_migrate->ID() );
+				EED_Multisite::switch_to_blog( $blog_to_migrate->ID() );
 				//and keep hammering that blog so long as it has stuff to migrate
 				do {
 					//pretend each call is a separaye request
@@ -122,12 +122,12 @@ class EE_Multisite_Migration_Manager {
 					$crash_email_subject = sprintf( __( 'Multisite Migration Error migrating %s', 'event_espresso' ), $blog_to_migrate->name());
 					$crash_email_body = sprintf( __( 'The blog at %s had a fatal error while migrating. Here is their migration history: %s', 'event_espresso' ), $blog_to_migrate->site_url(), print_r( EEM_System_Status::instance()->get_ee_migration_history(), TRUE ) );
 					//swithc blog now so we email the network admin, not the blog admin
-					restore_current_blog();
+					EED_Multisite::restore_current_blog();
 					$success = wp_mail( get_site_option( 'admin_email' ), $crash_email_subject, $crash_email_body );
 				} elseif ( $results[ 'status' ] == EE_Data_Migration_Manager::status_no_more_migration_scripts ) {
 					$blog_to_migrate->set_STS_ID( EEM_Blog::status_up_to_date );
 					$multisite_migration_message =  sprintf( __( '%1$sFinished migrating %2$s%3$s', 'event_espresso' ), '<h3>', $blog_to_migrate->name(), '</h3>' ) . '<br>' . $multisite_migration_message;
-					restore_current_blog();
+					EED_Multisite::restore_current_blog();
 				} else {
 					$blog_to_migrate->set_STS_ID( EEM_Blog::status_migrating );EED_Multisite::restore_current_blog();
 				}
@@ -201,7 +201,7 @@ class EE_Multisite_Migration_Manager {
 		$blogs_needing_to_migrate = 0;
 		foreach ( $blogs as $blog ) {
 			//switch to that blog and assess whether or not it needs to be migrated
-			switch_to_blog( $blog->ID() );
+			EED_Multisite::switch_to_blog( $blog->ID() );
 			$needs_migrating = EE_Maintenance_Mode::instance()->set_maintenance_mode_if_db_old();
 			if ( $needs_migrating ) {
 				$blog->set_STS_ID( EEM_Blog::status_out_of_date );
@@ -209,7 +209,7 @@ class EE_Multisite_Migration_Manager {
 			} else {
 				$blog->set_STS_ID( EEM_Blog::status_up_to_date );
 			}
-			restore_current_blog();
+			EED_Multisite::restore_current_blog();
 			$blog->save();
 		}
 		return $blogs_needing_to_migrate;

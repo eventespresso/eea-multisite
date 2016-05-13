@@ -172,19 +172,15 @@ class EED_Multisite extends EED_Module {
 
 
 	/**
-	 * Callback for the WordPress switch_blog action that fires whenever switch_to_blog and restore_current_blog is called.
-	 * We use this to fire any resets on EE systems that are needed when the blog context changes.
+	 * Similar to wp's switch_to_blog(), but also reset
+	 * a few EE singletons that need to be
+	 * reset too
 	 * @param int $new_blog_id
 	 * @param int $old_blog_id
 	 */
-	public static function switch_to_blog( $new_blog_id, $old_blog_id = 0 ) {
-		//first do we need to do anything?
-		if ( $new_blog_id == $old_blog_id ) {
-			return;
-		}
-		EE_Registry::reset( false, true, false );
-		//set model to new_blog_id
-		EEM_Base::set_model_query_blog_id( $new_blog_id );
+	public static function switch_to_blog( $new_blog_id ) {
+		switch_to_blog( $new_blog_id );
+		EE_Registry::reset();
 		EE_System::reset();
 		EE_Multisite::reset();
 	}
@@ -194,14 +190,12 @@ class EED_Multisite extends EED_Module {
 	/**
 	 * The same as wp's restore_current_blog(), but also takes care of restoring
 	 * a few EE-speicifc singletons
-	 *
-	 * This is no longer needed because we hook into the switch_blog core WP action.  So core switch_to_blog and restore_current_blog
-	 * can be used and everything will flow through EED_Multisite::switch_to_blog method.
-	 *
-	 * @deprecated 1.0.1.rc.000
 	 */
 	public static function restore_current_blog() {
-		return;
+		restore_current_blog();
+		EE_Registry::reset();
+		EE_System::reset();
+		EE_Multisite::reset();
 	}
 
 
