@@ -28,7 +28,7 @@ class EED_Multisite_Test extends EE_Multisite_UnitTestCase {
 		$activation_hook_fired = $wp_actions[ 'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation' ];
 		//allow the creation of these tables, because we know they're temporary
 		remove_all_filters( 'FHEE__EEH_Activation__create_table__short_circuit' );
-		EED_Multisite::switch_to_blog( $blog->blog_id );
+		switch_to_blog( $blog->blog_id );
 		//and put the filters back in place
 		add_filter( 'FHEE__EEH_Activation__create_table__short_circuit', '__return_true' );
 		$this->assertEquals( EE_System::req_type_new_activation, EE_System::instance()->detect_req_type() );
@@ -46,7 +46,7 @@ class EED_Multisite_Test extends EE_Multisite_UnitTestCase {
 		//make another blog on this site
 		$ee_blog = $this->_create_a_blog_with_ee();
 		$this->_pretend_ee_upgraded();
-		EED_Multisite::switch_to_blog( $ee_blog->ID() );
+		switch_to_blog( $ee_blog->ID() );
 		$this->assertEquals( EE_Maintenance_Mode::level_2_complete_maintenance, EE_Maintenance_Mode::instance()->real_level() );
 	}
 }
