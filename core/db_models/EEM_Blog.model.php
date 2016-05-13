@@ -269,7 +269,30 @@ class EEM_Blog extends EEM_Soft_Delete_Base {
 	 * @return int number of rows updated
 	 */
 	public function update_last_requested( $blog_id ) {
-		return $this->update_by_ID( array( 'BLG_last_requested' => current_time( 'mysql', TRUE ) ), $blog_id );
+		global $wpdb;
+		if( EEH_Activation::table_exists( $this->second_table() ) ) {
+			return $wpdb->update( 
+				$this->second_table(),
+				//update columns
+				array(
+					'BLG_last_requested' => current_time( 'mysql', true )
+				),
+				//where columns
+				array(
+					'blog_id_fk' => $blog_id
+				),
+				//update format
+				array(
+					'%s'
+				),
+				//where format
+				array(
+					'%d',
+				)
+			);
+		} else{
+			return 0;
+		}
 	}
 
 

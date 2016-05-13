@@ -147,9 +147,10 @@ class EED_Multisite extends EED_Module {
 	 */
 	public static function update_last_requested() {
 		//only record visits by non-bots, and non-cron
+		//also, only do this on the main site when its out of maintenance mode;
+		//other sites can do it fine in mainteannce mode
 		if( ! EED_Multisite::is_bot( $_SERVER[ 'HTTP_USER_AGENT' ] )
 			&& ! defined( 'DOING_CRON' )
-			&& EE_Maintenance_Mode::instance()->models_can_query()
 		) {
 			$current_blog_id = get_current_blog_id();
 			EEM_Blog::instance()->update_last_requested( $current_blog_id );
