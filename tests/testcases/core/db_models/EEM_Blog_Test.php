@@ -39,13 +39,13 @@ class EEM_Blog_Test extends EE_Multisite_UnitTestCase {
 
 
 	public function test_count_blogs_maybe_needing_migration() {
-		//these two MIGHT need migrating, so MIGHT the main site
+		//these two new ones start off marked as up-to-date; the main blog starts of unsure
 		$this->factory->blog->create_many( 2 );
 		$blog_needing_migration = $this->new_model_obj_with_dependencies( 'Blog', array( 'STS_ID' => EEM_Blog::status_out_of_date ) );
 		$blog_maybe_needing_migration = $this->new_model_obj_with_dependencies( 'Blog', array( 'STS_ID' => EEM_Blog::status_unsure ) );
 		$blog_up_to_date = $this->new_model_obj_with_dependencies( 'Blog', array( 'STS_ID' => EEM_Blog::status_up_to_date ) );
-		$this->assertEquals( 4, EEM_Blog::instance()->count_blogs_maybe_needing_migration() ); //main site, 2 created using factorya, and one with statu s'unsure'
-		$this->assertEquals( 4, count( EEM_Blog::instance()->get_all_blogs_maybe_needing_migration() ) );
+		$this->assertEquals( 2, EEM_Blog::instance()->count_blogs_maybe_needing_migration() ); //main site and one with statu s'unsure'
+		$this->assertEquals( 2, count( EEM_Blog::instance()->get_all_blogs_maybe_needing_migration() ) );
 	}
 
 

@@ -46,6 +46,9 @@ class EED_Multisite_Test extends EE_Multisite_UnitTestCase {
 		//make another blog on this site
 		$ee_blog = $this->_create_a_blog_with_ee();
 		$this->_pretend_ee_upgraded();
+		switch_to_blog( $ee_blog->ID() );
+		update_option( 'espresso_db_update', array( '4.8.0.p' => array( date( 'Y-m-d H:i:s',time() ) ) ) );
+		restore_current_blog();
 		EED_Multisite::switch_to_blog( $ee_blog->ID() );
 		$this->assertEquals( EE_Maintenance_Mode::level_2_complete_maintenance, EE_Maintenance_Mode::instance()->real_level() );
 	}
