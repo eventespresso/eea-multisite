@@ -34,6 +34,13 @@ class EED_Multisite extends EED_Module {
 	 */
 	public static $shortcode_active = FALSE;
 
+
+	/**
+	 * Used to track watch the blog id was before a switch so that we only run necessary code on switching blog as needed.
+	 * @var int
+	 */
+	protected static $_blog_id_before_switch = 0;
+
 	/**
 	 * 	set_hooks - for hooking into EE Core, other modules, etc
 	 *
@@ -77,19 +84,19 @@ class EED_Multisite extends EED_Module {
 	protected static function set_hooks_both() {
 		//don't do multisite stuff if multisite isn't enabled
 		if( is_multisite() ) {
-			add_action( 'AHEE__EE_Data_Migration_Manager__check_for_applicable_data_migration_scripts__scripts_that_should_run', array( 'EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ), 10, 1 ); 
+			add_action( 'AHEE__EE_Data_Migration_Manager__check_for_applicable_data_migration_scripts__scripts_that_should_run', array( 'EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ), 10, 1 );
 			add_action( 'wpmu_new_blog', array( 'EED_Multisite', 'new_blog_created' ), 10, 1 );
 			add_action( 'wp_loaded', array( 'EED_Multisite', 'update_last_requested' ) );
-		} 
-	} 
-		 
-	/** 
-	 * Checks if there are no migrations needed on a particular site, then we can mark it as being up-to-date right? 
-	 * @param EE_Data_Migration_Script_Base[] $migration_scripts_needed 
-	 */ 
-	public static function mark_blog_as_up_to_date_if_no_migrations_needed( $migration_scripts_needed) { 
-		if( empty( $migration_scripts_needed ) ){ 
-			EEM_Blog::instance()->mark_current_blog_as( EEM_Blog::status_up_to_date ); 
+		}
+	}
+
+	/**
+	 * Checks if there are no migrations needed on a particular site, then we can mark it as being up-to-date right?
+	 * @param EE_Data_Migration_Script_Base[] $migration_scripts_needed
+	 */
+	public static function mark_blog_as_up_to_date_if_no_migrations_needed( $migration_scripts_needed) {
+		if( empty( $migration_scripts_needed ) ){
+			EEM_Blog::instance()->mark_current_blog_as( EEM_Blog::status_up_to_date );
 		}
 	}
 
@@ -103,9 +110,9 @@ class EED_Multisite extends EED_Module {
 				$blogs_needing_migration = EEM_Blog::instance()->count_blogs_maybe_needing_migration();
 				if( $blogs_needing_migration ){
 					$network = EE_Admin_Page::add_query_args_and_nonce(array(), EE_MULTISITE_ADMIN_URL);
-						echo '<div class="error">
+					echo '<div class="error">
 						<p>'. sprintf(__('A change has been detected to your Event Espresso plugin or addons. Blogs on your network may require migration. %1$sClick here to check%2$s', "event_espresso"),"<a href='$network'>","</a>").
-					'</div>';
+					     '</div>';
 				}
 			}
 		}
@@ -121,13 +128,13 @@ class EED_Multisite extends EED_Module {
 		if( EE_Maintenance_Mode::instance()->level() == EE_Maintenance_Mode::level_2_complete_maintenance ){
 			$maintenance_page_url = EE_Admin_Page::add_query_args_and_nonce(array(), EE_MAINTENANCE_ADMIN_URL);
 			if ( is_main_site() ) {
-					$new_notice = '<div class="error">
+				$new_notice = '<div class="error">
 					<p>'. sprintf(__('Your main site\'s Event Espresso data is out of date %1$sand needs to be migrated.%2$s After doing this, you should check that the other blogs on your network are up-to-date.', "event_espresso"),"<a href='$maintenance_page_url'>","</a>").
-				'</div>';
-			 } else {
+				              '</div>';
+			} else {
 				$new_notice = '<div class="error">
 				<p>' . __('Your event site is in the process of being updated and is currently in maintainance mode.  It has been bumped to the front of the queue and you should be able to have full access again in about 5 minutes.', 'event_espresso' ) . '</p>' .
-				'</div>';
+				              '</div>';
 			}
 		}
 
@@ -150,13 +157,13 @@ class EED_Multisite extends EED_Module {
 		//also, only do this on the main site when its out of maintenance mode;
 		//other sites can do it fine in mainteannce mode
 		if( ! EED_Multisite::is_bot( $_SERVER[ 'HTTP_USER_AGENT' ] )
-			&& ! defined( 'DOING_CRON' )
+		    && ! defined( 'DOING_CRON' )
 		) {
 			$current_blog_id = get_current_blog_id();
 			EEM_Blog::instance()->update_last_requested( $current_blog_id );
 		}
 	}
-	
+
 	/**
 	 * Detects if the current user is a bot or what
 	 * @param type $user_agent_string
@@ -178,13 +185,21 @@ class EED_Multisite extends EED_Module {
 	 * @param int $old_blog_id
 	 */
 	public static function switch_to_blog( $new_blog_id, $old_blog_id = 0 ) {
-		//first do we need to do anything?
-		if ( $new_blog_id == $old_blog_id ) {
+
+		if ( empty( self::$_blog_id_before_switch ) ) {
+			self::$_blog_id_before_switch = get_current_blog_id();
+		}
+
+		//we always set the model blog id for any queries that may occur on the subsite.
+		EEM_Base::set_model_query_blog_id( $new_blog_id );
+
+		//if this is not a restore, or this is the same blog, then we don't do any resets.  Otherwise we go ahead and do our reset stuff.
+		if ( (int)  $new_blog_id === (int) $old_blog_id  || (int) self::$_blog_id_before_switch === (int) $old_blog_id ) {
+			self::$_blog_id_before_switch = $new_blog_id;
 			return;
 		}
+		self::$_blog_id_before_switch = $new_blog_id;
 		EE_Registry::reset( false, true, false );
-		//set model to new_blog_id
-		EEM_Base::set_model_query_blog_id( $new_blog_id );
 		EE_System::reset();
 		EE_Multisite::reset();
 	}
@@ -258,7 +273,7 @@ class EED_Multisite extends EED_Module {
 			wp_enqueue_script( 'espresso_multisite' );
 		}
 	}
-	
+
 	/**
 	 * A blog was just created; let's immediately create its row in the blog meta table and
 	 * set its last updated time and status
@@ -266,12 +281,12 @@ class EED_Multisite extends EED_Module {
 	 * which will cause duplicate entries in the blog meta table)
 	 */
 	public static function new_blog_created( $blog_id ) {
-		EEM_Blog::instance()->update_by_ID( 
-			array( 
-				'BLG_last_requested' => current_time( 'mysql', true ), 
-				'STS_ID' => EEM_Blog::status_up_to_date 
+		EEM_Blog::instance()->update_by_ID(
+			array(
+				'BLG_last_requested' => current_time( 'mysql', true ),
+				'STS_ID' => EEM_Blog::status_up_to_date
 			),
-			$blog_id 
+			$blog_id
 		);
 	}
 
