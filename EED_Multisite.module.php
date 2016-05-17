@@ -36,10 +36,11 @@ class EED_Multisite extends EED_Module {
 
 
 	/**
-	 * Used to track watch the blog id was before a switch so that we only run necessary code on switching blog as needed.
-	 * @var int
+	 * This is used to track the blogs switched to in a request and ensure we only do necessary resets ONCE for that blog.
+	 * when switching TO the blog (not restoring to the blog).
+	 * @var array
 	 */
-	protected static $_blog_id_before_switch = 0;
+	protected static $_blog_ids_switched_to_in_request = array();
 
 	/**
 	 * 	set_hooks - for hooking into EE Core, other modules, etc
@@ -186,22 +187,25 @@ class EED_Multisite extends EED_Module {
 	 */
 	public static function switch_to_blog( $new_blog_id, $old_blog_id = 0 ) {
 
-		if ( empty( self::$_blog_id_before_switch ) ) {
-			self::$_blog_id_before_switch = get_current_blog_id();
+		if ( empty( self::$_blog_ids_switched_to_in_request ) ) {
+			self::$_blog_ids_switched_to_in_request[ get_current_blog_id() ] = 1;
 		}
 
-		//we always set the model blog id for any queries that may occur on the subsite.
+		//things that happen on every switch
 		EEM_Base::set_model_query_blog_id( $new_blog_id );
-
-		//if this is not a restore, or this is the same blog, then we don't do any resets.  Otherwise we go ahead and do our reset stuff.
-		if ( (int)  $new_blog_id === (int) $old_blog_id  || (int) self::$_blog_id_before_switch === (int) $old_blog_id ) {
-			self::$_blog_id_before_switch = $new_blog_id;
-			return;
-		}
-		self::$_blog_id_before_switch = $new_blog_id;
 		EE_Registry::reset( false, true, false );
-		EE_System::reset();
 		EE_Multisite::reset();
+
+
+		//below is things that should happen only on the initial switch to a blog in a request.
+		if (
+			(int)  $new_blog_id !== (int) $old_blog_id
+			&& ! in_array( $new_blog_id, self::$_blog_ids_switched_to_in_request )
+		) {
+			EE_System::reset();
+		}
+
+		self::$_blog_ids_switched_to_in_request[] = $new_blog_id;
 	}
 
 
