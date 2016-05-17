@@ -23,7 +23,7 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 		$blog = $this->factory->blog->create_and_get();
 		//allow the creation of these tables, because we know they're temporary
 		remove_all_filters( 'FHEE__EEH_Activation__create_table__short_circuit' );
-		EED_Multisite::switch_to_blog($blog->blog_id);
+		switch_to_blog($blog->blog_id);
 		//and put the filters back in place
 		add_filter( 'FHEE__EEH_Activation__create_table__short_circuit', '__return_true' );
 		$this->assertNotEquals( EE_Maintenance_Mode::level_2_complete_maintenance, EE_Maintenance_Mode::instance()->level() );
@@ -37,7 +37,7 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 			'role' => 'administrator',
 		) );
 		update_user_meta( $admin->ID, 'primary_blog', get_current_blog_id() );
-		EED_Multisite::restore_current_blog();
+		restore_current_blog();
 
 		return EEM_Blog::instance()->get_one_by_ID( $blog->blog_id );
 	}
