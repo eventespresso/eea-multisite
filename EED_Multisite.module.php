@@ -187,25 +187,33 @@ class EED_Multisite extends EED_Module {
 	 */
 	public static function switch_to_blog( $new_blog_id, $old_blog_id = 0 ) {
 
+		//we DON'T call anything in here if wp is installing
+		if ( wp_installing() ) {
+			return;
+		}
+
 		if ( empty( self::$_blog_ids_switched_to_in_request ) ) {
 			self::$_blog_ids_switched_to_in_request[ get_current_blog_id() ] = 1;
 		}
+
+		/**
+		 * We need to add the incoming blog id to the blog id switch to cover any potential nested switches that may occur.
+		 */
+		$has_requested = in_array( $new_blog_id, self::$_blog_ids_switched_to_in_request );
+		self::$_blog_ids_switched_to_in_request[] = $new_blog_id;
 
 		//things that happen on every switch
 		EEM_Base::set_model_query_blog_id( $new_blog_id );
 		EE_Registry::reset( false, true, false );
 		EE_Multisite::reset();
 
-
 		//below is things that should happen only on the initial switch to a blog in a request.
 		if (
 			(int)  $new_blog_id !== (int) $old_blog_id
-			&& ! in_array( $new_blog_id, self::$_blog_ids_switched_to_in_request )
+			&& ! $has_requested
 		) {
 			EE_System::reset();
 		}
-
-		self::$_blog_ids_switched_to_in_request[] = $new_blog_id;
 	}
 
 
