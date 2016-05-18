@@ -42,6 +42,16 @@ class EED_Multisite extends EED_Module {
 	 */
 	protected static $_blog_ids_switched_to_in_request = array();
 
+
+	/**
+	 * This is used to flag whether EE_System should receive a full reset or not when `switch_to_blog` is called.
+	 * Typically, this is used by the migration tool to indicate that assessment and/or migrations should occur on the switch.
+	 *
+	 * This is automatically switched back to false after a restore_current_blog is called.
+	 * @var bool
+	 */
+	protected static $_do_full_system_reset_on_switch = false;
+
 	/**
 	 * 	set_hooks - for hooking into EE Core, other modules, etc
 	 *
@@ -178,6 +188,16 @@ class EED_Multisite extends EED_Module {
 	}
 
 
+	/**
+	 * Sets the $_do_full_system_reset_on_switch property to true to flag that the next `switch_to_blog` should do any
+	 * necessary migrations etc.  The second call to EED_Multisite.module.php (usually in the case of restore_current_blog()
+	 * being called) will reset this to false.
+	 */
+	public static function do_full_system_reset() {
+		self::$_do_full_system_reset_on_switch = true;
+	}
+
+
 
 	/**
 	 * Callback for the WordPress switch_blog action that fires whenever switch_to_blog and restore_current_blog is called.
@@ -186,6 +206,7 @@ class EED_Multisite extends EED_Module {
 	 * @param int $old_blog_id
 	 */
 	public static function switch_to_blog( $new_blog_id, $old_blog_id = 0 ) {
+		static $did_full_system_reset = false;
 
 		//we DON'T call anything in here if wp is installing
 		if ( wp_installing() || (int) $new_blog_id == (int) $old_blog_id ) {
@@ -202,22 +223,31 @@ class EED_Multisite extends EED_Module {
 		$has_requested = in_array( $new_blog_id, self::$_blog_ids_switched_to_in_request );
 		self::$_blog_ids_switched_to_in_request[] = $new_blog_id;
 
+		//if $did_full_system_reset is set to true, then we make sure we reset that.
+		//also considered the $has_requested value which indicates this blog has already been visited in this request.
+		if ( $did_full_system_reset || $has_requested ) {
+			$did_full_system_reset = false;
+			self::$_do_full_system_reset_on_switch = false;
+		}
+
+		// track between calls whether we've done a full system reset so we automatically disable it on the next
+		// call to this method.
+		if ( self::$_do_full_system_reset_on_switch ) {
+			$did_full_system_reset = true;
+		}
+
 		//things that happen on every switch
 		EEM_Base::set_model_query_blog_id( $new_blog_id );
 		EE_Registry::reset( false, true, false );
 		EE_Multisite::reset();
-
-		//below is things that should happen only on the initial switch to a blog in a request.
-		if ( ! $has_requested ) {
-			EE_System::reset();
-		}
+		EE_System::reset( self::$_do_full_system_reset_on_switch );
 	}
 
 
 
 	/**
 	 * The same as wp's restore_current_blog(), but also takes care of restoring
-	 * a few EE-speicifc singletons
+	 * a few EE-specific singletons
 	 *
 	 * This is no longer needed because we hook into the switch_blog core WP action.  So core switch_to_blog and restore_current_blog
 	 * can be used and everything will flow through EED_Multisite::switch_to_blog method.
