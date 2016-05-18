@@ -55,7 +55,7 @@ class EED_Multisite_Test extends EE_Multisite_UnitTestCase {
 
 		//switch to blog which should fire EE_System reset and put the blog into maintenance mode.
 		switch_to_blog( $ee_blog->ID() );
-		$this->assertEquals( EE_Maintenance_Mode::level_0_not_in_maintenance, EE_Maintenance_Mode::instance()->real_level() );
+		$this->assertEquals( EE_Maintenance_Mode::level_2_complete_maintenance, EE_Maintenance_Mode::instance()->real_level() );
 		restore_current_blog();
 	}
 }
