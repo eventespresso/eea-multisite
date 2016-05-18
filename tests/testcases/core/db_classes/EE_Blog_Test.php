@@ -20,7 +20,11 @@ class EE_Blog_Test extends EE_UnitTestCase {
 		//grab one
 		$blog1 = EEM_Blog::instance()->get_one();
 		$blog2 = EEM_Blog::instance()->get_one( array( array( 'blog_id' => array( '!=', $blog1->ID() ) ) ) );
+		//since the blog has NOT been initialized with EE (no tables setup etc) we need to make sure that we don't run that
+		//with the switch to blog that occurs when `get_blog_option` is called.
+		wp_installing(true);
 		$this->assertNotEquals( $blog1->get_blog_option( 'blogname', 'not_found' ), $blog2->get_blog_option( 'blogname', 'not_found' ) );
+		wp_installing(false);
 	}
 
 

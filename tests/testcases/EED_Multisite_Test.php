@@ -32,6 +32,7 @@ class EED_Multisite_Test extends EE_Multisite_UnitTestCase {
 		restore_current_blog();
 		wp_installing( false );
 		remove_all_filters( 'FHEE__EEH_Activation__create_table__short_circuit' );
+		EED_Multisite::do_full_system_reset();
 		switch_to_blog( $blog->blog_id );
 		//and put the filters back in place
 		add_filter( 'FHEE__EEH_Activation__create_table__short_circuit', '__return_true' );
@@ -52,7 +53,7 @@ class EED_Multisite_Test extends EE_Multisite_UnitTestCase {
 		$ee_blog = $this->_create_a_blog_with_ee();
 		$this->_pretend_ee_upgraded();
 
-		//switch to blog which should fire our normal resets and we should not be in maintenance mode.
+		//switch to blog which should fire our normal resets (no full system reset) and we should not be in maintenance mode.
 		switch_to_blog( $ee_blog->ID() );
 		$this->assertEquals( EE_Maintenance_Mode::level_0_not_in_maintenance, EE_Maintenance_Mode::instance()->real_level() );
 		restore_current_blog();
