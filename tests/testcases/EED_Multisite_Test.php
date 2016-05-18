@@ -16,17 +16,21 @@ class EED_Multisite_Test extends EE_Multisite_UnitTestCase {
 	/**
 	 * Make sure it's ok that we switch to a blog that hasn't had EE setup on
 	 * (although it is active on)
+	 *
 	 */
 	public function test_switch_to_blog__no_ee(){
 		global $wp_actions;
 		//make another blog on this site
 		$blog = $this->factory->blog->create_and_get();
 
+		wp_installing( true );
 		switch_to_blog( $blog->blog_id );
 		$this->assertTableDoesNotExist( "esp_attendee_meta" );
 		//when we switch to it using EED_Multisite, EE should be installed on it
 		$activation_hook_fired = $wp_actions[ 'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation' ];
 		//allow the creation of these tables, because we know they're temporary
+		restore_current_blog();
+		wp_installing( false );
 		remove_all_filters( 'FHEE__EEH_Activation__create_table__short_circuit' );
 		switch_to_blog( $blog->blog_id );
 		//and put the filters back in place
@@ -36,21 +40,22 @@ class EED_Multisite_Test extends EE_Multisite_UnitTestCase {
 		global $wpdb;
 		$this->assertEquals( 'wptests_' . $blog->blog_id . '_', $wpdb->prefix );
 		$this->assertTableExists( $wpdb->prefix . "esp_attendee_meta" );
+		restore_current_blog();
 	}
 
-		/**
-	 * Make sure it's ok that we switch to a blog that hasn't had EE setup on
-	 * (although it is active on)
+	/**
+	 * Make sure it's ok that we switch to a blog that HAS had EE setup on it.
+	 *
 	 */
 	public function test_switch_to_blog__in_mm(){
-		//make another blog on this site
+		//make another blog on this site and this DOES setup EE tables.
 		$ee_blog = $this->_create_a_blog_with_ee();
 		$this->_pretend_ee_upgraded();
+
+		//switch to blog which should fire our normal resets and we should not be in maintenance mode.
 		switch_to_blog( $ee_blog->ID() );
-		update_option( 'espresso_db_update', array( '4.8.0.p' => array( date( 'Y-m-d H:i:s',time() ) ) ) );
+		$this->assertEquals( EE_Maintenance_Mode::level_0_not_in_maintenance, EE_Maintenance_Mode::instance()->real_level() );
 		restore_current_blog();
-		EED_Multisite::switch_to_blog( $ee_blog->ID() );
-		$this->assertEquals( EE_Maintenance_Mode::level_2_complete_maintenance, EE_Maintenance_Mode::instance()->real_level() );
 	}
 }
 
