@@ -19,8 +19,8 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 
 	public function test_assess_sites_needing_migration() {
 		//pretend multisite with 2 blogs
-		$blog1 = $this->factory->blog->create_and_get();
-		$blog2 = $this->factory->blog->create_and_get();
+		$blog1 = $this->_create_a_blog_with_ee();
+		$blog2 = $this->_create_a_blog_with_ee();
 
 		//pretend there was an upgrade that has a DMS that needs to run
 		$this->_pretend_ee_upgraded();
