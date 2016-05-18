@@ -23,8 +23,8 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 		$blog = $this->factory->blog->create_and_get();
 		//allow the creation of these tables, because we know they're temporary
 		remove_all_filters( 'FHEE__EEH_Activation__create_table__short_circuit' );
-		EED_Multisite::do_full_system_reset();
-		switch_to_blog($blog->blog_id);
+
+		switch_to_blog( $blog->blog_id );
 		//and put the filters back in place
 		add_filter( 'FHEE__EEH_Activation__create_table__short_circuit', '__return_true' );
 		$this->assertNotEquals( EE_Maintenance_Mode::level_2_complete_maintenance, EE_Maintenance_Mode::instance()->level() );
@@ -66,6 +66,9 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 
 		//now double-check that NO DMSs apply to the main blog because we upgraded
 		$all_dmss = EE_Data_Migration_Manager::reset()->check_for_applicable_data_migration_scripts();
+
+		//reset module so if EE_System was already reset in this request it will get called again.
+		EED_Multisite::reset();
 		$this->assertEquals( array(), $all_dmss );
 	}
 
