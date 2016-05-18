@@ -73,12 +73,20 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 
 		//reset module so if EE_System was already reset in this request it will get called again.
 		EED_Multisite::reset();
+
+		//filter the version reported so that we trigger the correct req_type on the next EE_System::reset()
+		add_filter( 'FHEE__espresso__espresso_version', function( $version ) {
+			return '9.9.9';
+		});
 		$this->assertEquals( array(), $all_dmss );
 	}
 
 	public function tearDown(){
 		//in case we called _pretend_ee_upgraded(), which added some DMSs, deregister them
 		EE_Register_Data_Migration_Scripts::deregister('Pretend_Upgrade');
+		remove_all_filters( 'FHEE__espresso__espresso_version' );
+		//reset EED_Multisite since we're simulating separate requests
+		EED_Multisite::reset();
 		parent::tearDown();
 	}
 
