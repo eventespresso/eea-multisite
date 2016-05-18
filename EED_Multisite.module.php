@@ -188,7 +188,7 @@ class EED_Multisite extends EED_Module {
 	public static function switch_to_blog( $new_blog_id, $old_blog_id = 0 ) {
 
 		//we DON'T call anything in here if wp is installing
-		if ( wp_installing() ) {
+		if ( wp_installing() || (int) $new_blog_id == (int) $old_blog_id ) {
 			return;
 		}
 
@@ -208,10 +208,7 @@ class EED_Multisite extends EED_Module {
 		EE_Multisite::reset();
 
 		//below is things that should happen only on the initial switch to a blog in a request.
-		if (
-			(int)  $new_blog_id !== (int) $old_blog_id
-			&& ! $has_requested
-		) {
+		if ( ! $has_requested ) {
 			EE_System::reset();
 		}
 	}
