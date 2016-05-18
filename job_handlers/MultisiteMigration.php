@@ -80,7 +80,6 @@ class MultisiteMigration extends JobHandler {
 	 * @return boolean
 	 */
 	protected function site_need_migration( $blog ) {
-		\EED_Multisite::do_full_system_reset();
 		\switch_to_blog( $blog->ID() );
 		$needs_migrating = \EE_Maintenance_Mode::instance()->set_maintenance_mode_if_db_old();
 		if ( $needs_migrating ) {

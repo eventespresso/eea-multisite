@@ -36,21 +36,19 @@ class EED_Multisite extends EED_Module {
 
 
 	/**
-	 * This is used to track the blogs switched to in a request and ensure we only do necessary resets ONCE for that blog.
-	 * when switching TO the blog (not restoring to the blog).
+	 * This is used to track the blogs that have had a EE_System reset done in a request so that only one system reset is done
+	 * per request.  Since EE_System::reset() takes care of any activations etc.  This ensures that that process is not repeated
+	 * unnecessarily.
 	 * @var array
 	 */
-	protected static $_blog_ids_switched_to_in_request = array();
+	protected static $_blogs_that_had_system_reset_done = array();
 
 
 	/**
-	 * This is used to flag whether EE_System should receive a full reset or not when `switch_to_blog` is called.
-	 * Typically, this is used by the migration tool to indicate that assessment and/or migrations should occur on the switch.
-	 *
-	 * This is automatically switched back to false after a restore_current_blog is called.
+	 * This is a flag used to indicate whether EE_System::reset() should be called on a blog switch or not.
 	 * @var bool
 	 */
-	protected static $_do_full_system_reset_on_switch = false;
+	protected static $_skip_system_reset = false;
 
 	/**
 	 * 	set_hooks - for hooking into EE Core, other modules, etc
@@ -189,12 +187,12 @@ class EED_Multisite extends EED_Module {
 
 
 	/**
-	 * Sets the $_do_full_system_reset_on_switch property to true to flag that the next `switch_to_blog` should do any
-	 * necessary migrations etc.  The second call to EED_Multisite.module.php (usually in the case of restore_current_blog()
+	 * Sets the $_skip_system_reset property to true to flag that the next `switch_to_blog` should NOT
+	 * call EE_System::reset().  The second call to EED_Multisite::switch_to_blog (usually in the case of restore_current_blog()
 	 * being called) will reset this to false.
 	 */
-	public static function do_full_system_reset() {
-		self::$_do_full_system_reset_on_switch = true;
+	public static function skip_system_reset() {
+		self::$_skip_system_reset = true;
 	}
 
 
@@ -206,41 +204,45 @@ class EED_Multisite extends EED_Module {
 	 * @param int $old_blog_id
 	 */
 	public static function switch_to_blog( $new_blog_id, $old_blog_id = 0 ) {
-		static $did_full_system_reset = false;
+		static $skipped_system_reset = false;
 
 		//we DON'T call anything in here if wp is installing
 		if ( wp_installing() || (int) $new_blog_id == (int) $old_blog_id ) {
 			return;
 		}
 
-		if ( empty( self::$_blog_ids_switched_to_in_request ) ) {
-			self::$_blog_ids_switched_to_in_request[ get_current_blog_id() ] = 1;
-		}
+		//are we restoring?
+		$restoring = isset( $GLOBALS['_wp_switched_stack'] ) && ! in_array( $old_blog_id, $GLOBALS['_wp_switched_stack'] );
 
-		/**
-		 * We need to add the incoming blog id to the blog id switch to cover any potential nested switches that may occur.
-		 */
-		$has_requested = in_array( $new_blog_id, self::$_blog_ids_switched_to_in_request );
-		self::$_blog_ids_switched_to_in_request[] = $new_blog_id;
-
-		//if $did_full_system_reset is set to true, then we make sure we reset that.
-		//also considered the $has_requested value which indicates this blog has already been visited in this request.
-		if ( $did_full_system_reset || $has_requested ) {
-			$did_full_system_reset = false;
-			self::$_do_full_system_reset_on_switch = false;
+		//if $skipped_system_reset is set to true, then we make sure we reset that.
+		if ( $skipped_system_reset  ) {
+			$skipped_system_reset = false;
+			self::$_skip_system_reset = false;
 		}
 
 		// track between calls whether we've done a full system reset so we automatically disable it on the next
 		// call to this method.
-		if ( self::$_do_full_system_reset_on_switch ) {
-			$did_full_system_reset = true;
+		if ( self::$_skip_system_reset ) {
+			$skipped_system_reset = true;
 		}
 
 		//things that happen on every switch
 		EEM_Base::set_model_query_blog_id( $new_blog_id );
 		EE_Registry::reset( false, true, false );
 		EE_Multisite::reset();
-		EE_System::reset( self::$_do_full_system_reset_on_switch );
+
+		//if this particular site has not already been requested AND the EE_System::reset is not being skipped, then
+		//call EE_System::reset()
+		//we also NEVER call EE_System::reset() on a restore.
+		if (
+			! isset( self::$_blogs_that_had_system_reset_done[ $new_blog_id ] )
+			&& ! self::$_skip_system_reset
+			&& ! $restoring
+		) {
+			EE_System::reset();
+			//makes sure we set this blog as having had EE_System::reset() done on it.
+			self::$_blogs_that_had_system_reset_done[ $new_blog_id ] = 1;
+		}
 	}
 
 
@@ -327,6 +329,17 @@ class EED_Multisite extends EED_Module {
 			),
 			$blog_id
 		);
+	}
+
+
+	/**
+	 * Used to reset all static properties in this module.
+	 * Typically used by unit tests and should NOT be used in production.
+	 */
+	public static function reset() {
+		self::$shortcode_active = false;
+		self::$_blogs_that_had_system_reset_done = array();
+		self::$_skip_system_reset = false;
 	}
 
 
