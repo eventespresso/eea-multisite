@@ -21,6 +21,10 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 	protected function _create_a_blog_with_ee() {
 		global $wpdb;
 		$blog = $this->factory->blog->create_and_get();
+
+		//reset EED_Multisite to remove any records of blogs that had EE_System::reset() run on it in case
+		//the same blog_id is used again when created.
+		EED_Multisite::reset();
 		//allow the creation of these tables, because we know they're temporary
 		remove_all_filters( 'FHEE__EEH_Activation__create_table__short_circuit' );
 
