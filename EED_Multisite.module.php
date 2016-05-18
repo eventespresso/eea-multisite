@@ -206,8 +206,11 @@ class EED_Multisite extends EED_Module {
 	public static function switch_to_blog( $new_blog_id, $old_blog_id = 0 ) {
 		static $skipped_system_reset = false;
 
+		$prevent_excessive_switches = self::_prevent_excessive_switches();
+
+
 		//we DON'T call anything in here if wp is installing
-		if ( wp_installing() || (int) $new_blog_id == (int) $old_blog_id ) {
+		if ( wp_installing() || (int) $new_blog_id == (int) $old_blog_id || $prevent_excessive_switches ) {
 			return;
 		}
 
@@ -243,6 +246,40 @@ class EED_Multisite extends EED_Module {
 			//makes sure we set this blog as having had EE_System::reset() done on it.
 			self::$_blogs_that_had_system_reset_done[ $new_blog_id ] = 1;
 		}
+	}
+
+
+
+	protected static function _prevent_excessive_switches() {
+		static $count = 0;
+		static $skip_count = false;
+
+		/**
+		 * This means we've reached our limit already so let's just return true to kill the normal switch process.
+		 */
+		if ( $skip_count ) {
+			return true;
+		}
+
+		if ( $count === 30 ) {
+			//make sure we don't hit this code anymore.
+			$skip_count = true;
+			$error_message = __( 'EED_Multisite::switch_to_blog() has been executed 30 times in the request. It has been shutdown to prevent timeouts.', 'event_espresso' );
+			try {
+				throw new EE_Error( $error_message );
+			} catch( EE_Error $e ) {
+				$e->write_to_error_log();
+				//add a persistent notice to the main site
+				switch_to_blog( 1 );
+				$error_message .= ' The stack trace has been logged to the error log.';
+				EE_Error::add_persistent_admin_notice( 'ee_excessive_switch_to_blog',  $error_message, true );
+				restore_current_blog();
+				return true;
+			}
+		}
+
+		$count++;
+		return false;
 	}
 
 
