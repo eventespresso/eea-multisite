@@ -87,10 +87,11 @@ class EE_Multisite_Migration_Manager {
 			while ( $blogs_migrated++ < $max_blogs_to_migrate &&
 					$num_migrated < $records_to_migrate &&
 					$blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested() ) {
+				
 				switch_to_blog( $blog_to_migrate->ID() );
 				//and keep hammering that blog so long as it has stuff to migrate
 				do {
-					//pretend each call is a separaye request
+					//pretend each call is a separate request
 
 					$results = EE_Data_Migration_Manager::reset()->migration_step( $records_to_migrate - $num_migrated );
 					$num_migrated += $results[ 'records_migrated' ];
@@ -129,7 +130,8 @@ class EE_Multisite_Migration_Manager {
 					$multisite_migration_message =  sprintf( __( '%1$sFinished migrating %2$s%3$s', 'event_espresso' ), '<h3>', $blog_to_migrate->name(), '</h3>' ) . '<br>' . $multisite_migration_message;
 					restore_current_blog();
 				} else {
-					$blog_to_migrate->set_STS_ID( EEM_Blog::status_migrating );EED_Multisite::restore_current_blog();
+					$blog_to_migrate->set_STS_ID( EEM_Blog::status_migrating );
+					restore_current_blog();
 				}
 
 				$blog_to_migrate->save();

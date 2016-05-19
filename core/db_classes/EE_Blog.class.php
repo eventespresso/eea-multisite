@@ -242,6 +242,7 @@ class EE_Blog extends EE_Soft_Delete_Base_Class {
 		if ( !is_array( $option_names ) ) {
 			$option_names = array( $option_names );
 		}
+		EED_Multisite::skip_system_reset();
 		switch_to_blog( $this->ID() );
 		foreach ( $option_names as $option_name ) {
 			$this->_cached_blog_options[ $option_name ] = get_option( $option_name );

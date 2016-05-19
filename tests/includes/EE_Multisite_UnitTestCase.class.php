@@ -21,9 +21,14 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 	protected function _create_a_blog_with_ee() {
 		global $wpdb;
 		$blog = $this->factory->blog->create_and_get();
+
+		//reset EED_Multisite to remove any records of blogs that had EE_System::reset() run on it in case
+		//the same blog_id is used again when created.
+		EED_Multisite::reset();
 		//allow the creation of these tables, because we know they're temporary
 		remove_all_filters( 'FHEE__EEH_Activation__create_table__short_circuit' );
-		EED_Multisite::switch_to_blog($blog->blog_id);
+
+		switch_to_blog( $blog->blog_id );
 		//and put the filters back in place
 		add_filter( 'FHEE__EEH_Activation__create_table__short_circuit', '__return_true' );
 		$this->assertNotEquals( EE_Maintenance_Mode::level_2_complete_maintenance, EE_Maintenance_Mode::instance()->level() );
@@ -37,7 +42,7 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 			'role' => 'administrator',
 		) );
 		update_user_meta( $admin->ID, 'primary_blog', get_current_blog_id() );
-		EED_Multisite::restore_current_blog();
+		restore_current_blog();
 
 		return EEM_Blog::instance()->get_one_by_ID( $blog->blog_id );
 	}
@@ -65,12 +70,23 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 
 		//now double-check that NO DMSs apply to the main blog because we upgraded
 		$all_dmss = EE_Data_Migration_Manager::reset()->check_for_applicable_data_migration_scripts();
+
+		//reset module so if EE_System was already reset in this request it will get called again.
+		EED_Multisite::reset();
+
+		//filter the version reported so that we trigger the correct req_type on the next EE_System::reset()
+		add_filter( 'FHEE__espresso__espresso_version', function( $version ) {
+			return '9.9.9';
+		});
 		$this->assertEquals( array(), $all_dmss );
 	}
 
 	public function tearDown(){
 		//in case we called _pretend_ee_upgraded(), which added some DMSs, deregister them
 		EE_Register_Data_Migration_Scripts::deregister('Pretend_Upgrade');
+		remove_all_filters( 'FHEE__espresso__espresso_version' );
+		//reset EED_Multisite since we're simulating separate requests
+		EED_Multisite::reset();
 		parent::tearDown();
 	}
 

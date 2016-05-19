@@ -12,7 +12,11 @@ if ( !defined( 'EVENT_ESPRESSO_VERSION' ) ) {
  * @author				Mike Nelson
  *
  */
+
+
 class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
+
+
 	public function test_assess_sites_needing_migration() {
 		//pretend multisite with 2 blogs
 		$blog1 = $this->_create_a_blog_with_ee();
@@ -36,7 +40,7 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 	 */
 	public function test_assess_sites_needing_migration__auto_upgrade() {
 		global $wp_actions;
-		//pretend multisite with 2 blogs
+		//pretend multisite with 2 blogs where EE has NOT been setup.
 		$blog1 = $this->factory->blog->create_and_get();
 		$blog2 = $this->factory->blog->create_and_get();
 		//mark them as possibly being out of date (normally when sites are first created 
@@ -51,23 +55,33 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 				)
 			)
 		);
+		$activation_hook_fired_before_switch = $wp_actions[ 'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation' ];
 		//verify these blogs don't have the EE table yet
+		EED_Multisite::skip_system_reset();
 		switch_to_blog( $blog1->blog_id );
 		$this->assertTableDoesNotExist( "esp_attendee_meta" );
 		restore_current_blog();
+		EED_Multisite::skip_system_reset();
 		switch_to_blog( $blog2->blog_id );
 		$this->assertTableDoesNotExist( "esp_attendee_meta" );
 		restore_current_blog();
-		$activation_hook_fired = $wp_actions[ 'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation' ];
+		
+		$activation_hook_fired_after_switch = $wp_actions[ 'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation' ];
+
+		//we expect that the activation hook BEFORE doing the switch_to_blogs should have only fired once (for the current request).
+		$this->assertEquals( 1, $activation_hook_fired_before_switch );
+
+		//we expect that the activation hook AFTER doing the switch to blogs should STILL only have fired once (for the current request)
+		//because EE_System::reset should not have been called.
+		$this->assertEquals( 1, $activation_hook_fired_after_switch );
+
 		//allow the creation of these tables, because we know they're temporary
 		remove_all_filters( 'FHEE__EEH_Activation__create_table__short_circuit' );
 		$needing_migration = EE_Multisite_Migration_Manager::instance()->assess_sites_needing_migration( 10 );
-		//and put the filters back in place
-		add_filter( 'FHEE__EEH_Activation__create_table__short_circuit', '__return_true' );
 
 		//site shouldn't need migration. It should have just been upgraded automatically
 		$this->assertEquals( 0, $needing_migration );
-		$this->assertEquals( $activation_hook_fired + 2, $wp_actions[ 'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation' ] );
+
 		switch_to_blog( $blog1->blog_id );
 		global $wpdb;
 		$this->assertEquals( 'wptests_' . $blog1->blog_id . '_', $wpdb->prefix );
@@ -78,9 +92,10 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 		$this->assertEquals( 'wptests_' . $blog2->blog_id . '_', $wpdb->prefix );
 		$this->assertTableExists( $wpdb->prefix . "esp_attendee_meta" );
 		restore_current_blog();
+
+		//and put the filters back in place
+		add_filter( 'FHEE__EEH_Activation__create_table__short_circuit', '__return_true' );
 	}
-
-
 
 
 	public function test_migration_step() {
@@ -89,6 +104,7 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 		//pretend multisite with 2 blogs
 		$blog1 = $this->_create_a_blog_with_ee();
 		$blog2 = $this->_create_a_blog_with_ee();
+
 		//make blog2 last-requested a long time ago, so it will be migrated 2nd
 		$blog2->set_last_requested( current_time( 'timestamp' ) - DAY_IN_SECONDS * 10 );
 
@@ -106,7 +122,7 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 		$step_results = EE_Multisite_Migration_Manager::instance()->migration_step( $step_size );
 		$last_ran_dms = EE_Data_Migration_Manager::instance()->get_last_ran_script();
 		//so we should have just migrated a few records from the first site
-		$this->assertEquals( 'Site 1', $step_results[ 'current_blog_name' ] );
+		$this->assertEquals( $blog1->name(), $step_results[ 'current_blog_name' ] );
 		//we should only know about the 1st migration for now. Maybe someday EE_Data_Migration_Manager will be smart
 		//enough to know about the 2nd, but not currently
 		$this->assertEquals( array( 'Multisite Mock Migration' ), $step_results[ 'current_blog_script_names' ] );
@@ -118,7 +134,7 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 		//remember that each of the two DMSs has 333 records to migrate each (see tests/mocks/data_migration_scripts/
 		//but remember that once we have finished a single DMS, EE_Data_Migration_Manager stops there
 		//so we only expect to finish the 1st DMS on this 2nd request
-		$this->assertEquals( 'Site 1', $step_2_results[ 'current_blog_name' ] );
+		$this->assertEquals( $blog1->name(), $step_2_results[ 'current_blog_name' ] );
 		//only the 2nd migration should be left to do
 		$this->assertEquals( array( 'Multisite Mock Migration Two' ), $step_2_results[ 'current_blog_script_names' ] );
 		$this->assertEquals( __( 'Multisite Mock Migration', 'event_espresso' ), $step_results[ 'current_dms' ][ 'script' ] );
@@ -126,7 +142,7 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 
 		$step_3_results = EE_Multisite_Migration_Manager::instance()->migration_step( $step_size );
 		//we should have gotten 200 records into the 2nd DMS for blog 1
-		$this->assertEquals( 'Site 1', $step_3_results[ 'current_blog_name' ] );
+		$this->assertEquals( $blog1->name(), $step_3_results[ 'current_blog_name' ] );
 		//only the 2nd migration should be left to do
 		$this->assertEquals( array( 'Multisite Mock Migration Two' ), $step_3_results[ 'current_blog_script_names' ] );
 		$this->assertEquals( __( 'Multisite Mock Migration Two', 'event_espresso' ), $step_3_results[ 'current_dms' ][ 'script' ] );
@@ -134,7 +150,7 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 
 		$step_4_results = EE_Multisite_Migration_Manager::instance()->migration_step( $step_size );
 		//we should have finished the 2nd DMS for the 1st blog and taken it out of MM
-		$this->assertEquals( 'Site 1', $step_4_results[ 'current_blog_name' ] );
+		$this->assertEquals( $blog1->name(), $step_4_results[ 'current_blog_name' ] );
 		//only the 2nd migration should be left to do
 		$this->assertEquals( array( ), $step_4_results[ 'current_blog_script_names' ] );
 		$this->assertEquals( __( 'Multisite Mock Migration Two Completed', 'event_espresso' ), $step_4_results[ 'current_dms' ][ 'script' ] );
@@ -142,7 +158,7 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 
 		$step_5_results = EE_Multisite_Migration_Manager::instance()->migration_step( $step_size );
 		//we should have gotten 200 records into the 2nd blog's 1st DMS
-		$this->assertEquals( 'Site 2', $step_5_results[ 'current_blog_name' ] );
+		$this->assertEquals( $blog2->name(), $step_5_results[ 'current_blog_name' ] );
 		//only the 2nd migration should be left to do
 		$this->assertEquals( array( 'Multisite Mock Migration' ), $step_5_results[ 'current_blog_script_names' ] );
 		$this->assertEquals( __( 'Multisite Mock Migration', 'event_espresso' ), $step_5_results[ 'current_dms' ][ 'script' ] );

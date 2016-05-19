@@ -240,7 +240,6 @@ class EEM_Blog extends EEM_Soft_Delete_Base {
 		$current_blog_id = get_current_blog_id();
 		//needs to use WP's core switch_to_blog() instead of EED_Multisite::switch_to_blog()
 		//instead ot avoid an infinite loop.
-		switch_to_blog( 1 );
 		EE_Registry::instance()->load_helper('Activation');
 		if( EEH_Activation::table_exists(  $this->second_table() ) ){
 			global $wpdb;			
@@ -256,7 +255,6 @@ class EEM_Blog extends EEM_Soft_Delete_Base {
 			//later when either the site's maintenance page is visited or the multisite migrator checks it.
 			//not a HUGE deal though.
 		}
-		restore_current_blog();
 	}
 
 

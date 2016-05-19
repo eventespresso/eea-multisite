@@ -34,6 +34,22 @@ class EED_Multisite extends EED_Module {
 	 */
 	public static $shortcode_active = FALSE;
 
+
+	/**
+	 * This is used to track the blogs that have had a EE_System reset done in a request so that only one system reset is done
+	 * per request.  Since EE_System::reset() takes care of any activations etc.  This ensures that that process is not repeated
+	 * unnecessarily.
+	 * @var array
+	 */
+	protected static $_blogs_that_had_system_reset_done = array();
+
+
+	/**
+	 * This is a flag used to indicate whether EE_System::reset() should be called on a blog switch or not.
+	 * @var bool
+	 */
+	protected static $_skip_system_reset = false;
+
 	/**
 	 * 	set_hooks - for hooking into EE Core, other modules, etc
 	 *
@@ -77,19 +93,19 @@ class EED_Multisite extends EED_Module {
 	protected static function set_hooks_both() {
 		//don't do multisite stuff if multisite isn't enabled
 		if( is_multisite() ) {
-			add_action( 'AHEE__EE_Data_Migration_Manager__check_for_applicable_data_migration_scripts__scripts_that_should_run', array( 'EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ), 10, 1 ); 
+			add_action( 'AHEE__EE_Data_Migration_Manager__check_for_applicable_data_migration_scripts__scripts_that_should_run', array( 'EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ), 10, 1 );
 			add_action( 'wpmu_new_blog', array( 'EED_Multisite', 'new_blog_created' ), 10, 1 );
 			add_action( 'wp_loaded', array( 'EED_Multisite', 'update_last_requested' ) );
-		} 
-	} 
-		 
-	/** 
-	 * Checks if there are no migrations needed on a particular site, then we can mark it as being up-to-date right? 
-	 * @param EE_Data_Migration_Script_Base[] $migration_scripts_needed 
-	 */ 
-	public static function mark_blog_as_up_to_date_if_no_migrations_needed( $migration_scripts_needed) { 
-		if( empty( $migration_scripts_needed ) ){ 
-			EEM_Blog::instance()->mark_current_blog_as( EEM_Blog::status_up_to_date ); 
+		}
+	}
+
+	/**
+	 * Checks if there are no migrations needed on a particular site, then we can mark it as being up-to-date right?
+	 * @param EE_Data_Migration_Script_Base[] $migration_scripts_needed
+	 */
+	public static function mark_blog_as_up_to_date_if_no_migrations_needed( $migration_scripts_needed) {
+		if( empty( $migration_scripts_needed ) ){
+			EEM_Blog::instance()->mark_current_blog_as( EEM_Blog::status_up_to_date );
 		}
 	}
 
@@ -103,9 +119,9 @@ class EED_Multisite extends EED_Module {
 				$blogs_needing_migration = EEM_Blog::instance()->count_blogs_maybe_needing_migration();
 				if( $blogs_needing_migration ){
 					$network = EE_Admin_Page::add_query_args_and_nonce(array(), EE_MULTISITE_ADMIN_URL);
-						echo '<div class="error">
+					echo '<div class="error">
 						<p>'. sprintf(__('A change has been detected to your Event Espresso plugin or addons. Blogs on your network may require migration. %1$sClick here to check%2$s', "event_espresso"),"<a href='$network'>","</a>").
-					'</div>';
+					     '</div>';
 				}
 			}
 		}
@@ -121,13 +137,13 @@ class EED_Multisite extends EED_Module {
 		if( EE_Maintenance_Mode::instance()->level() == EE_Maintenance_Mode::level_2_complete_maintenance ){
 			$maintenance_page_url = EE_Admin_Page::add_query_args_and_nonce(array(), EE_MAINTENANCE_ADMIN_URL);
 			if ( is_main_site() ) {
-					$new_notice = '<div class="error">
+				$new_notice = '<div class="error">
 					<p>'. sprintf(__('Your main site\'s Event Espresso data is out of date %1$sand needs to be migrated.%2$s After doing this, you should check that the other blogs on your network are up-to-date.', "event_espresso"),"<a href='$maintenance_page_url'>","</a>").
-				'</div>';
-			 } else {
+				              '</div>';
+			} else {
 				$new_notice = '<div class="error">
 				<p>' . __('Your event site is in the process of being updated and is currently in maintainance mode.  It has been bumped to the front of the queue and you should be able to have full access again in about 5 minutes.', 'event_espresso' ) . '</p>' .
-				'</div>';
+				              '</div>';
 			}
 		}
 
@@ -150,13 +166,13 @@ class EED_Multisite extends EED_Module {
 		//also, only do this on the main site when its out of maintenance mode;
 		//other sites can do it fine in mainteannce mode
 		if( ! EED_Multisite::is_bot( $_SERVER[ 'HTTP_USER_AGENT' ] )
-			&& ! defined( 'DOING_CRON' )
+		    && ! defined( 'DOING_CRON' )
 		) {
 			$current_blog_id = get_current_blog_id();
 			EEM_Blog::instance()->update_last_requested( $current_blog_id );
 		}
 	}
-	
+
 	/**
 	 * Detects if the current user is a bot or what
 	 * @param type $user_agent_string
@@ -170,6 +186,16 @@ class EED_Multisite extends EED_Module {
 	}
 
 
+	/**
+	 * Sets the $_skip_system_reset property to true to flag that the next `switch_to_blog` should NOT
+	 * call EE_System::reset().  The second call to EED_Multisite::switch_to_blog (usually in the case of restore_current_blog()
+	 * being called) will reset this to false.
+	 */
+	public static function skip_system_reset() {
+		self::$_skip_system_reset = true;
+	}
+
+
 
 	/**
 	 * Callback for the WordPress switch_blog action that fires whenever switch_to_blog and restore_current_blog is called.
@@ -178,22 +204,97 @@ class EED_Multisite extends EED_Module {
 	 * @param int $old_blog_id
 	 */
 	public static function switch_to_blog( $new_blog_id, $old_blog_id = 0 ) {
-		//first do we need to do anything?
-		if ( $new_blog_id == $old_blog_id ) {
+		static $skipped_system_reset = false;
+
+		$prevent_excessive_switches = self::_prevent_excessive_switches();
+
+
+		//we DON'T call anything in here if wp is installing
+		if ( wp_installing() || (int) $new_blog_id == (int) $old_blog_id || $prevent_excessive_switches ) {
 			return;
 		}
-		EE_Registry::reset( false, true, false );
-		//set model to new_blog_id
+
+		//are we restoring?
+		$restoring = isset( $GLOBALS['_wp_switched_stack'] ) && ! in_array( $old_blog_id, $GLOBALS['_wp_switched_stack'] );
+
+		//if $skipped_system_reset is set to true, then we make sure we reset that.
+		if ( $skipped_system_reset  ) {
+			$skipped_system_reset = false;
+			self::$_skip_system_reset = false;
+		}
+
+		// track between calls whether we've done a full system reset so we automatically disable it on the next
+		// call to this method.
+		if ( self::$_skip_system_reset ) {
+			$skipped_system_reset = true;
+		}
+
+		//things that happen on every switch
 		EEM_Base::set_model_query_blog_id( $new_blog_id );
-		EE_System::reset();
+		EE_Registry::reset( false, true, false );
 		EE_Multisite::reset();
+
+		//if this particular site has not already been requested AND the EE_System::reset is not being skipped, then
+		//call EE_System::reset()
+		//we also NEVER call EE_System::reset() on a restore.
+		if (
+			! isset( self::$_blogs_that_had_system_reset_done[ $new_blog_id ] )
+			&& ! self::$_skip_system_reset
+			&& ! $restoring
+		) {
+			EE_System::reset();
+			//makes sure we set this blog as having had EE_System::reset() done on it.
+			self::$_blogs_that_had_system_reset_done[ $new_blog_id ] = 1;
+		}
+	}
+
+
+	/**
+	 * This method is basically used to by EED_Multisite::switch_to_blog to count how many times that method is called and
+	 * then handle logging a stack trace and throwing a persistent notice on the main site when the maximum set number is exceeed.
+	 *
+	 * The intention is this will help prevent php timeouts due to a large number of blogs being called that have all the various EE
+	 * things reset on them.  This will provide clues for us in optimizing code loaded in a request so switch_to_blog isn't called excessively.
+	 *
+	 * @return bool
+	 */
+	protected static function _prevent_excessive_switches() {
+		static $count = 0;
+		static $skip_count = false;
+
+		$max_count_allowed = defined( 'EE_EXCESSIVE_SWITCHES_MAX_COUNT' ) ? (int) EE_EXCESSIVE_SWITCHES_MAX_COUNT : 30;
+
+		/**
+		 * This means we've reached our limit already so let's just return true to kill the normal switch process.
+		 */
+		if ( $skip_count ) {
+			return true;
+		}
+
+		if ( $count === $max_count_allowed ) {
+			//make sure we don't hit this code anymore.
+			$skip_count = true;
+			$error_message = sprintf( __( 'EED_Multisite::switch_to_blog() has been executed %d times in the request. It has been shutdown to prevent timeouts.', 'event_espresso' ), $max_count_allowed );
+			$e = new EE_Error( $error_message );
+			$e->write_to_error_log();
+			//add a persistent notice to the main site
+			switch_to_blog( 1 );
+			$error_message .= ' The stack trace has been logged to the error log.';
+			EE_Error::add_persistent_admin_notice( 'ee_excessive_switch_to_blog',  $error_message, true );
+			restore_current_blog();
+			return true;
+		}
+
+
+		$count++;
+		return false;
 	}
 
 
 
 	/**
 	 * The same as wp's restore_current_blog(), but also takes care of restoring
-	 * a few EE-speicifc singletons
+	 * a few EE-specific singletons
 	 *
 	 * This is no longer needed because we hook into the switch_blog core WP action.  So core switch_to_blog and restore_current_blog
 	 * can be used and everything will flow through EED_Multisite::switch_to_blog method.
@@ -258,7 +359,7 @@ class EED_Multisite extends EED_Module {
 			wp_enqueue_script( 'espresso_multisite' );
 		}
 	}
-	
+
 	/**
 	 * A blog was just created; let's immediately create its row in the blog meta table and
 	 * set its last updated time and status
@@ -266,13 +367,24 @@ class EED_Multisite extends EED_Module {
 	 * which will cause duplicate entries in the blog meta table)
 	 */
 	public static function new_blog_created( $blog_id ) {
-		EEM_Blog::instance()->update_by_ID( 
-			array( 
-				'BLG_last_requested' => current_time( 'mysql', true ), 
-				'STS_ID' => EEM_Blog::status_up_to_date 
+		EEM_Blog::instance()->update_by_ID(
+			array(
+				'BLG_last_requested' => current_time( 'mysql', true ),
+				'STS_ID' => EEM_Blog::status_up_to_date
 			),
-			$blog_id 
+			$blog_id
 		);
+	}
+
+
+	/**
+	 * Used to reset all static properties in this module.
+	 * Typically used by unit tests and should NOT be used in production.
+	 */
+	public static function reset() {
+		self::$shortcode_active = false;
+		self::$_blogs_that_had_system_reset_done = array();
+		self::$_skip_system_reset = false;
 	}
 
 
