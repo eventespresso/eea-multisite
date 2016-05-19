@@ -274,7 +274,7 @@ class EED_Multisite extends EED_Module {
 		if ( $count === $max_count_allowed ) {
 			//make sure we don't hit this code anymore.
 			$skip_count = true;
-			$error_message = __( 'EED_Multisite::switch_to_blog() has been executed 30 times in the request. It has been shutdown to prevent timeouts.', 'event_espresso' );
+			$error_message = sprintf( __( 'EED_Multisite::switch_to_blog() has been executed %d times in the request. It has been shutdown to prevent timeouts.', 'event_espresso' ), $max_count_allowed );
 			$e = new EE_Error( $error_message );
 			$e->write_to_error_log();
 			//add a persistent notice to the main site
