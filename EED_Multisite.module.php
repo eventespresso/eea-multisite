@@ -249,10 +249,20 @@ class EED_Multisite extends EED_Module {
 	}
 
 
-
+	/**
+	 * This method is basically used to by EED_Multisite::switch_to_blog to count how many times that method is called and
+	 * then handle logging a stack trace and throwing a persistent notice on the main site when the maximum set number is exceeed.
+	 *
+	 * The intention is this will help prevent php timeouts due to a large number of blogs being called that have all the various EE
+	 * things reset on them.  This will provide clues for us in optimizing code loaded in a request so switch_to_blog isn't called excessively.
+	 *
+	 * @return bool
+	 */
 	protected static function _prevent_excessive_switches() {
 		static $count = 0;
 		static $skip_count = false;
+
+		$max_count_allowed = defined( 'EE_EXCESSIVE_SWITCHES_MAX_COUNT' ) ? (int) EE_EXCESSIVE_SWITCHES_MAX_COUNT : 30;
 
 		/**
 		 * This means we've reached our limit already so let's just return true to kill the normal switch process.
@@ -261,22 +271,20 @@ class EED_Multisite extends EED_Module {
 			return true;
 		}
 
-		if ( $count === 30 ) {
+		if ( $count === $max_count_allowed ) {
 			//make sure we don't hit this code anymore.
 			$skip_count = true;
 			$error_message = __( 'EED_Multisite::switch_to_blog() has been executed 30 times in the request. It has been shutdown to prevent timeouts.', 'event_espresso' );
-			try {
-				throw new EE_Error( $error_message );
-			} catch( EE_Error $e ) {
-				$e->write_to_error_log();
-				//add a persistent notice to the main site
-				switch_to_blog( 1 );
-				$error_message .= ' The stack trace has been logged to the error log.';
-				EE_Error::add_persistent_admin_notice( 'ee_excessive_switch_to_blog',  $error_message, true );
-				restore_current_blog();
-				return true;
-			}
+			$e = new EE_Error( $error_message );
+			$e->write_to_error_log();
+			//add a persistent notice to the main site
+			switch_to_blog( 1 );
+			$error_message .= ' The stack trace has been logged to the error log.';
+			EE_Error::add_persistent_admin_notice( 'ee_excessive_switch_to_blog',  $error_message, true );
+			restore_current_blog();
+			return true;
 		}
+
 
 		$count++;
 		return false;
