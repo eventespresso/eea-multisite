@@ -192,6 +192,12 @@ class EED_Multisite extends EED_Module {
 	/**
 	 * Callback for the WordPress switch_blog action that fires whenever switch_to_blog and restore_current_blog is called.
 	 * We use this to fire any resets on EE systems that are needed when the blog context changes.
+	 *
+	 * Important:  If self::do_full_reset() is called BEFORE this callback gets executed, then a full reset of EE is done.
+	 * Otherwise, the only thing that will happen is the `$new_blog_id` will be set on EEM_Base.  Also this method will not
+	 * do anything if in a WordPress installing context or if the switch is being done to the same blog as what's being switched
+	 * from.
+	 *
 	 * @param int $new_blog_id
 	 * @param int $old_blog_id
 	 */
