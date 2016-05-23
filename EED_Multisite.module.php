@@ -36,7 +36,8 @@ class EED_Multisite extends EED_Module {
 
 	/**
 	 * This is a flag used to indicate whether a full reset of EE singletons should be done on a `switch_to_blog` or
-	 * `restore_current_blog` call.
+	 * `restore_current_blog` call.  Typically this should be set to true when client code is calling any EE code (besides
+	 * EEM models) that could be specific to the site (eg. EE_Config, Data Migrations, Messages system).
 	 * @var bool
 	 */
 	protected static $_do_full_reset = false;
