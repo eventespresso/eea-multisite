@@ -141,7 +141,10 @@ Class EE_Multisite extends EE_Addon {
 		add_filter( 'FHEE__EEH_Activation__get_default_creator_id__pre_filtered_id', array( 'EE_Multisite', 'filter_get_default_creator_id' ) );
 		add_action( 'AHEE__EE_System__initialize', array( 'EE_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ) );
 		
-		//hook into core WordPress switch_to_blog so we run additional resets etc after.  This will execute on switch_to_blog() and restore_current_blog()
+		//hook into core WordPress switch_to_blog so we run additional resets etc after.  This will execute on
+		// switch_to_blog() and restore_current_blog(). This hook is added here because a `switch_to_blog` or
+		// `restore_current_blog` may happen before 'init' on WordPress installs.  Other plugins may need to ensure EE
+		// is reset on those switches.
 		add_action( 'switch_blog', array( 'EED_Multisite', 'switch_to_blog' ), 10, 2 );
 	}
 
