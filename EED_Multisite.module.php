@@ -34,21 +34,12 @@ class EED_Multisite extends EED_Module {
 	 */
 	public static $shortcode_active = FALSE;
 
-
 	/**
-	 * This is used to track the blogs that have had a EE_System reset done in a request so that only one system reset is done
-	 * per request.  Since EE_System::reset() takes care of any activations etc.  This ensures that that process is not repeated
-	 * unnecessarily.
-	 * @var array
-	 */
-	protected static $_blogs_that_had_system_reset_done = array();
-
-
-	/**
-	 * This is a flag used to indicate whether EE_System::reset() should be called on a blog switch or not.
+	 * This is a flag used to indicate whether a full reset of EE singletons should be done on a `switch_to_blog` or
+	 * `restore_current_blog` call.
 	 * @var bool
 	 */
-	protected static $_skip_system_reset = false;
+	protected static $_do_full_reset = false;
 
 	/**
 	 * 	set_hooks - for hooking into EE Core, other modules, etc
@@ -187,12 +178,13 @@ class EED_Multisite extends EED_Module {
 
 
 	/**
-	 * Sets the $_skip_system_reset property to true to flag that the next `switch_to_blog` should NOT
-	 * call EE_System::reset().  The second call to EED_Multisite::switch_to_blog (usually in the case of restore_current_blog()
+	 * Sets the $_do_full_reset property to true to flag that the next `switch_to_blog` SHOULD do a full reset of all
+	 * EE singletons.
+	 * The second call to EED_Multisite::switch_to_blog (usually in the case of restore_current_blog()
 	 * being called) will reset this to false.
 	 */
-	public static function skip_system_reset() {
-		self::$_skip_system_reset = true;
+	public static function do_full_reset() {
+		self::$_do_full_reset = true;
 	}
 
 
@@ -204,90 +196,26 @@ class EED_Multisite extends EED_Module {
 	 * @param int $old_blog_id
 	 */
 	public static function switch_to_blog( $new_blog_id, $old_blog_id = 0 ) {
-		static $skipped_system_reset = false;
-
-		$prevent_excessive_switches = self::_prevent_excessive_switches();
-
 
 		//we DON'T call anything in here if wp is installing
-		if ( wp_installing() || (int) $new_blog_id == (int) $old_blog_id || $prevent_excessive_switches ) {
+		if ( wp_installing() || (int) $new_blog_id == (int) $old_blog_id ) {
 			return;
 		}
 
-		//are we restoring?
-		$restoring = isset( $GLOBALS['_wp_switched_stack'] ) && ! in_array( $old_blog_id, $GLOBALS['_wp_switched_stack'] );
-
-		//if $skipped_system_reset is set to true, then we make sure we reset that.
-		if ( $skipped_system_reset  ) {
-			$skipped_system_reset = false;
-			self::$_skip_system_reset = false;
-		}
-
-		// track between calls whether we've done a full system reset so we automatically disable it on the next
-		// call to this method.
-		if ( self::$_skip_system_reset ) {
-			$skipped_system_reset = true;
-		}
-
-		//things that happen on every switch
+		//if made it here then we just set_model_query_blog_id
 		EEM_Base::set_model_query_blog_id( $new_blog_id );
+
+		//if not a full reset then return
+		if ( ! self::$_do_full_reset ) {
+			return;
+		}
+
+		//make sure that we reset _do_full_reset so the next switch doesn't happen.
+		self::$_do_full_reset = false;
+
 		EE_Registry::reset( false, true, false );
 		EE_Multisite::reset();
-
-		//if this particular site has not already been requested AND the EE_System::reset is not being skipped, then
-		//call EE_System::reset()
-		//we also NEVER call EE_System::reset() on a restore.
-		if (
-			! isset( self::$_blogs_that_had_system_reset_done[ $new_blog_id ] )
-			&& ! self::$_skip_system_reset
-			&& ! $restoring
-		) {
-			EE_System::reset();
-			//makes sure we set this blog as having had EE_System::reset() done on it.
-			self::$_blogs_that_had_system_reset_done[ $new_blog_id ] = 1;
-		}
-	}
-
-
-	/**
-	 * This method is basically used to by EED_Multisite::switch_to_blog to count how many times that method is called and
-	 * then handle logging a stack trace and throwing a persistent notice on the main site when the maximum set number is exceeed.
-	 *
-	 * The intention is this will help prevent php timeouts due to a large number of blogs being called that have all the various EE
-	 * things reset on them.  This will provide clues for us in optimizing code loaded in a request so switch_to_blog isn't called excessively.
-	 *
-	 * @return bool
-	 */
-	protected static function _prevent_excessive_switches() {
-		static $count = 0;
-		static $skip_count = false;
-
-		$max_count_allowed = defined( 'EE_EXCESSIVE_SWITCHES_MAX_COUNT' ) ? (int) EE_EXCESSIVE_SWITCHES_MAX_COUNT : 30;
-
-		/**
-		 * This means we've reached our limit already so let's just return true to kill the normal switch process.
-		 */
-		if ( $skip_count ) {
-			return true;
-		}
-
-		if ( $count === $max_count_allowed ) {
-			//make sure we don't hit this code anymore.
-			$skip_count = true;
-			$error_message = sprintf( __( 'EED_Multisite::switch_to_blog() has been executed %d times in the request. It has been shutdown to prevent timeouts.', 'event_espresso' ), $max_count_allowed );
-			$e = new EE_Error( $error_message );
-			$e->write_to_error_log();
-			//add a persistent notice to the main site
-			switch_to_blog( 1 );
-			$error_message .= ' The stack trace has been logged to the error log.';
-			EE_Error::add_persistent_admin_notice( 'ee_excessive_switch_to_blog',  $error_message, true );
-			restore_current_blog();
-			return true;
-		}
-
-
-		$count++;
-		return false;
+		EE_System::reset();
 	}
 
 
@@ -383,8 +311,7 @@ class EED_Multisite extends EED_Module {
 	 */
 	public static function reset() {
 		self::$shortcode_active = false;
-		self::$_blogs_that_had_system_reset_done = array();
-		self::$_skip_system_reset = false;
+		self::$_do_full_reset = false;
 	}
 
 
