@@ -84,7 +84,7 @@ class MultisiteQueryer extends JobHandlerFile {
 	 */
 	protected function _query_blog( $blog_id, $wpdb_method, $sql_query, $stop_on_error = false ) {
 		global $wpdb;
-		switch_to_blog( $blog_id );
+		\switch_to_blog( $blog_id );
 		$parsed_query = str_replace( 
 			array(
 				'{$wpdb->prefix}',
