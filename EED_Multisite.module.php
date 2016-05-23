@@ -181,8 +181,7 @@ class EED_Multisite extends EED_Module {
 	/**
 	 * Sets the $_do_full_reset property to true to flag that the next `switch_to_blog` SHOULD do a full reset of all
 	 * EE singletons.
-	 * The second call to EED_Multisite::switch_to_blog (usually in the case of restore_current_blog()
-	 * being called) will reset this to false.
+	 * The initial call to EED_Multisite::switch_to_blog after calling this method will reset this to false.
 	 */
 	public static function do_full_reset() {
 		self::$_do_full_reset = true;
