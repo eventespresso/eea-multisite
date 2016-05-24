@@ -57,11 +57,9 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 		);
 		$activation_hook_fired_before_switch = $wp_actions[ 'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation' ];
 		//verify these blogs don't have the EE table yet
-		EED_Multisite::skip_system_reset();
 		switch_to_blog( $blog1->blog_id );
 		$this->assertTableDoesNotExist( "esp_attendee_meta" );
 		restore_current_blog();
-		EED_Multisite::skip_system_reset();
 		switch_to_blog( $blog2->blog_id );
 		$this->assertTableDoesNotExist( "esp_attendee_meta" );
 		restore_current_blog();
@@ -82,11 +80,13 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase {
 		//site shouldn't need migration. It should have just been upgraded automatically
 		$this->assertEquals( 0, $needing_migration );
 
+		EED_Multisite::do_full_reset();
 		switch_to_blog( $blog1->blog_id );
 		global $wpdb;
 		$this->assertEquals( 'wptests_' . $blog1->blog_id . '_', $wpdb->prefix );
 		$this->assertTableExists( $wpdb->prefix . "esp_attendee_meta" );
 		restore_current_blog();
+		EED_Multisite::do_full_reset();
 		switch_to_blog( $blog2->blog_id );
 		global $wpdb;
 		$this->assertEquals( 'wptests_' . $blog2->blog_id . '_', $wpdb->prefix );

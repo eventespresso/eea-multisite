@@ -28,6 +28,7 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase {
 		//allow the creation of these tables, because we know they're temporary
 		remove_all_filters( 'FHEE__EEH_Activation__create_table__short_circuit' );
 
+		EED_Multisite::do_full_reset();
 		switch_to_blog( $blog->blog_id );
 		//and put the filters back in place
 		add_filter( 'FHEE__EEH_Activation__create_table__short_circuit', '__return_true' );

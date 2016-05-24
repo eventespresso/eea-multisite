@@ -24,6 +24,8 @@ class EED_Multisite_Test extends EE_Multisite_UnitTestCase {
 		$blog = $this->factory->blog->create_and_get();
 
 		wp_installing( true );
+		//although we trigger a full reset it should NOT happen when wp_installing.
+		EED_Multisite::do_full_reset();
 		switch_to_blog( $blog->blog_id );
 		$this->assertTableDoesNotExist( "esp_attendee_meta" );
 		//when we switch to it using EED_Multisite, EE should be installed on it
@@ -32,6 +34,7 @@ class EED_Multisite_Test extends EE_Multisite_UnitTestCase {
 		restore_current_blog();
 		wp_installing( false );
 		remove_all_filters( 'FHEE__EEH_Activation__create_table__short_circuit' );
+		EED_Multisite::do_full_reset();
 		switch_to_blog( $blog->blog_id );
 		//and put the filters back in place
 		add_filter( 'FHEE__EEH_Activation__create_table__short_circuit', '__return_true' );
@@ -54,6 +57,7 @@ class EED_Multisite_Test extends EE_Multisite_UnitTestCase {
 		$this->_pretend_ee_upgraded();
 
 		//switch to blog which should fire EE_System reset and put the blog into maintenance mode.
+		EED_Multisite::do_full_reset();
 		switch_to_blog( $ee_blog->ID() );
 		$this->assertEquals( EE_Maintenance_Mode::level_2_complete_maintenance, EE_Maintenance_Mode::instance()->real_level() );
 		restore_current_blog();

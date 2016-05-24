@@ -87,7 +87,8 @@ class EE_Multisite_Migration_Manager {
 			while ( $blogs_migrated++ < $max_blogs_to_migrate &&
 					$num_migrated < $records_to_migrate &&
 					$blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested() ) {
-				
+
+				EED_Multisite::do_full_reset();
 				switch_to_blog( $blog_to_migrate->ID() );
 				//and keep hammering that blog so long as it has stuff to migrate
 				do {
@@ -203,6 +204,7 @@ class EE_Multisite_Migration_Manager {
 		$blogs_needing_to_migrate = 0;
 		foreach ( $blogs as $blog ) {
 			//switch to that blog and assess whether or not it needs to be migrated
+			EED_Multisite::do_full_reset();
 			switch_to_blog( $blog->ID() );
 			$needs_migrating = EE_Maintenance_Mode::instance()->set_maintenance_mode_if_db_old();
 			if ( $needs_migrating ) {

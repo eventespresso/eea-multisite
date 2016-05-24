@@ -410,6 +410,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 		if( $blog_migrating ){
 			$blog_migrating->set_STS_ID( EEM_Blog::status_borked );
 			$blog_migrating->save();
+			EED_Multisite::do_full_reset();
 			switch_to_blog($blog_migrating->ID());
 			EE_Data_Migration_Manager::instance()->add_error_to_migrations_ran( $this->_req_data[ 'message' ] );
 			global $wpdb;
@@ -622,7 +623,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 
 			
                         //next need to delete all Event Espresso data on the site.
-						EED_Multisite::do_full_system_reset();
+						EED_Multisite::do_full_reset();
                         switch_to_blog( $blog_id );
                         $registry = EE_Registry::instance();
                         $registry->LIB = new stdClass();
