@@ -219,6 +219,16 @@ class EED_Multisite extends EED_Module {
 		//make sure that we reset _do_full_reset so the next switch doesn't happen.
 		self::$_do_full_reset = false;
 
+		self::perform_full_reset();
+	}
+
+
+
+
+	/**
+	 * Contains all the code for performing a full reset.
+	 */
+	public static function perform_full_reset() {
 		EE_Registry::reset( false, true, false );
 		EE_Multisite::reset();
 		EE_System::reset();
