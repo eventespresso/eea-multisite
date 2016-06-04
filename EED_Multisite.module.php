@@ -227,9 +227,11 @@ class EED_Multisite extends EED_Module {
 
 	/**
 	 * Contains all the code for performing a full reset.
+	 * @param bool  $reset_models  If this is set to true then the models receive a full reset.  This is necessary when
+	 *                             it is desired that the entity maps in the models be cleared out.
 	 */
-	public static function perform_full_reset() {
-		EE_Registry::reset( false, true, false );
+	public static function perform_full_reset( $reset_models = false ) {
+		EE_Registry::reset( false, true, $reset_models );
 		EE_Multisite::reset();
 		EE_System::reset();
 	}
