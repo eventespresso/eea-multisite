@@ -140,7 +140,17 @@ Class EE_Multisite extends EE_Addon {
 		//a very specific hook for when running the EE_DMS_Core_4_5_0
 		add_filter( 'FHEE__EEH_Activation__get_default_creator_id__pre_filtered_id', array( 'EE_Multisite', 'filter_get_default_creator_id' ) );
 		add_action( 'AHEE__EE_System__initialize', array( 'EE_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed' ) );
-		
+
+		//set hook for actions/filters we want to have set after core config is loaded.
+		add_action( 'AHEE__EE_System__load_core_configuration__complete', array( 'EE_Multisite', 'load_after_modules_loaded' ), 20 );
+	}
+
+
+	/**
+	 * Callback for AHEE__EE_System__load_core_configuration__complete used to set any hooks/filters after core Config has
+	 * been loaded.
+	 */
+	public static function load_after_modules_loaded() {
 		//hook into core WordPress switch_to_blog so we run additional resets etc after.  This will execute on
 		// switch_to_blog() and restore_current_blog(). This hook is added here because a `switch_to_blog` or
 		// `restore_current_blog` may happen before 'init' on WordPress installs.  Other plugins may need to ensure EE
