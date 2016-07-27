@@ -622,7 +622,7 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 			}
 
 			EEM_Base::set_model_query_blog_id( $blog_id );
-			EEH_Activation::delete_espresso_tables();
+			EEH_Activation::drop_espresso_tables();
 			//reset the model's internal blog id
 			EEM_Base::set_model_query_blog_id();
 			//now delete core blog tables/data
