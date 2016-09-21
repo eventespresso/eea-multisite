@@ -157,11 +157,10 @@ class EED_Multisite extends EED_Module {
 		//only record visits by non-bots, and non-cron
 		//also, only do this on the main site when its out of maintenance mode;
 		//other sites can do it fine in mainteannce mode
-		if( ! EED_Multisite::is_bot( 
-				isset( $_SERVER[ 'HTTP_USER_AGENT' ] ) ?  
+		$user_agent = isset( $_SERVER[ 'HTTP_USER_AGENT' ] ) ?  
 				$_SERVER[ 'HTTP_USER_AGENT' ] :
-				''
-			)
+				'';
+		if( ! EED_Multisite::is_bot( $user_agent )
 		    && ! defined( 'DOING_CRON' )
 		) {
 			$current_blog_id = get_current_blog_id();
