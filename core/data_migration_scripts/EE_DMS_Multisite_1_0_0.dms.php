@@ -39,8 +39,7 @@ class EE_DMS_Multisite_1_0_0 extends EE_Data_Migration_Script_Base {
 				BLG_last_requested datetime NOT NULL default '0000-00-00 00:00:00',
 				PRIMARY KEY  (BLM_ID),
 				KEY blog_id_fk (blog_id_fk),
-				KEY STS_ID (STS_ID),
-				KEY BLG_last_requested (BLG_last_requested)"
+				KEY STS_ID (STS_ID)"
 			);
 
 //			$this->insert_default_status_codes();
