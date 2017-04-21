@@ -10,7 +10,7 @@
 		"src/circle.yml",
 		"src/readme.txt"
 	],
-	"github" : false,
+	"github" : true,
 	"demoee" : true,
 	"awsbucket" : "",
 	"awsregion" : "",
