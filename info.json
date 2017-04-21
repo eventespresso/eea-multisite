@@ -12,8 +12,6 @@
 	],
 	"github" : true,
 	"demoee" : true,
-	"awsbucket" : "",
-	"awsregion" : "",
 	"srcBuildFolderName" : "eea-multisite",
 	"textDomain" : "event_espresso"
 }
