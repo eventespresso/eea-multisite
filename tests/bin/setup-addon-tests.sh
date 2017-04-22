@@ -48,6 +48,8 @@ function eeCoreSetup {
         git fetch --tags
         git checkout tags/$BRANCH -b $BRANCH
     fi
+    #back to previous directory
+    cd -
     echo "Building against EE core" $BRANCH
 }
 
