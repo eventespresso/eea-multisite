@@ -62,6 +62,10 @@ function addOnSetup {
 
 # commands taking care of creating the WordPress test db.
 function createDB {
+    ## only run this is in circle env.
+    if [ -z "$CIRCLE_ENV" ]; then
+        return
+    fi
     mysql -e 'CREATE DATABASE wordpress_test;' -uroot;
 }
 
