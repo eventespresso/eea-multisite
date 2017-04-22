@@ -8,6 +8,7 @@
 		"src/tests/**",
 		"src/info.json",
 		"src/circle.yml",
+        "src/.travis.yml",
 		"src/readme.txt"
 	],
 	"github" : true,
