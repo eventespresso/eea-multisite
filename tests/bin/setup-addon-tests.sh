@@ -40,7 +40,7 @@ function wpCoreSetup {
 # receives an argument indicating what branch to checkout.
 function eeCoreSetup {
     local BRANCH=$1
-    git clone git@github.com:eventespresso/event-espresso-core.git $event_espresso_core_dir
+    git clone https://github.com/eventespresso/event-espresso-core.git $event_espresso_core_dir
     cd $event_espresso_core_dir/tests
     if [ "$BRANCH" = "master" ]; then
         git checkout master
