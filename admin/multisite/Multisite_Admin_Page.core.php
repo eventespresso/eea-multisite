@@ -621,21 +621,10 @@ class Multisite_Admin_Page extends EE_Admin_Page {
 				$users = get_users( array( 'blog_id' => $blog_id, 'fields' => 'ids' ) );
 			}
 
-			
-                        //next need to delete all Event Espresso data on the site.
-						EED_Multisite::do_full_reset();
-                        switch_to_blog( $blog_id );
-                        $registry = EE_Registry::instance();
-                        $registry->LIB = new stdClass();
-
-                        //alright we've switched blogs and reset needed stuff (except EE_System, because we'd rather not waste
-                        //time detecting if the site has been upgraded etc when we intend to delete it anyways
-                        EE_Registry::instance()->load_helper('Activation');
-                        EE_Maintenance_Mode::instance()->set_maintenance_level(EE_Maintenance_Mode::level_0_not_in_maintenance);
-                        EEH_Activation::delete_all_espresso_tables_and_data();
-                        //ok all done the work on this site, return to main site
-                        restore_current_blog();
-
+			EEM_Base::set_model_query_blog_id( $blog_id );
+			EEH_Activation::drop_espresso_tables();
+			//reset the model's internal blog id
+			EEM_Base::set_model_query_blog_id();
 			//now delete core blog tables/data
 			wpmu_delete_blog( $blog_id, true );
 
