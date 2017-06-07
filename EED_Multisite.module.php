@@ -97,6 +97,42 @@ class EED_Multisite extends EED_Module
                 array('EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed'), 10, 1);
             add_action('wpmu_new_blog', array('EED_Multisite', 'new_blog_created'), 10, 1);
             add_action('wp_loaded', array('EED_Multisite', 'update_last_requested'));
+            add_filter('delete_blog', array('EED_Multisite', 'delete_ee_custom_tables_too'), 10, 2);
+        }
+    }
+
+
+
+    /**
+     * Drop EE custom tables when a site is deleted and its tables are dropped.
+     * Also, remove the site's users if they're not member of any other site
+     *
+     * @param int  $blog_id The site ID.
+     * @param bool $drop    True if site's table should be dropped. Default is false.
+     */
+    public static function delete_ee_custom_tables_too($blog_id, $drop)
+    {
+        if($drop){
+            EEM_Base::set_model_query_blog_id($blog_id);
+            EEH_Activation::drop_espresso_tables();
+            EEM_Base::set_model_query_blog_id();
+            //clean up blog_meta table
+            $tables = EEM_Blog::instance()->get_tables();
+            if (isset($tables['Blog_Meta']) && $tables['Blog_Meta'] instanceof EE_Secondary_Table) {
+                //the main blog entry is already deleted, let's clean up the entry in the secondary table
+                global $wpdb;
+                $wpdb->delete($tables['Blog_Meta']->get_table_name(), array('blog_id_fk' => $blog_id));
+            }
+            //delete all non super_admin users that were attached to that blog if configured to drop them
+            if (EE_Registry::instance()->CFG->addons->ee_multisite->delete_non_super_admin_users) {
+                $users = get_users(array('blog_id' => $blog_id, 'fields' => 'ids'));
+                foreach ($users as $user_id) {
+                    if (is_super_admin($user_id)) {
+                        continue;
+                    }
+                    wpmu_delete_user($user_id);
+                }
+            }
         }
     }
 

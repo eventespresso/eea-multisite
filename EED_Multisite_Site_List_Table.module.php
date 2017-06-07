@@ -89,7 +89,7 @@ class EED_Multisite_Site_List_Table extends EED_Module
             //		var_dump( $screen) ;
             $from_blogs_sql = "FROM {$wpdb->blogs}";
             if (isset($screen->base) && $screen->base == 'sites-network' && strpos($query, $from_blogs_sql) !== false) {
-                $from_blogs_join_blog_meta_sql = $from_blogs_sql . " LEFT JOIN {$wpdb->prefix}esp_blog_meta ON {$wpdb->blogs}.blog_id = {$wpdb->prefix}esp_blog_meta.blog_id_fk";
+                $from_blogs_join_blog_meta_sql = $from_blogs_sql . " LEFT JOIN {$wpdb->base_prefix}esp_blog_meta ON {$wpdb->blogs}.blog_id = {$wpdb->base_prefix}esp_blog_meta.blog_id_fk";
                 $query = str_replace($from_blogs_sql, $from_blogs_join_blog_meta_sql, $query);
                 // sanitize incoming request vars
                 $orderby = isset($_REQUEST['orderby']) ? sanitize_sql_orderby($_REQUEST['orderby']) : '';
