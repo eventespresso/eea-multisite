@@ -1,3 +1,3 @@
-<h1><?php _e( 'Site in Maintenance Mode', 'event_espresso' ); ?></h1>
-<p><?php _e( 'The multisite addon cannot function properly while the main site is in maintenance mode - even the multisite migrator.') ?></p>
-<p><?php printf( __( 'Please %1$s bring your main site up-to-date,%2$s and then return here to migration the rest of the network', 'event_espresso'), "<a href='$migration_page_url'>", '</a>' );?></p>
+<h1><?php _e('Site in Maintenance Mode', 'event_espresso'); ?></h1>
+<p><?php _e('The multisite addon cannot function properly while the main site is in maintenance mode - even the multisite migrator.') ?></p>
+<p><?php printf(__('Please %1$s bring your main site up-to-date,%2$s and then return here to migration the rest of the network', 'event_espresso'), "<a href='$migration_page_url'>", '</a>'); ?></p>

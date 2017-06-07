@@ -2,24 +2,26 @@
 /**
  * Device Detector - The Universal Device Detection library for parsing User Agents
  *
- * @link http://piwik.org
+ * @link    http://piwik.org
  * @license http://www.gnu.org/licenses/lgpl.html LGPL v3 or later
  */
+
 namespace DeviceDetector\Parser\Client;
 
 use DeviceDetector\Parser\Client\Browser\Engine;
 
 /**
  * Class Browser
- *
  * Client parser for browser detection
  *
  * @package DeviceDetector\Parser\Client
  */
 class Browser extends ClientParserAbstract
 {
+
     protected $fixtureFile = 'regexes/client/browsers.yml';
-    protected $parserName = 'browser';
+
+    protected $parserName  = 'browser';
 
     /**
      * Known browsers mapped to their internal short codes
@@ -146,7 +148,7 @@ class Browser extends ClientParserAbstract
         'WO' => 'wOSBrowser',
         'WT' => 'WeTab Browser',
         'YA' => 'Yandex Browser',
-        'XI' => 'Xiino'
+        'XI' => 'Xiino',
     );
 
     /**
@@ -167,11 +169,14 @@ class Browser extends ClientParserAbstract
         'Nokia Browser'      => array('NB', 'NO', 'NV'),
         'Opera'              => array('OP', 'OM', 'OI', 'ON'),
         'Safari'             => array('SF', 'MF'),
-        'Sailfish Browser'   => array('SA')
+        'Sailfish Browser'   => array('SA'),
     );
+
+
 
     /**
      * Returns list of all available browsers
+     *
      * @return array
      */
     public static function getAvailableBrowsers()
@@ -179,14 +184,18 @@ class Browser extends ClientParserAbstract
         return self::$availableBrowsers;
     }
 
+
+
     /**
      * Returns list of all available browser families
+     *
      * @return array
      */
     public static function getAvailableBrowserFamilies()
     {
         return self::$browserFamilies;
     }
+
 
 
     /**
@@ -203,6 +212,8 @@ class Browser extends ClientParserAbstract
         return false;
     }
 
+
+
     public function parse()
     {
         foreach ($this->getRegexes() as $regex) {
@@ -211,30 +222,28 @@ class Browser extends ClientParserAbstract
                 break;
             }
         }
-
-        if (!$matches) {
+        if (! $matches) {
             return null;
         }
-
-        $name  = $this->buildByMatch($regex['name'], $matches);
-
+        $name = $this->buildByMatch($regex['name'], $matches);
         foreach (self::getAvailableBrowsers() as $browserShort => $browserName) {
             if (strtolower($name) == strtolower($browserName)) {
-                $version = (string) $this->buildVersion($regex['version'], $matches);
+                $version = (string)$this->buildVersion($regex['version'], $matches);
                 $engine = $this->buildEngine(isset($regex['engine']) ? $regex['engine'] : array(), $version);
                 return array(
                     'type'       => 'browser',
                     'name'       => $browserName,
                     'short_name' => $browserShort,
                     'version'    => $version,
-                    'engine'     => $engine
+                    'engine'     => $engine,
                 );
             }
         }
-
         // This Exception should never be thrown. If so a defined browser name is missing in $availableBrowsers
         throw new \Exception('Detected browser name was not found in $availableBrowsers'); // @codeCoverageIgnore
     }
+
+
 
     protected function buildEngine($engineData, $browserVersion)
     {
@@ -257,7 +266,6 @@ class Browser extends ClientParserAbstract
             $engineParser->setUserAgent($this->userAgent);
             $engine = $engineParser->parse();
         }
-
         return $engine;
     }
 }

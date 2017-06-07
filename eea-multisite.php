@@ -36,41 +36,39 @@
  *
  * ------------------------------------------------------------------------
  */
-define( 'EE_MULTISITE_CORE_VERSION_REQUIRED', '4.9.26.rc.000' );
-define( 'EE_MULTISITE_VERSION', '1.0.2.rc.020' );
-define( 'EE_MULTISITE_PLUGIN_FILE', __FILE__ );
-
-function load_espresso_multisite() {
-	if ( class_exists( 'EE_Addon' ) ) {
-		// multisite version
-		require_once ( plugin_dir_path( __FILE__ ) . 'EE_Multisite.class.php' );
-		EE_Multisite::register_addon();
-	}
+define('EE_MULTISITE_CORE_VERSION_REQUIRED', '4.9.26.rc.000');
+define('EE_MULTISITE_VERSION', '1.0.2.rc.020');
+define('EE_MULTISITE_PLUGIN_FILE', __FILE__);
+function load_espresso_multisite()
+{
+    if (class_exists('EE_Addon')) {
+        // multisite version
+        require_once(plugin_dir_path(__FILE__) . 'EE_Multisite.class.php');
+        EE_Multisite::register_addon();
+    }
 }
-add_action( 'AHEE__EE_System__load_espresso_addons', 'load_espresso_multisite' );
 
+add_action('AHEE__EE_System__load_espresso_addons', 'load_espresso_multisite');
 /**
  * add wp-installing function which isn't available pre wp4.4 (and we need for ES which is currently on an older
  * version of WP)
  */
 global $wp_version;
-if ( $wp_version < '4.4.0' && ! function_exists( 'wp_installing' ) ) {
-	function wp_installing( $is_installing = null ) {
-		static $installing = null;
-
-		// Support for the `WP_INSTALLING` constant, defined before WP is loaded.
-		if ( is_null( $installing ) ) {
-			$installing = defined( 'WP_INSTALLING' ) && WP_INSTALLING;
-		}
-
-		if ( ! is_null( $is_installing ) ) {
-			$old_installing = $installing;
-			$installing = $is_installing;
-			return (bool) $old_installing;
-		}
-
-		return (bool) $installing;
-	}
+if ($wp_version < '4.4.0' && ! function_exists('wp_installing')) {
+    function wp_installing($is_installing = null)
+    {
+        static $installing = null;
+        // Support for the `WP_INSTALLING` constant, defined before WP is loaded.
+        if (is_null($installing)) {
+            $installing = defined('WP_INSTALLING') && WP_INSTALLING;
+        }
+        if (! is_null($is_installing)) {
+            $old_installing = $installing;
+            $installing = $is_installing;
+            return (bool)$old_installing;
+        }
+        return (bool)$installing;
+    }
 }
 // End of file espresso_multisite.php
 // Location: wp-content/plugins/espresso-multisite/espresso_multisite.php
