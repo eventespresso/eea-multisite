@@ -124,13 +124,23 @@ class EED_Multisite extends EED_Module
                 $wpdb->delete($tables['Blog_Meta']->get_table_name(), array('blog_id_fk' => $blog_id));
             }
             //delete all non super_admin users that were attached to that blog if configured to drop them
+            //so long as they're not a member of another site (main site's ok; we want to delete them from there too)
             if (EE_Registry::instance()->CFG->addons->ee_multisite->delete_non_super_admin_users) {
                 $users = get_users(array('blog_id' => $blog_id, 'fields' => 'ids'));
                 foreach ($users as $user_id) {
                     if (is_super_admin($user_id)) {
                         continue;
                     }
-                    wpmu_delete_user($user_id);
+                    //are they a member of another site (besides the main site)? If so, don't delete them
+                    if (! array_diff_key(
+                        get_blogs_of_user($user_id),
+                        array(
+                            1 => true,
+                            $blog_id => true
+                        )
+                    )){
+                        wpmu_delete_user($user_id);
+                    }
                 }
             }
         }
