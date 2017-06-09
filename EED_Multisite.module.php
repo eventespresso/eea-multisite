@@ -128,7 +128,7 @@ class EED_Multisite extends EED_Module
             if (EE_Registry::instance()->CFG->addons->ee_multisite->delete_non_super_admin_users) {
                 $users = get_users(array('blog_id' => $blog_id, 'fields' => 'ids'));
                 foreach ($users as $user_id) {
-                    if (is_super_admin($user_id)) {
+                    if (EED_Multisite::user_never_gets_deleted($user_id)) {
                         continue;
                     }
                     //are they a member of another site (besides the main site)? If so, don't delete them
@@ -144,6 +144,25 @@ class EED_Multisite extends EED_Module
                 }
             }
         }
+    }
+
+
+
+    /**
+     * Whether or not this is a user who should never get deleted automatically
+     * @param int $user_id
+     * @return bool
+     */
+    protected static function user_never_gets_deleted($user_id)
+    {
+        if (is_super_admin($user_id)) {
+            return true;
+        }
+        if (class_exists('EE_Saas_Site_Utility')
+            && method_exists('EE_Saas_Site_Utility', 'ee_saas_support_user_id')){
+            return $user_id = EE_Saas_Site_Utility::ee_saas_support_user_id();
+        }
+        return false;
     }
 
 
