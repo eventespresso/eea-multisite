@@ -160,7 +160,7 @@ class EED_Multisite extends EED_Module
         }
         if (class_exists('EE_Saas_Site_Utility')
             && method_exists('EE_Saas_Site_Utility', 'ee_saas_support_user_id')){
-            return $user_id = EE_Saas_Site_Utility::ee_saas_support_user_id();
+            return $user_id == EE_Saas_Site_Utility::ee_saas_support_user_id();
         }
         return false;
     }
