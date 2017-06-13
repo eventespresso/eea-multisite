@@ -641,38 +641,11 @@ class Multisite_Admin_Page extends EE_Admin_Page
         $blog_ids_to_delete = EEM_Blog::instance()->get_col(array($delete_where_conditions, 'limit' => $batch_size, 'default_where_conditions' => 'none'), 'blog_id');
         //loop through the blog_ids and let's get deleting!
         foreach ($blog_ids_to_delete as $blog_id) {
-            $users = array();
-            //first get the current users on the blog so we can loop through and delete them after (but only if users
-            //are to be deleted!
-            if (EE_Registry::instance()->CFG->addons->ee_multisite->delete_non_super_admin_users) {
-                $users = get_users(array('blog_id' => $blog_id, 'fields' => 'ids'));
-            }
-            EEM_Base::set_model_query_blog_id($blog_id);
-            EEH_Activation::drop_espresso_tables();
-            //reset the model's internal blog id
-            EEM_Base::set_model_query_blog_id();
-            //now delete core blog tables/data
             wpmu_delete_blog($blog_id, true);
             //since WordPress doesn't return any info on the success of the deleted blog, let's verify it was deleted
             if (! EEM_Blog::instance()->exists_by_ID($blog_id)) {
                 //deleted!
                 $total_deleted++;
-                //clean up blog_meta table
-                $tables = EEM_Blog::instance()->get_tables();
-                if (isset($tables['Blog_Meta']) && $tables['Blog_Meta'] instanceof EE_Secondary_Table) {
-                    //the main blog entry is already deleted, let's clean up the entry in the secondary table
-                    global $wpdb;
-                    $wpdb->delete($tables['Blog_Meta']->get_table_name(), array('blog_id_fk' => $blog_id));
-                    //delete all non super_admin users that were attached to that blog if configured to drop them
-                    if (EE_Registry::instance()->CFG->addons->ee_multisite->delete_non_super_admin_users && $users) {
-                        foreach ($users as $user_id) {
-                            if (is_super_admin($user_id)) {
-                                continue;
-                            }
-                            wpmu_delete_user($user_id);
-                        }
-                    }
-                }
             }
         }
         //all done, return the total blogs deleted.

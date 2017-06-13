@@ -97,7 +97,72 @@ class EED_Multisite extends EED_Module
                 array('EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed'), 10, 1);
             add_action('wpmu_new_blog', array('EED_Multisite', 'new_blog_created'), 10, 1);
             add_action('wp_loaded', array('EED_Multisite', 'update_last_requested'));
+            add_filter('delete_blog', array('EED_Multisite', 'delete_ee_custom_tables_too'), 10, 2);
         }
+    }
+
+
+
+    /**
+     * Drop EE custom tables when a site is deleted and its tables are dropped.
+     * Also, remove the site's users if they're not member of any other site
+     *
+     * @param int  $blog_id The site ID.
+     * @param bool $drop    True if site's table should be dropped. Default is false.
+     */
+    public static function delete_ee_custom_tables_too($blog_id, $drop)
+    {
+        if($drop){
+            EEM_Base::set_model_query_blog_id($blog_id);
+            EEH_Activation::drop_espresso_tables();
+            EEM_Base::set_model_query_blog_id();
+            //clean up blog_meta table
+            $tables = EEM_Blog::instance()->get_tables();
+            if (isset($tables['Blog_Meta']) && $tables['Blog_Meta'] instanceof EE_Secondary_Table) {
+                //the main blog entry is already deleted, let's clean up the entry in the secondary table
+                global $wpdb;
+                $wpdb->delete($tables['Blog_Meta']->get_table_name(), array('blog_id_fk' => $blog_id));
+            }
+            //delete all non super_admin users that were attached to that blog if configured to drop them
+            //so long as they're not a member of another site (main site's ok; we want to delete them from there too)
+            if (EE_Registry::instance()->CFG->addons->ee_multisite->delete_non_super_admin_users) {
+                $users = get_users(array('blog_id' => $blog_id, 'fields' => 'ids'));
+                foreach ($users as $user_id) {
+                    if (EED_Multisite::user_never_gets_deleted($user_id)) {
+                        continue;
+                    }
+                    //are they a member of another site (besides the main site)? If so, don't delete them
+                    if (! array_diff_key(
+                        get_blogs_of_user($user_id),
+                        array(
+                            1 => true,
+                            $blog_id => true
+                        )
+                    )){
+                        wpmu_delete_user($user_id);
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    /**
+     * Whether or not this is a user who should never get deleted automatically
+     * @param int $user_id
+     * @return bool
+     */
+    protected static function user_never_gets_deleted($user_id)
+    {
+        if (is_super_admin($user_id)) {
+            return true;
+        }
+        if (class_exists('EE_Saas_Site_Utility')
+            && method_exists('EE_Saas_Site_Utility', 'ee_saas_support_user_id')){
+            return $user_id == EE_Saas_Site_Utility::ee_saas_support_user_id();
+        }
+        return false;
     }
 
 
