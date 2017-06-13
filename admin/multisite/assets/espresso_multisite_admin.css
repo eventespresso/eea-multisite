@@ -9,46 +9,47 @@ Styling the progress bar and migration page
 /* PROGRESS BAR STUFF */
 
 .progress-bar {
-	width: 90%;
-	float: left;
+    width: 90%;
+    float: left;
 
 }
+
 /* Progress bar containers */
 .progress-bar figure {
-	position: relative;
-	height: 25px;
-	border: 2px solid #A39D9C;
-	border-radius: 3px;
-	background: #fff;
-	margin: 0 0 1em;
+    position: relative;
+    height: 25px;
+    border: 2px solid #A39D9C;
+    border-radius: 3px;
+    background: #fff;
+    margin: 0 0 1em;
 }
 
 /* blue bar */
 .progress-bar .bar {
-	background: #2EA2CC;
-	width: 0;
-	height: 25px;
-	border-radius: 2px;
+    background: #2EA2CC;
+    width: 0;
+    height: 25px;
+    border-radius: 2px;
 }
 
 /* Percent text */
 .progress-bar .percent {
-	position: absolute;
-	top: 5px;
-	right: 10px;
-	font-size: 15px;
-	line-height: 15px;
-	font-weight: normal;
-	font-family: sans-serif;
-	color: #59595B;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 15px;
+    line-height: 15px;
+    font-weight: normal;
+    font-family: sans-serif;
+    color: #59595B;
 }
 
-table.widefat tbody>tr>td:first-child{
-	width: 20%;
+table.widefat tbody > tr > td:first-child {
+    width: 20%;
 }
 
-textarea.system_status_info{
-	width: 80%;
-	height: 100px;
-	overflow-y: scroll;
+textarea.system_status_info {
+    width: 80%;
+    height: 100px;
+    overflow-y: scroll;
 }

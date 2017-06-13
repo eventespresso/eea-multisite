@@ -1,30 +1,22 @@
 <?php
 /**
- * Bootstrap for EE4 Addon Skeleton Unit Tests
- *
- * @since 		0.0.1.dev.002
- * @package 		EE4 Addon Skeleton
- * @subpackage 	Tests
+ * Bootstrap for eea-multisite tests
  */
-require( dirname( __FILE__ ) . '/includes/define-constants.php' );
-if ( !is_readable( WP_TESTS_DIR . '/includes/functions.php' ) ) {
-	die( "The WordPress PHPUnit test suite could not be found.\n" );
+use EETests\bootstrap\AddonLoader;
+
+$core_tests_dir = dirname(dirname(dirname(__FILE__))) . '/event-espresso-core/tests/';
+//if still don't have $core_tests_dir, then let's check tmp folder.
+if (! is_dir($core_tests_dir)) {
+    $core_tests_dir = '/tmp/event-espresso-core/tests/';
 }
-
-require_once WP_TESTS_DIR . '/includes/functions.php';
-
-function _install_and_load_core_and_ee_promos() {
-	require EE_TESTS_DIR . 'includes/loader.php';
-	require EEADDON_TESTS_DIR . 'includes/loader.php';
-}
-
-
-
-tests_add_filter( 'muplugins_loaded', '_install_and_load_core_and_ee_promos' );
-
-require WP_TESTS_DIR . '/includes/bootstrap.php';
-
-//Load the EE_specific testing tools
-require EE_TESTS_DIR . 'includes/EE_UnitTestCase.class.php';
-
-require EEADDON_TESTS_DIR . 'includes/EE_Multisite_UnitTestCase.class.php';
+require $core_tests_dir . 'includes/CoreLoader.php';
+require $core_tests_dir . 'includes/AddonLoader.php';
+define('EEA_MULTISITE_PLUGIN_DIR', dirname(dirname(__FILE__)) . '/');
+define('EEA_MULTISITE_TESTS_DIR', EEA_MULTISITE_PLUGIN_DIR . 'tests/');
+$addon_loader = new AddonLoader(
+    EEA_MULTISITE_TESTS_DIR,
+    EEA_MULTISITE_PLUGIN_DIR,
+    'eea-multisite.php'
+);
+$addon_loader->init();
+require EEA_MULTISITE_TESTS_DIR . 'includes/EE_Multisite_UnitTestCase.class.php';

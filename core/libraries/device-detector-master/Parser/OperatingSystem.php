@@ -2,16 +2,15 @@
 /**
  * Device Detector - The Universal Device Detection library for parsing User Agents
  *
- * @link http://piwik.org
+ * @link    http://piwik.org
  * @license http://www.gnu.org/licenses/lgpl.html LGPL v3 or later
  */
+
 namespace DeviceDetector\Parser;
 
 /**
  * Class OperatingSystem
- *
  * Parses the useragent for operating system information
- *
  * Detected operating systems can be found in self::$operatingSystems and /regexes/oss.yml
  * This class also defined some operating system families and methods to get the family for a specific os
  *
@@ -19,8 +18,10 @@ namespace DeviceDetector\Parser;
  */
 class OperatingSystem extends ParserAbstract
 {
+
     protected $fixtureFile = 'regexes/oss.yml';
-    protected $parserName = 'os';
+
+    protected $parserName  = 'os';
 
     /**
      * Known operating systems mapped to their internal short codes
@@ -103,7 +104,7 @@ class OperatingSystem extends ParserAbstract
         'YNS' => 'YunOs',
         'IOS' => 'iOS',
         'POS' => 'palmOS',
-        'WOS' => 'webOS'
+        'WOS' => 'webOS',
     );
 
     /**
@@ -134,8 +135,10 @@ class OperatingSystem extends ParserAbstract
         'Unix'                  => array('SOS', 'AIX', 'HPX', 'BSD', 'NBS', 'OBS', 'DFB', 'SYL', 'IRI', 'T64', 'INF'),
         'WebTV'                 => array('WTV'),
         'Windows'               => array('WIN'),
-        'Windows Mobile'        => array('WPH', 'WMO', 'WCE', 'WRT')
+        'Windows Mobile'        => array('WPH', 'WMO', 'WCE', 'WRT'),
     );
+
+
 
     /**
      * Returns all available operating systems
@@ -147,6 +150,8 @@ class OperatingSystem extends ParserAbstract
         return self::$operatingSystems;
     }
 
+
+
     /**
      * Returns all available operating system families
      *
@@ -157,44 +162,41 @@ class OperatingSystem extends ParserAbstract
         return self::$osFamilies;
     }
 
+
+
     public function parse()
     {
         $return = array();
-
         foreach ($this->getRegexes() as $osRegex) {
             $matches = $this->matchUserAgent($osRegex['regex']);
             if ($matches) {
                 break;
             }
         }
-
-        if (!$matches) {
+        if (! $matches) {
             return $return;
         }
-
-        $name  = $this->buildByMatch($osRegex['name'], $matches);
+        $name = $this->buildByMatch($osRegex['name'], $matches);
         $short = 'UNK';
-
         foreach (self::$operatingSystems as $osShort => $osName) {
             if (strtolower($name) == strtolower($osName)) {
-                $name  = $osName;
+                $name = $osName;
                 $short = $osShort;
             }
         }
-
         $return = array(
             'name'       => $name,
             'short_name' => $short,
             'version'    => $this->buildVersion($osRegex['version'], $matches),
-            'platform'   => $this->parsePlatform()
+            'platform'   => $this->parsePlatform(),
         );
-
         if (in_array($return['name'], self::$operatingSystems)) {
             $return['short_name'] = array_search($return['name'], self::$operatingSystems);
         }
-
         return $return;
     }
+
+
 
     protected function parsePlatform()
     {
@@ -205,9 +207,9 @@ class OperatingSystem extends ParserAbstract
         } elseif ($this->matchUserAgent('i[0-9]86|i86pc')) {
             return 'x86';
         }
-
         return '';
     }
+
 
 
     /**
@@ -226,12 +228,13 @@ class OperatingSystem extends ParserAbstract
         return false;
     }
 
+
+
     /**
      * Returns the full name for the given short name
      *
      * @param      $os
      * @param bool $ver
-     *
      * @return bool|string
      */
     public static function getNameFromId($os, $ver = false)

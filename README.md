@@ -1,7 +1,10 @@
-New EE4 Addon Starter Template
+EE Multisite Addon
 =========
+[![Latest Release](https://img.shields.io/github/tag/eventespresso/eea-multisite.svg?style=flat&label=Latest%20Release)](https://github.com/eventespresso/eea-multisite/releases)
+[![Travis](https://travis-ci.org/eventespresso/eea-multisite.svg?branch=master)](https://travis-ci.org/eventespresso/eea-multisite)
+[![License](https://img.shields.io/badge/License-GPLv2-blue.svg?style=flat)](https://www.gnu.org/licenses/gpl-2.0.html)
+[![Event Espresso Addon](https://img.shields.io/badge/Addon%20For-Event%20Espresso-blue.svg)](https://github.com/eventespresso/event-espresso-core)
+[![Minimum EE Core Version:](https://img.shields.io/badge/Minimum%20%20EE%20version:-4.9.26.p-red.svg)](https://github.com/eventespresso/event-espresso-core/releases/tag/4.9.26.p)
 
-A set of files and classes to use as a template for creating a New Event Espresso  Addon
-
-This plugin/addon needs to be uploaded to the "/wp-content/plugins/" directory on your server or installed using the WordPress plugins installer.
+This add-on improves EE behaviour on multisite. Not intended for distribution. Use at your own risk.
 

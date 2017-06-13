@@ -2,36 +2,49 @@
 /**
  * Device Detector - The Universal Device Detection library for parsing User Agents
  *
- * @link http://piwik.org
+ * @link    http://piwik.org
  * @license http://www.gnu.org/licenses/lgpl.html LGPL v3 or later
  */
+
 namespace DeviceDetector\Parser\Device;
 
 use DeviceDetector\Parser\ParserAbstract;
 
 /**
  * Class DeviceParserAbstract
- *
  * Abstract class for all device parsers
  *
  * @package DeviceDetector\Parser\Device
  */
 abstract class DeviceParserAbstract extends ParserAbstract
 {
+
     protected $deviceType = null;
-    protected $model = null;
-    protected $brand = null;
+
+    protected $model      = null;
+
+    protected $brand      = null;
 
     const DEVICE_TYPE_DESKTOP              = 0;
+
     const DEVICE_TYPE_SMARTPHONE           = 1;
+
     const DEVICE_TYPE_TABLET               = 2;
+
     const DEVICE_TYPE_FEATURE_PHONE        = 3;
+
     const DEVICE_TYPE_CONSOLE              = 4;
+
     const DEVICE_TYPE_TV                   = 5; // including set top boxes, blu-ray players,...
+
     const DEVICE_TYPE_CAR_BROWSER          = 6;
+
     const DEVICE_TYPE_SMART_DISPLAY        = 7;
+
     const DEVICE_TYPE_CAMERA               = 8;
+
     const DEVICE_TYPE_PORTABLE_MEDIA_PAYER = 9;
+
     const DEVICE_TYPE_PHABLET              = 10;
 
     /**
@@ -50,12 +63,11 @@ abstract class DeviceParserAbstract extends ParserAbstract
         'smart display'         => self::DEVICE_TYPE_SMART_DISPLAY,
         'camera'                => self::DEVICE_TYPE_CAMERA,
         'portable media player' => self::DEVICE_TYPE_PORTABLE_MEDIA_PAYER,
-        'phablet'               => self::DEVICE_TYPE_PHABLET
+        'phablet'               => self::DEVICE_TYPE_PHABLET,
     );
 
     /**
      * Known device brands
-     *
      * Note: Before using a new brand in on of the regex files, it needs to be added here
      *
      * @var array
@@ -359,10 +371,14 @@ abstract class DeviceParserAbstract extends ParserAbstract
         'ZT' => 'ZTE',
     );
 
+
+
     public function getDeviceType()
     {
         return $this->deviceType;
     }
+
+
 
     /**
      * Returns available device types
@@ -375,6 +391,8 @@ abstract class DeviceParserAbstract extends ParserAbstract
         return self::$deviceTypes;
     }
 
+
+
     /**
      * Returns names of all available device types
      *
@@ -385,17 +403,20 @@ abstract class DeviceParserAbstract extends ParserAbstract
         return array_keys(self::$deviceTypes);
     }
 
+
+
     /**
      * Returns the name of the given device type
      *
      * @param int $deviceType one of the DEVICE_TYPE_* constants
-     *
      * @return mixed
      */
     public static function getDeviceName($deviceType)
     {
         return array_search($deviceType, self::$deviceTypes);
     }
+
+
 
     /**
      * Returns the detected device model
@@ -407,6 +428,8 @@ abstract class DeviceParserAbstract extends ParserAbstract
         return $this->model;
     }
 
+
+
     /**
      * Returns the detected device brand
      *
@@ -417,10 +440,12 @@ abstract class DeviceParserAbstract extends ParserAbstract
         return $this->brand;
     }
 
+
+
     /**
      * Returns the full brand name for the given short name
      *
-     * @param string $brandId  short brand name
+     * @param string $brandId short brand name
      * @return string
      */
     public static function getFullName($brandId)
@@ -428,9 +453,10 @@ abstract class DeviceParserAbstract extends ParserAbstract
         if (array_key_exists($brandId, self::$deviceBrands)) {
             return self::$deviceBrands[$brandId];
         }
-
         return '';
     }
+
+
 
     public function parse()
     {
@@ -441,26 +467,21 @@ abstract class DeviceParserAbstract extends ParserAbstract
                 break;
             }
         }
-
         if (empty($matches)) {
             return false;
         }
-
         $brandId = array_search($brand, self::$deviceBrands);
         if ($brandId === false) {
             // This Exception should never be thrown. If so a defined brand name is missing in $deviceBrands
             throw new \Exception("The brand with name '$brand' should be listed in the deviceBrands array."); // @codeCoverageIgnore
         }
         $this->brand = $brandId;
-
         if (isset($regex['device']) && in_array($regex['device'], self::$deviceTypes)) {
             $this->deviceType = self::$deviceTypes[$regex['device']];
         }
-
         if (isset($regex['model'])) {
             $this->model = $this->buildModel($regex['model'], $matches);
         }
-
         if (isset($regex['models'])) {
             foreach ($regex['models'] as $modelRegex) {
                 $modelMatches = $this->matchUserAgent($modelRegex['regex']);
@@ -468,37 +489,30 @@ abstract class DeviceParserAbstract extends ParserAbstract
                     break;
                 }
             }
-
             if (empty($modelMatches)) {
                 return true;
             }
-
             $this->model = trim($this->buildModel($modelRegex['model'], $modelMatches));
-
             if (isset($modelRegex['brand']) && $brandId = array_search($modelRegex['brand'], self::$deviceBrands)) {
                 $this->brand = $brandId;
             }
-
             if (isset($modelRegex['device']) && in_array($modelRegex['device'], self::$deviceTypes)) {
                 $this->deviceType = self::$deviceTypes[$modelRegex['device']];
             }
         }
-
         return true;
     }
+
+
 
     protected function buildModel($model, $matches)
     {
         $model = $this->buildByMatch($model, $matches);
-
         $model = str_replace('_', ' ', $model);
-
         $model = preg_replace('/ TD$/i', '', $model);
-
         if ($model === 'Build') {
             return null;
         }
-
         return $model;
     }
 }
