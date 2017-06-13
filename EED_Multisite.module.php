@@ -140,6 +140,7 @@ class EED_Multisite extends EED_Module
                         )
                     )){
                         wpmu_delete_user($user_id);
+
                     }
                 }
             }
@@ -155,14 +156,16 @@ class EED_Multisite extends EED_Module
      */
     protected static function user_never_gets_deleted($user_id)
     {
+        $user_never_gets_deleted = false;
         if (is_super_admin($user_id)) {
-            return true;
+            $user_never_gets_deleted = true;
         }
-        if (class_exists('EE_Saas_Site_Utility')
-            && method_exists('EE_Saas_Site_Utility', 'ee_saas_support_user_id')){
-            return $user_id == EE_Saas_Site_Utility::ee_saas_support_user_id();
-        }
-        return false;
+
+        return apply_filters(
+            'FHEE__EED_Multisite__user_never_gets_deleted',
+            $user_never_gets_deleted,
+            $user_id
+        );
     }
 
 
