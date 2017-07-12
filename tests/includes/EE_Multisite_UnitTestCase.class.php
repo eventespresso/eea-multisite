@@ -89,6 +89,10 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase
         $current_user = $this->factory->user->create_and_get();
         $current_user->add_role('administrator');
         wp_set_current_user($current_user->ID);
+        //REMOTE_ADDR not defined for WordPress 4.1, which multisite supposedly supports
+        if ( !isset($_SERVER['REMOTE_ADDR'])) {
+            $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        }
     }
 
     public function tearDown()
