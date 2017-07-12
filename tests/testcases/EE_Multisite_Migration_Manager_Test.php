@@ -42,7 +42,7 @@ class EE_Multisite_Migration_Manager_Test extends EE_Multisite_UnitTestCase
     public function test_assess_sites_needing_migration__auto_upgrade()
     {
         global $wp_actions;
-        //pretend multisite with 2 blogs where EE has NOT been setup.
+        //pretend multisite with 2 blogs where EE has NOT been setup
         $blog1 = $this->factory->blog->create_and_get();
         $blog2 = $this->factory->blog->create_and_get();
         //mark them as possibly being out of date (normally when sites are first created 

@@ -31,6 +31,7 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase
         remove_all_filters('FHEE__EEH_Activation__create_table__short_circuit');
         EED_Multisite::do_full_reset();
         switch_to_blog($blog->blog_id);
+
         //and put the filters back in place
         add_filter('FHEE__EEH_Activation__create_table__short_circuit', '__return_true');
         $this->assertNotEquals(EE_Maintenance_Mode::level_2_complete_maintenance, EE_Maintenance_Mode::instance()->level());
@@ -81,7 +82,14 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase
         $this->assertEquals(array(), $all_dmss);
     }
 
-
+    public function setUp(){
+        parent::setUp();
+        //when we create another blog, we need to set a current user, otherwise
+        //we have issues creating its default data
+        $current_user = $this->factory->user->create_and_get();
+        $current_user->add_role('administrator');
+        wp_set_current_user($current_user->ID);
+    }
 
     public function tearDown()
     {
