@@ -91,6 +91,7 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase
         //reset EED_Multisite since we're simulating separate requests
         EED_Multisite::reset();
         parent::tearDown();
+        EE_System::reset();
     }
 
 
