@@ -77,7 +77,7 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase
         EED_Multisite::reset();
         //filter the version reported so that we trigger the correct req_type on the next EE_System::reset()
         add_filter('FHEE__espresso__espresso_version', function ($version) {
-            return '9.9.9';
+            return '9.9.9.rc.001';
         });
         $this->assertEquals(array(), $all_dmss);
     }
