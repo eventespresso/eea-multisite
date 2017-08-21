@@ -31,6 +31,7 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase
         remove_all_filters('FHEE__EEH_Activation__create_table__short_circuit');
         EED_Multisite::do_full_reset();
         switch_to_blog($blog->blog_id);
+
         //and put the filters back in place
         add_filter('FHEE__EEH_Activation__create_table__short_circuit', '__return_true');
         $this->assertNotEquals(EE_Maintenance_Mode::level_2_complete_maintenance, EE_Maintenance_Mode::instance()->level());
@@ -76,12 +77,23 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase
         EED_Multisite::reset();
         //filter the version reported so that we trigger the correct req_type on the next EE_System::reset()
         add_filter('FHEE__espresso__espresso_version', function ($version) {
-            return '9.9.9';
+            return '9.9.9.rc.001';
         });
         $this->assertEquals(array(), $all_dmss);
     }
 
-
+    public function setUp(){
+        parent::setUp();
+        //when we create another blog, we need to set a current user, otherwise
+        //we have issues creating its default data
+        $current_user = $this->factory->user->create_and_get();
+        $current_user->add_role('administrator');
+        wp_set_current_user($current_user->ID);
+        //REMOTE_ADDR not defined for WordPress 4.1, which multisite supposedly supports
+        if ( !isset($_SERVER['REMOTE_ADDR'])) {
+            $_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+        }
+    }
 
     public function tearDown()
     {
@@ -91,6 +103,7 @@ class EE_Multisite_UnitTestCase extends EE_UnitTestCase
         //reset EED_Multisite since we're simulating separate requests
         EED_Multisite::reset();
         parent::tearDown();
+        EE_System::reset();
     }
 
 
