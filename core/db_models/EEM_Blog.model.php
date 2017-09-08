@@ -83,6 +83,7 @@ class EEM_Blog extends EEM_Soft_Delete_Base
                 'blog_id_fk'         => new EE_DB_Only_Int_Field('blog_id_fk', __('Blog ID', 'event_espresso'), false, 0),
                 'STS_ID'             => new EE_Foreign_Key_String_Field('STS_ID', __('Status', 'event_espresso'), false, self::status_unsure, 'Status'),
                 'BLG_last_requested' => new EE_Datetime_Field('BLG_last_requested', __('Last Request for this Blog', 'event_espresso'), false, current_time('timestamp')),
+                'BLG_last_event_admin_visit' => new EE_Datetime_Field('BLG_last_event_admin_visit', __('Last Request for this Blog by an Admin', 'event_espresso'), false, current_time('timestamp')),
             ),
         );
         $this->_model_relations = array(
