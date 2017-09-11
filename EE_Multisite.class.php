@@ -60,6 +60,7 @@ Class EE_Multisite extends EE_Addon
                 'module_paths'     => array(
                     EE_MULTISITE_PATH . 'EED_Multisite.module.php',
                     EE_MULTISITE_PATH . 'EED_Multisite_Site_List_Table.module.php',
+                    EE_MULTISITE_PATH . 'EED_Multisite_Auto_Site_Cleanup.module.php',
                 ),
                 // only register the DMS if on the main site.
                 // This way we avoid adding and removing tables from blogs which aren't the main one
