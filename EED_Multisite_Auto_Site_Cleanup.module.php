@@ -113,46 +113,12 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
     }
 
 
-    /**
-     * Whether or not this is a user who should never get deleted automatically
-     * @param int $user_id
-     * @return bool
-     */
-    protected static function user_never_gets_deleted($user_id)
-    {
-        $user_never_gets_deleted = false;
-        if (is_super_admin($user_id)) {
-            $user_never_gets_deleted = true;
-        }
-
-        return apply_filters(
-            'FHEE__EED_Multisite__user_never_gets_deleted',
-            $user_never_gets_deleted,
-            $user_id
-        );
-    }
 
 
     /**
-     * Run on frontend requests to update when the blog was last updated
+     * Declare unused abstract method
      */
-    public static function update_last_requested()
-    {
-        //only record visits by non-bots, and non-cron
-        //also, only do this on the main site when its out of maintenance mode;
-        //other sites can do it fine in mainteannce mode
-        $user_agent = isset($_SERVER['HTTP_USER_AGENT'])
-            ?
-            $_SERVER['HTTP_USER_AGENT']
-            :
-            '';
-        if (! EED_Multisite::is_bot($user_agent)
-            && ! defined('DOING_CRON')
-        ) {
-            $current_blog_id = get_current_blog_id();
-            EEM_Blog::instance()->update_last_requested($current_blog_id);
-        }
-    }
+    public function run($WP){}
 }
 
 // End of file EED_Multisite.module.php
