@@ -165,10 +165,15 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
     {
         return  sanitize_key($interval_label . '_event');
     }
+
+
+
     /**
      * Checks for blogs that meet the criteria for cleanup tasks,
      * and for each it finds, it fires a WP action with that cleanup task.
      * When doing the last cleanup task, also archives the site.
+     *
+     * @throws \EE_Error
      */
     public static function check_for_cleanup_tasks()
     {
@@ -177,10 +182,10 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
         $last_interval = end($intervals);
         reset($intervals);
         foreach($intervals as $label => $interval) {
-            $date = date(EE_Datetime_Field::mysql_timestamp_format, strtotime('-' . $interval));
+            $treshhold_time = strtotime('-' . $interval);
             $query = array(
                 array(
-                    'BLG_last_admin_visit' => array('<', $date),
+                    'BLG_last_admin_visit' => array('<', $treshhold_time),
                 )
             );
             if($previous_interval_label !== null) {
@@ -196,16 +201,20 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
             foreach($blogs_matching_criteria as $blog) {
                 if($last_interval === $interval) {
                     //it's the last interval. Cleanup time
-                    $blog->save(
-                        array(
-                        'archived' =>true
-                        )
-                    );
+                    $blog->set('archived', true);
                 }
+                //in case there was a mixup and this action is getting fired much later than it should
+                //avoid sending all the events in rapid succession by making sure the last recorded
+                //visit by an admin matches what this action expected it to. This means if we send a
+                //message saying the site will be archived in 4 months, and it's actually 1 month from
+                //the date, because we're sending the message late somehow, we're actually delaying
+                //the site's archival so that the message is correct.
+                $blog->set('BLG_last_admin_visit', $treshhold_time);
                 //record that it's been fired
                 $blog->add_extra_meta(EED_Multisite_Auto_Site_Cleanup::_get_action_record_name($label), current_time('mysql', true));
                 //fire an action other plugins can listen for
                 do_action('AHEE__EED_Multisite_Auto_Site_Cleanup', $blog, $label, $interval);
+                $blog->save();
             }
             //remember this label during the next iteration
             $previous_interval_label = $label;
