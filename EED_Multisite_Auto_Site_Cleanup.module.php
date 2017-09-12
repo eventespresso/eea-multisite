@@ -61,12 +61,6 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
     {
         //don't do multisite stuff if multisite isn't enabled
         if (is_multisite()) {
-            //check for admin visits
-            //setup cron task
-            add_filter(
-                'FHEE__EEH_Activation__get_cron_tasks',
-                array('EED_Multisite_Auto_Site_Cleanup','add_cron_task')
-            );
             //handle cron task callback
             add_action(
                 'AHEE__EED_Multisite_Auto_Site_Cleanup__check_for_cleanup_tasks',
@@ -121,18 +115,6 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
             'FHEE__EED_Multisite_Auto_Site_Cleanup__current_user_is_tracked',
             current_user_can($cap_that_determines_track_worthiness) && ! is_super_admin()
         );
-    }
-
-
-
-    /**
-     * Adds a weekly cron task to check for site cleanup tasks
-     * @param $existing_cron_task_data
-     */
-    public static function add_cron_task($existing_cron_task_data)
-    {
-        $existing_cron_task_data['AHEE__EED_Multisite_Auto_Site_Cleanup__check_for_cleanup_tasks'] = 'weekly';
-        return $existing_cron_task_data;
     }
 
 

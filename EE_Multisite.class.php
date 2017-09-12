@@ -125,6 +125,19 @@ Class EE_Multisite extends EE_Addon
             array('EE_Multisite', 'load_after_modules_loaded'),
             20
         );
+        //setup cron task on main site to check for cleanup tasks
+        if( is_main_site()) {
+            add_filter(
+                'FHEE__EEH_Activation__get_cron_tasks',
+                array('EE_Multisite','add_cron_task')
+            );
+            add_filter( 'cron_schedules',
+                array(
+                    'EE_Multisite',
+                    'cron_add_weekly'
+                )
+            );
+        }
     }
 
 
@@ -279,6 +292,35 @@ Class EE_Multisite extends EE_Addon
                 EEM_Blog::instance()->mark_current_blog_as(EEM_Blog::status_up_to_date);
             }
         }
+    }
+
+
+    /**
+     * Adds a weekly cron task to check for site cleanup tasks. We need to set this up early
+     * because the activation code that fires this filter runs early
+     * @param $existing_cron_task_data
+     */
+    public static function add_cron_task($existing_cron_task_data)
+    {
+        $existing_cron_task_data['AHEE__EED_Multisite_Auto_Site_Cleanup__check_for_cleanup_tasks'] = 'weekly';
+        return $existing_cron_task_data;
+    }
+
+
+
+    /**
+     * Adds a cron schedule for "weekly"
+     * @param array $schedules
+     * @return array
+     */
+    public static function cron_add_weekly($schedules)
+    {
+        // Adds once weekly to the existing schedules.
+        $schedules['weekly'] = array(
+            'interval' => 604800,
+            'display'  =>  esc_html__('Once Weekly', 'event_espresso'),
+        );
+        return $schedules;
     }
 
 
