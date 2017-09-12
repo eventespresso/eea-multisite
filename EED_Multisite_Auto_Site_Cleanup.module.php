@@ -61,9 +61,14 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
     {
         //don't do multisite stuff if multisite isn't enabled
         if (is_multisite()) {
-            //check for admin visits
-            //setup cron task
             //handle cron task callback
+            add_action(
+                'AHEE__EED_Multisite_Auto_Site_Cleanup__check_for_cleanup_tasks',
+                array(
+                    'EED_Multisite_Auto_Site_Cleanup',
+                    'check_for_cleanup_tasks'
+                )
+            );
             //redirect to splash if first visit in x months
         }
     }
@@ -113,46 +118,97 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
     }
 
 
-    /**
-     * Whether or not this is a user who should never get deleted automatically
-     * @param int $user_id
-     * @return bool
-     */
-    protected static function user_never_gets_deleted($user_id)
-    {
-        $user_never_gets_deleted = false;
-        if (is_super_admin($user_id)) {
-            $user_never_gets_deleted = true;
-        }
 
-        return apply_filters(
-            'FHEE__EED_Multisite__user_never_gets_deleted',
-            $user_never_gets_deleted,
-            $user_id
-        );
+    /**
+     * Gets a list of time intervals when an action should take place.
+     * Keys are their labels, values are the time values associated with them
+     * @return array
+     */
+    public static function get_cleanup_task()
+    {
+        return array(
+                'first_warning' => '22 months',
+                'second_warning' => '23 months',
+                'bluff_archive' => '24 months',
+                'really_archive' => '25 months',
+            );
     }
 
 
+
     /**
-     * Run on frontend requests to update when the blog was last updated
+     * Gets the name used for the EE extra meta that records when the action
+     * for this interval was given
+     *
+     * @param $interval_label
+     * @return string
      */
-    public static function update_last_requested()
+    protected static function _get_action_record_name($interval_label)
     {
-        //only record visits by non-bots, and non-cron
-        //also, only do this on the main site when its out of maintenance mode;
-        //other sites can do it fine in mainteannce mode
-        $user_agent = isset($_SERVER['HTTP_USER_AGENT'])
-            ?
-            $_SERVER['HTTP_USER_AGENT']
-            :
-            '';
-        if (! EED_Multisite::is_bot($user_agent)
-            && ! defined('DOING_CRON')
-        ) {
-            $current_blog_id = get_current_blog_id();
-            EEM_Blog::instance()->update_last_requested($current_blog_id);
+        return  sanitize_key($interval_label . '_event');
+    }
+
+
+
+    /**
+     * Checks for blogs that meet the criteria for cleanup tasks,
+     * and for each it finds, it fires a WP action with that cleanup task.
+     * When doing the last cleanup task, also archives the site.
+     *
+     * @throws \EE_Error
+     */
+    public static function check_for_cleanup_tasks()
+    {
+        $previous_interval_label = null;
+        $intervals = EED_Multisite_Auto_Site_Cleanup::get_cleanup_task();
+        $last_interval = end($intervals);
+        reset($intervals);
+        foreach($intervals as $label => $interval) {
+            $treshhold_time = strtotime('-' . $interval);
+            $query = array(
+                array(
+                    'BLG_last_admin_visit' => array('<', $treshhold_time),
+                )
+            );
+            if($previous_interval_label !== null) {
+                $query[0] = array_merge(
+                    $query[0],
+                    array(
+                        'Extra_Meta.EXM_key' => EED_Multisite_Auto_Site_Cleanup::_get_action_record_name($previous_interval_label),
+                        'Extra_Meta.EXM_value' => array('IS_NOT_NULL')
+                    )
+                );
+            }
+            $blogs_matching_criteria = EEM_Blog::instance()->get_all($query);
+            foreach($blogs_matching_criteria as $blog) {
+                if($last_interval === $interval) {
+                    //it's the last interval. Cleanup time
+                    $blog->set('archived', true);
+                }
+                //in case there was a mixup and this action is getting fired much later than it should
+                //avoid sending all the events in rapid succession by making sure the last recorded
+                //visit by an admin matches what this action expected it to. This means if we send a
+                //message saying the site will be archived in 4 months, and it's actually 1 month from
+                //the date, because we're sending the message late somehow, we're actually delaying
+                //the site's archival so that the message is correct.
+                $blog->set('BLG_last_admin_visit', $treshhold_time);
+                //record that it's been fired
+                $blog->add_extra_meta(EED_Multisite_Auto_Site_Cleanup::_get_action_record_name($label), current_time('mysql', true));
+                //fire an action other plugins can listen for
+                do_action('AHEE__EED_Multisite_Auto_Site_Cleanup', $blog, $label, $interval);
+                $blog->save();
+            }
+            //remember this label during the next iteration
+            $previous_interval_label = $label;
         }
     }
+
+
+
+    /**
+     * Declare unused abstract method
+     */
+    public function run($WP){}
 }
 
 // End of file EED_Multisite.module.php
