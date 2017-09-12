@@ -101,6 +101,126 @@ class EEM_Blog_Test extends EE_Multisite_UnitTestCase
 
 
 
+    /**
+     * @group current
+     */
+    public function test_get_all_logged_into_since_time_with_extra_meta()
+    {
+        //create some blogs, all of which have been visited quite recently
+        $blog_no_action = $this->new_model_obj_with_dependencies(
+            'Blog',
+            array(
+                'domain' => 'no-action',
+                'BLG_last_admin_visit' => new \EventEspresso\core\domain\entities\DbSafeDateTime('now')
+            )
+        );
+        $blog_first_warning = $this->new_model_obj_with_dependencies(
+            'Blog',
+            array(
+                'domain' => 'give_me_first_warning',
+                'BLG_last_admin_visit' => new \EventEspresso\core\domain\entities\DbSafeDateTime('-23 months')
+            )
+        );
+        $blog_second_warning = $this->new_model_obj_with_dependencies(
+            'Blog',
+            array(
+                'domain' => 'give_me_second_warning',
+                'BLG_last_admin_visit' => new \EventEspresso\core\domain\entities\DbSafeDateTime('-24 months')
+            )
+        );
+        $this->_pretend_did_actions_up_to_but_not_including('second_warning', $blog_second_warning);
+
+        $blog_archive_me = $this->new_model_obj_with_dependencies(
+            'Blog',
+            array(
+                'domain' => 'bluff-archive-me',
+                'BLG_last_admin_visit' => new \EventEspresso\core\domain\entities\DbSafeDateTime('-26 months')
+            )
+        );
+        $this->_pretend_did_actions_up_to_but_not_including('really_archive', $blog_archive_me);
+
+        $blog_archived = $this->new_model_obj_with_dependencies(
+            'Blog',
+            array(
+                'domain' => 'really-archive-me',
+                'BLG_last_admin_visit' => new \EventEspresso\core\domain\entities\DbSafeDateTime('-28 months')
+            )
+        );
+        $this->_pretend_did_actions_up_to_but_not_including('', $blog_archived);
+
+        $cleanup_tasks_and_expected_matches = array(
+            'first_warning' => array(
+                'interval' => '22 months',
+                'expected' => array(
+                    $blog_first_warning->ID() => $blog_first_warning
+                )
+            ),
+            'second_warning' => array(
+                'interval' => '23 months',
+                'expected' => array(
+                    $blog_second_warning->ID() => $blog_second_warning
+                )
+            ),
+            'bluff_archive' => array(
+                'interval' => '24 months',
+                'expected' => array()
+            ),
+            'really_archive' => array(
+                'interval' => '25 months',
+                'expected' => array(
+                    $blog_archive_me->ID() => $blog_archive_me
+                )
+            )
+        );
+        $previous_interval_label = null;
+        foreach ($cleanup_tasks_and_expected_matches as $label => $more_info) {
+            $threshold_time = strtotime('-' . $more_info['interval']);
+            $blogs_matching_criteria = EEM_Blog::instance()->get_all_logged_into_since_time_with_extra_meta(
+                $threshold_time,
+                EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name(
+                    $previous_interval_label
+                ),
+                EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name(
+                    $label
+                )
+            );
+            $this->assertEquals(
+                $more_info['expected'],
+                $blogs_matching_criteria,
+                $label
+            );
+            $previous_interval_label = $label;
+        }
+    }
+
+
+
+    /**
+     * Adds extra metas which indicate all the previous cleanup tasks, except the one with label $action_label_name, were already done.
+     * @param string $action_label_name. A key from EED_Multisite_Auto_Site_Cleanup::get_cleanup_tasks(). Otherwise, will pretend ALL actions were done
+     * @param EE_Base_Class $blog
+     * @return void
+     */
+    protected function _pretend_did_actions_up_to_but_not_including( $action_label_name, EE_Blog $blog)
+    {
+        $action_labels = array_keys(EED_Multisite_Auto_Site_Cleanup::get_cleanup_tasks());
+        foreach( $action_labels as $an_action_label) {
+            if( $action_label_name === $an_action_label) {
+                break;
+            }
+            $blog->add_extra_meta(
+                EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name($an_action_label),
+                '2017-01-01 00:00:00'
+            );
+        }
+    }
+    //test a blog matching the first criteria
+    //test a blog matching the 2nd criteria but hasn't done the first criteria
+    //test a blog has done the penultimate event and not yet meeting the criteria for the last event
+    //test a blog has done the penultimate event and mathces the criteria for the last event
+
+
+
 }
 
 // End of file EEM_Blog_Test.php

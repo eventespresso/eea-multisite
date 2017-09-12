@@ -124,7 +124,7 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
      * Keys are their labels, values are the time values associated with them
      * @return array
      */
-    public static function get_cleanup_task()
+    public static function get_cleanup_tasks()
     {
         return array(
                 'first_warning' => '22 months',
@@ -143,9 +143,11 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
      * @param $interval_label
      * @return string
      */
-    protected static function _get_action_record_name($interval_label)
+    public static function get_action_record_extra_meta_name($interval_label)
     {
-        return  sanitize_key($interval_label . '_event');
+        return  $interval_label === null
+            ? null
+            : sanitize_key($interval_label . '_event');
     }
 
 
@@ -156,30 +158,27 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
      * When doing the last cleanup task, also archives the site.
      *
      * @throws \EE_Error
+     * @throws \EventEspresso\core\exceptions\InvalidDataTypeException
+     * @throws \EventEspresso\core\exceptions\InvalidInterfaceException
+     * @throws \InvalidArgumentException
      */
     public static function check_for_cleanup_tasks()
     {
         $previous_interval_label = null;
-        $intervals = EED_Multisite_Auto_Site_Cleanup::get_cleanup_task();
+        $intervals = EED_Multisite_Auto_Site_Cleanup::get_cleanup_tasks();
         $last_interval = end($intervals);
         reset($intervals);
         foreach($intervals as $label => $interval) {
-            $treshhold_time = strtotime('-' . $interval);
-            $query = array(
-                array(
-                    'BLG_last_admin_visit' => array('<', $treshhold_time),
+            $threshold_time = strtotime('-' . $interval);
+            $blogs_matching_criteria = EEM_Blog::instance()->get_all_logged_into_since_time_with_extra_meta(
+                $threshold_time,
+                EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name(
+                    $previous_interval_label
+                ),
+                EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name(
+                    $label
                 )
             );
-            if($previous_interval_label !== null) {
-                $query[0] = array_merge(
-                    $query[0],
-                    array(
-                        'Extra_Meta.EXM_key' => EED_Multisite_Auto_Site_Cleanup::_get_action_record_name($previous_interval_label),
-                        'Extra_Meta.EXM_value' => array('IS_NOT_NULL')
-                    )
-                );
-            }
-            $blogs_matching_criteria = EEM_Blog::instance()->get_all($query);
             foreach($blogs_matching_criteria as $blog) {
                 if($last_interval === $interval) {
                     //it's the last interval. Cleanup time
@@ -191,9 +190,9 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
                 //message saying the site will be archived in 4 months, and it's actually 1 month from
                 //the date, because we're sending the message late somehow, we're actually delaying
                 //the site's archival so that the message is correct.
-                $blog->set('BLG_last_admin_visit', $treshhold_time);
+                $blog->set('BLG_last_admin_visit', $threshold_time);
                 //record that it's been fired
-                $blog->add_extra_meta(EED_Multisite_Auto_Site_Cleanup::_get_action_record_name($label), current_time('mysql', true));
+                $blog->add_extra_meta(EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name($label), current_time('mysql', true));
                 //fire an action other plugins can listen for
                 do_action('AHEE__EED_Multisite_Auto_Site_Cleanup', $blog, $label, $interval);
                 $blog->save();
