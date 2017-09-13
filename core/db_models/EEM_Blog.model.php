@@ -326,15 +326,17 @@ class EEM_Blog extends EEM_Soft_Delete_Base
      * Gets all blogs which have been visited by an event admin since the specified time,
      * who also have an entry for the specified extra meta key
      *
-     * @param int|DateTime $treshhold_time
+     * @param int|DateTime $threshold_time
      * @param string       $key_that_should_exist
      * @param string       $key_that_shouldnt_exist
+     * @param array        $protected_blogs blog IDs that shouldn't be returned
      * @return EE_Blog[]
      */
     public function get_all_logged_into_since_time_with_extra_meta(
-        $treshhold_time,
+        $threshold_time,
         $key_that_should_exist,
-        $key_that_shouldnt_exist
+        $key_that_shouldnt_exist,
+        $protected_blogs = array()
     ) {
         global $wpdb;
 
@@ -354,10 +356,13 @@ class EEM_Blog extends EEM_Soft_Delete_Base
             $query .= ' m1.EXM_value IS NOT NULL AND';
         }
         $query .= ' m2.EXM_value IS NULL AND bm.BLG_last_admin_visit < "'
-                  . date(EE_Datetime_Field::mysql_timestamp_format, $treshhold_time)
-                  . '"' ;
+                  . date(EE_Datetime_Field::mysql_timestamp_format, $threshold_time)
+                  . '"';
+        if (! empty($protected_blogs)) {
+            $query .= ' AND b.blog_id NOT IN (' . implode(',', $protected_blogs) . ')';
+        }
         $blog_ids = $this->_do_wpdb_query('get_col',array($query));
-        if( ! is_array($blog_ids)) {
+        if (! is_array($blog_ids) || empty($blog_ids)) {
             return array();
         }
         return $this->get_all(

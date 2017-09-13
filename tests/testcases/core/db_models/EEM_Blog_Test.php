@@ -106,7 +106,12 @@ class EEM_Blog_Test extends EE_Multisite_UnitTestCase
      */
     public function test_get_all_logged_into_since_time_with_extra_meta()
     {
-        //create some blogs, all of which have been visited quite recently
+        //set the main blog so it would get archived, but it's protected so it shouldn't
+        $main_blog = EEM_Blog::instance()->get_one_by_ID(1);
+        $main_blog->set('domain','main');
+        $main_blog->set('BLG_last_admin_visit', new \EventEspresso\core\domain\entities\DbSafeDateTime('-24 months'));
+
+        //this blog was recently visited, so it shouldn't have any actions taken on it
         $blog_no_action = $this->new_model_obj_with_dependencies(
             'Blog',
             array(
@@ -114,6 +119,8 @@ class EEM_Blog_Test extends EE_Multisite_UnitTestCase
                 'BLG_last_admin_visit' => new \EventEspresso\core\domain\entities\DbSafeDateTime('now')
             )
         );
+
+        //this blog was visited a long time ago and should get the first warning
         $blog_first_warning = $this->new_model_obj_with_dependencies(
             'Blog',
             array(
@@ -121,6 +128,8 @@ class EEM_Blog_Test extends EE_Multisite_UnitTestCase
                 'BLG_last_admin_visit' => new \EventEspresso\core\domain\entities\DbSafeDateTime('-23 months')
             )
         );
+
+        //this blog already got the first warning and should get the 2nd warning
         $blog_second_warning = $this->new_model_obj_with_dependencies(
             'Blog',
             array(
@@ -130,6 +139,7 @@ class EEM_Blog_Test extends EE_Multisite_UnitTestCase
         );
         $this->_pretend_did_actions_up_to_but_not_including('second_warning', $blog_second_warning);
 
+        //this blog already got both warnings and so should get an email telling them their site will be deleted
         $blog_archive_me = $this->new_model_obj_with_dependencies(
             'Blog',
             array(
@@ -139,6 +149,7 @@ class EEM_Blog_Test extends EE_Multisite_UnitTestCase
         );
         $this->_pretend_did_actions_up_to_but_not_including('really_archive', $blog_archive_me);
 
+        //this site has been warned and told their site is deleted, which was a bluff. But now they should really be deleted
         $blog_archived = $this->new_model_obj_with_dependencies(
             'Blog',
             array(

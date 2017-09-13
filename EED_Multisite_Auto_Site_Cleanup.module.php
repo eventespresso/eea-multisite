@@ -89,14 +89,24 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
         if (! get_transient('ee_user_site_visit_record')
             && self::current_user_is_tracked()
         ) {
-            $current_blog_id = get_current_blog_id();
-            EEM_Blog::instance()->update_by_ID(
+            $current_blog = EEM_Blog::instance()->get_one_by_ID(get_current_blog_id());
+            $last_visit = (int)$current_blog->get_raw('BLG_last_admin_visit');
+            $current_blog->save(
                 array(
-                    'BLG_last_admin_visit' => current_time('timestamp', true)
-                ),
-                $current_blog_id
+                    'BLG_last_admin_visit'=> current_time('timestamp')
+                )
             );
             set_transient('ee_user_site_visit_record', 1, DAY_IN_SECONDS);
+            $threshold_time = strtotime('-22 months');
+            if($last_visit < $threshold_time){
+                //ok forget we ever sent them any warnings etc
+                foreach(EED_Multisite_Auto_Site_Cleanup::get_cleanup_tasks() as $label => $time_threshold) {
+                    $current_blog->delete_extra_meta(EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name($label));
+                }
+                //tell them we won't be deleting their site anymore
+                EEH_Template::display_template(EE_MULTISITE_PATH . 'templates/multisite_site_archival_aborted.template.php');
+                die;
+            }
         }
     }
 
@@ -177,7 +187,8 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
                 ),
                 EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name(
                     $label
-                )
+                ),
+                EED_Multisite_Auto_Site_Cleanup::get_protected_blogs()
             );
             foreach($blogs_matching_criteria as $blog) {
                 if($last_interval === $interval) {
@@ -200,6 +211,20 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
             //remember this label during the next iteration
             $previous_interval_label = $label;
         }
+    }
+
+
+
+    /**
+     * Gets an array of all the blog IDs that are "protected" from being automatically archived etc.
+     * @return array
+     */
+    public static function get_protected_blogs(){
+        $protected_blogs = isset(EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_excludes) ? EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_excludes : array();
+        //always make sure that the main site is excluded from any deletes and that we've typecast the values in the array.
+        $protected_blogs[] = 1;
+        $protected_blogs = array_map('absint', $protected_blogs);
+        return $protected_blogs;
     }
 
 
