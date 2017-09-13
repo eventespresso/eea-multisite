@@ -97,7 +97,7 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
             $last_visit = (int)$current_blog->get_raw('BLG_last_admin_visit');
             $current_blog->save(
                 array(
-                    'BLG_last_admin_visit'=> current_time('timestamp')
+                    'BLG_last_admin_visit'=> EEM_Blog::instance()->current_time_for_query('BLG_last_admin_visit')
                 )
             );
             set_transient('ee_user_site_visit_record', 1, DAY_IN_SECONDS);
