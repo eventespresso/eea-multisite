@@ -99,6 +99,10 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
             set_transient('ee_user_site_visit_record', 1, DAY_IN_SECONDS);
             $threshold_time = strtotime('-22 months');
             if($last_visit < $threshold_time){
+                //ok forget we ever sent them any warnings etc
+                foreach(EED_Multisite_Auto_Site_Cleanup::get_cleanup_tasks() as $label => $time_threshold) {
+                    $current_blog->delete_extra_meta(EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name($label));
+                }
                 //tell them we won't be deleting their site anymore
                 EEH_Template::display_template(EE_MULTISITE_PATH . 'templates/multisite_site_archival_aborted.template.php');
                 die;
