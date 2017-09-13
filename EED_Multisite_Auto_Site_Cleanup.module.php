@@ -86,7 +86,11 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
      */
     public static function track_admin_visits()
     {
-        if (! get_transient('ee_user_site_visit_record')
+        if (
+            (
+                WP_DEBUG//for debugging, check this everytime
+                || ! get_transient('ee_user_site_visit_record')
+            )
             && self::current_user_is_tracked()
         ) {
             $current_blog = EEM_Blog::instance()->get_one_by_ID(get_current_blog_id());
