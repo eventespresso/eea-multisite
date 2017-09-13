@@ -183,7 +183,8 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
                 ),
                 EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name(
                     $label
-                )
+                ),
+                EED_Multisite_Auto_Site_Cleanup::get_protected_blogs()
             );
             foreach($blogs_matching_criteria as $blog) {
                 if($last_interval === $interval) {
@@ -206,6 +207,20 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
             //remember this label during the next iteration
             $previous_interval_label = $label;
         }
+    }
+
+
+
+    /**
+     * Gets an array of all the blog IDs that are "protected" from being automatically archived etc.
+     * @return array
+     */
+    public static function get_protected_blogs(){
+        $protected_blogs = isset(EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_excludes) ? EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_excludes : array();
+        //always make sure that the main site is excluded from any deletes and that we've typecast the values in the array.
+        $protected_blogs[] = 1;
+        $protected_blogs = array_map('absint', $protected_blogs);
+        return $protected_blogs;
     }
 
 
