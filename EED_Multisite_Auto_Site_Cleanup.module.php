@@ -89,14 +89,20 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
         if (! get_transient('ee_user_site_visit_record')
             && self::current_user_is_tracked()
         ) {
-            $current_blog_id = get_current_blog_id();
-            EEM_Blog::instance()->update_by_ID(
+            $current_blog = EEM_Blog::instance()->get_one_by_ID(get_current_blog_id());
+            $last_visit = (int)$current_blog->get_raw('BLG_last_admin_visit');
+            $current_blog->save(
                 array(
-                    'BLG_last_admin_visit' => current_time('timestamp', true)
-                ),
-                $current_blog_id
+                    'BLG_last_admin_visit'=> current_time('timestamp')
+                )
             );
             set_transient('ee_user_site_visit_record', 1, DAY_IN_SECONDS);
+            $threshold_time = strtotime('-22 months');
+            if($last_visit < $threshold_time){
+                //tell them we won't be deleting their site anymore
+                EEH_Template::display_template(EE_MULTISITE_PATH . 'templates/multisite_site_archival_aborted.template.php');
+                die;
+            }
         }
     }
 
