@@ -92,7 +92,7 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
             $current_blog_id = get_current_blog_id();
             EEM_Blog::instance()->update_by_ID(
                 array(
-                    'BLG_last_admin_visit' => current_time('mysql', true)
+                    'BLG_last_admin_visit' => current_time('timestamp', true)
                 ),
                 $current_blog_id
             );
