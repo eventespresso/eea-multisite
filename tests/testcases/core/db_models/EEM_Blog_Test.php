@@ -160,24 +160,24 @@ class EEM_Blog_Test extends EE_Multisite_UnitTestCase
         $this->_pretend_did_actions_up_to_but_not_including('', $blog_archived);
 
         $cleanup_tasks_and_expected_matches = array(
-            'first_warning' => array(
-                'interval' => '22 months',
+            EED_Multisite_Auto_Site_Cleanup::FIRST_WARNING_LABEL      => array(
+                'interval' => EED_Multisite_Auto_Site_Cleanup::FIRST_WARNING_WAIT_TIME,
                 'expected' => array(
                     $blog_first_warning->ID() => $blog_first_warning
                 )
             ),
-            'second_warning' => array(
-                'interval' => '23 months',
+            EED_Multisite_Auto_Site_Cleanup::SECOND_WARNING_LABEL     => array(
+                'interval' => EED_Multisite_Auto_Site_Cleanup::SECOND_WARNING_WAIT_TIME,
                 'expected' => array(
                     $blog_second_warning->ID() => $blog_second_warning
                 )
             ),
-            'bluff_archive' => array(
-                'interval' => '24 months',
+            EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_BLUFF_LABEL => array(
+                'interval' => EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_BLUFF_WAIT_TIME,
                 'expected' => array()
             ),
-            'really_archive' => array(
-                'interval' => '25 months',
+            EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_REAL_LABEL  => array(
+                'interval' => EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_REAL_WAIT_TIME,
                 'expected' => array(
                     $blog_archive_me->ID() => $blog_archive_me
                 )

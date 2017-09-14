@@ -31,6 +31,52 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
 {
 
     /**
+     * label for site cleanup task that gives the user their first warning
+     */
+    const FIRST_WARNING_LABEL     = 'first_warning';
+
+    /**
+     * The time to wait before doing the first warning cleanup task
+     */
+    const FIRST_WARNING_WAIT_TIME = '22 months';
+
+    /**
+     * label for site cleanup tasks that gives the user their second warning
+     */
+    const SECOND_WARNING_LABEL = 'second_warning';
+
+    /**
+     * The time to wait before doing the second warning cleanup task
+     */
+    const SECOND_WARNING_WAIT_TIME = '23 months';
+
+    /**
+     * label for site cleanup task that says its going to delete the user's
+     * site, but it's just bluffing
+     */
+    const ARCHIVE_SITE_BLUFF_LABEL = 'archive_site_bluff';
+
+    /**
+     * The time to wait before doing the bluff site archival cleanup task
+     */
+    const ARCHIVE_SITE_BLUFF_WAIT_TIME = '24 months';
+
+    /**
+     * label for site cleanup task that actually archives the user's site
+     */
+    const ARCHIVE_SITE_REAL_LABEL = 'archive_site_real';
+
+    /**
+     * The time to wait before doing the real site archival task
+     */
+    const ARCHIVE_SITE_REAL_WAIT_TIME = '25 months';
+
+    /**
+     * The name of the transient used to record an admin visited the site already today
+     * so we don't need to again update BLG_last_admin_visit
+     */
+    const SITE_ADMIN_VISIT_RECORD = 'ee_user_site_visit_record';
+    /**
      *    set_hooks - for hooking into EE Core, other modules, etc
      *
      * @access    public
@@ -87,10 +133,7 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
     public static function track_admin_visits()
     {
         if (
-            (
-                WP_DEBUG//for debugging, check this everytime
-                || ! get_transient('ee_user_site_visit_record')
-            )
+            ! get_transient(EED_Multisite_Auto_Site_Cleanup::SITE_ADMIN_VISIT_RECORD)
             && self::current_user_is_tracked()
         ) {
             $current_blog = EEM_Blog::instance()->get_one_by_ID(get_current_blog_id());
@@ -100,7 +143,13 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
                     'BLG_last_admin_visit'=> EEM_Blog::instance()->current_time_for_query('BLG_last_admin_visit')
                 )
             );
-            set_transient('ee_user_site_visit_record', 1, DAY_IN_SECONDS);
+            set_transient(
+                EED_Multisite_Auto_Site_Cleanup::SITE_ADMIN_VISIT_RECORD,
+                1,
+                apply_filters(
+                    'FHEE__EED_Multisite_Auto_Site_Cleanup__track_admin_visits__frequency',
+                    DAY_IN_SECONDS)
+            );
             $threshold_time = strtotime('-22 months');
             if($last_visit < $threshold_time){
                 //ok forget we ever sent them any warnings etc
@@ -143,10 +192,10 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
     public static function get_cleanup_tasks()
     {
         return array(
-                'first_warning' => '22 months',
-                'second_warning' => '23 months',
-                'bluff_archive' => '24 months',
-                'really_archive' => '25 months',
+            EED_Multisite_Auto_Site_Cleanup::FIRST_WARNING_LABEL      => EED_Multisite_Auto_Site_Cleanup::FIRST_WARNING_WAIT_TIME,
+            EED_Multisite_Auto_Site_Cleanup::SECOND_WARNING_LABEL     => EED_Multisite_Auto_Site_Cleanup::SECOND_WARNING_WAIT_TIME,
+            EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_BLUFF_LABEL => EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_BLUFF_WAIT_TIME,
+            EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_REAL_LABEL  => EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_REAL_WAIT_TIME,
             );
     }
 
