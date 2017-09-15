@@ -137,7 +137,10 @@ class EEM_Blog_Test extends EE_Multisite_UnitTestCase
                 'BLG_last_admin_visit' => new \EventEspresso\core\domain\entities\DbSafeDateTime('-24 months')
             )
         );
-        $this->_pretend_did_actions_up_to_but_not_including('second_warning', $blog_second_warning);
+        $this->_pretend_did_actions_up_to_but_not_including(
+            EED_Multisite_Auto_Site_Cleanup::SECOND_WARNING_LABEL,
+            $blog_second_warning
+        );
 
         //this blog already got both warnings and so should get an email telling them their site will be deleted
         $blog_archive_me = $this->new_model_obj_with_dependencies(
@@ -147,9 +150,13 @@ class EEM_Blog_Test extends EE_Multisite_UnitTestCase
                 'BLG_last_admin_visit' => new \EventEspresso\core\domain\entities\DbSafeDateTime('-26 months')
             )
         );
-        $this->_pretend_did_actions_up_to_but_not_including('really_archive', $blog_archive_me);
+        $this->_pretend_did_actions_up_to_but_not_including(
+            EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_REAL_LABEL,
+            $blog_archive_me
+        );
 
-        //this site has been warned and told their site is deleted, which was a bluff. But now they should really be deleted
+        //this site has been warned and told their site is deleted, which was a bluff.
+        // But now they should really be deleted
         $blog_archived = $this->new_model_obj_with_dependencies(
             'Blog',
             array(
@@ -225,13 +232,5 @@ class EEM_Blog_Test extends EE_Multisite_UnitTestCase
             );
         }
     }
-    //test a blog matching the first criteria
-    //test a blog matching the 2nd criteria but hasn't done the first criteria
-    //test a blog has done the penultimate event and not yet meeting the criteria for the last event
-    //test a blog has done the penultimate event and mathces the criteria for the last event
-
-
-
 }
-
 // End of file EEM_Blog_Test.php
