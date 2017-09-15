@@ -191,12 +191,15 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
      */
     public static function get_cleanup_tasks()
     {
-        return array(
-            EED_Multisite_Auto_Site_Cleanup::FIRST_WARNING_LABEL      => EED_Multisite_Auto_Site_Cleanup::FIRST_WARNING_WAIT_TIME,
-            EED_Multisite_Auto_Site_Cleanup::SECOND_WARNING_LABEL     => EED_Multisite_Auto_Site_Cleanup::SECOND_WARNING_WAIT_TIME,
-            EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_BLUFF_LABEL => EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_BLUFF_WAIT_TIME,
-            EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_REAL_LABEL  => EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_REAL_WAIT_TIME,
-            );
+        return apply_filters(
+            'FHEE__EED_Multisite_Auto_Site_Cleanup__get_cleanup_tasks',
+            array(
+                EED_Multisite_Auto_Site_Cleanup::FIRST_WARNING_LABEL      => EED_Multisite_Auto_Site_Cleanup::FIRST_WARNING_WAIT_TIME,
+                EED_Multisite_Auto_Site_Cleanup::SECOND_WARNING_LABEL     => EED_Multisite_Auto_Site_Cleanup::SECOND_WARNING_WAIT_TIME,
+                EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_BLUFF_LABEL => EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_BLUFF_WAIT_TIME,
+                EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_REAL_LABEL  => EED_Multisite_Auto_Site_Cleanup::ARCHIVE_SITE_REAL_WAIT_TIME,
+            )
+        );
     }
 
 
