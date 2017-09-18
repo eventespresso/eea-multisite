@@ -157,9 +157,9 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
                 foreach(EED_Multisite_Auto_Site_Cleanup::get_cleanup_tasks() as $label => $time_threshold) {
                     $current_blog->delete_extra_meta(EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name($label));
                 }
-                restore_current_blog();
                 //tell them we won't be deleting their site anymore
                 EEH_Template::display_template(EE_MULTISITE_PATH . 'templates/multisite_site_archival_aborted.template.php');
+                restore_current_blog();
                 die;
             }
         }
