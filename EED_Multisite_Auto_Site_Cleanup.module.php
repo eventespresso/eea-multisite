@@ -162,9 +162,13 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
                 }
                 restore_current_blog();
                 //tell them we won't be deleting their site anymore
+                $site_details = get_blog_details();
+                $blog_name = trim($site_details->blogname) === '' ? $site_details->domain : $site_details->blogname;
                 $content = EEH_Template::display_template(
                     EE_MULTISITE_PATH . 'templates/multisite_site_archival_aborted.template.php',
-                    array(),
+                    array(
+                        'blog_name' => $blog_name,
+                    ),
                     true
                 );
                 wp_die($content, esc_html__('Thanks for Coming Back!', 'event_espresso'), 200);
