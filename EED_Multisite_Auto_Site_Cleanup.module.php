@@ -167,7 +167,7 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
                     array(),
                     true
                 );
-                wp_die($content, esc_html__('Thanks for Coming Back!', 'event_espresso'));
+                wp_die($content, esc_html__('Thanks for Coming Back!', 'event_espresso'), 200);
             }
         }
     }
