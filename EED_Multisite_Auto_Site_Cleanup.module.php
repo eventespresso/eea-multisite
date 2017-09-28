@@ -123,18 +123,21 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
 
     /**
      * Tracks when an admin user visits the site, which is handy for knowing when to cleanup the site.
-     * This callback is only added when it's a visit to the admin dashboard
+     * This callback is only added when it's a visit to the admin dashboard (not ajax requests
+     * because we don't want to change those and we may want to change the response)
      *
      * @throws EE_Error|Exception
      * @throws \EventEspresso\core\exceptions\InvalidDataTypeException
      * @throws \EventEspresso\core\exceptions\InvalidInterfaceException
      * @throws \InvalidArgumentException
+     * @throws \DomainException
      */
     public static function track_admin_visits()
     {
         if (
             ! get_transient(EED_Multisite_Auto_Site_Cleanup::SITE_ADMIN_VISIT_RECORD)
-            && self::current_user_is_tracked()
+            &&  EED_Multisite_Auto_Site_Cleanup::current_user_is_tracked()
+            && ! wp_doing_ajax()
         ) {
             $current_blog = EEM_Blog::instance()->get_one_by_ID(get_current_blog_id());
             $last_visit = (int)$current_blog->get_raw('BLG_last_admin_visit');
@@ -159,8 +162,16 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
                 }
                 restore_current_blog();
                 //tell them we won't be deleting their site anymore
-                EEH_Template::display_template(EE_MULTISITE_PATH . 'templates/multisite_site_archival_aborted.template.php');
-                die;
+                $site_details = get_blog_details();
+                $blog_name = trim($site_details->blogname) === '' ? $site_details->domain : $site_details->blogname;
+                $content = EEH_Template::display_template(
+                    EE_MULTISITE_PATH . 'templates/multisite_site_archival_aborted.template.php',
+                    array(
+                        'blog_name' => $blog_name,
+                    ),
+                    true
+                );
+                wp_die($content, esc_html__('Thanks for Coming Back!', 'event_espresso'), 200);
             }
         }
     }

@@ -56,12 +56,12 @@ class EE_DMS_Multisite_1_0_0 extends EE_Data_Migration_Script_Base
             $wpdb->query('UPDATE '
                          . EEM_Blog::instance()->second_table()
                          . ' SET BLG_last_admin_visit = BLG_last_requested'
-                         . ' WHERE BLG_last_admin_visit = NULL;'
+                         . ' WHERE BLG_last_admin_visit = NULL or BLG_last_admin_visit = \'0000-00-00 00:00:00\';'
             );
             $wpdb->query('UPDATE '
                          . EEM_Blog::instance()->second_table()
                          . ' SET BLG_last_admin_visit = "' . current_time('mysql')
-                         . '" WHERE BLG_last_admin_visit = NULL'
+                         . '" WHERE (BLG_last_admin_visit = NULL or BLG_last_admin_visit = \'0000-00-00 00:00:00\')'
                          . ' AND BLG_last_requested = NULL'
             );
         }
