@@ -20,11 +20,17 @@ if (! defined('EVENT_ESPRESSO_VERSION')) {
 
 
 /**
- * Class  EED_Multisite
- *
+ * Class  EED_Multisite_Auto_Site_Cleanup
+ * Tracks when admin users (but not network-admins, and possibly other special users) visit the site.
+ * Also defines a set of "cleanup tasks" that should occur after a certain number of time since the previous "admin visit".
+ * A cron task is setup from `EE_Multisite` (it would have been added here, but this hooks in too late) to check
+ * for sites that haven't been visited in a while, and performs the "cleanup tasks" that qualify.
+ * Performing a "cleanup task" actually just involves firing a WP action, that other plugins can listen for
+ * (e.g., they could send an email when that happens).
+ * When the last cleanup task is done, however, the site is archived (but not permanently deleted).
  * @package               Event Espresso
  * @subpackage            espresso-multisite
- * @author                Brent Christensen
+ * @author                Mike Nelson
  * ------------------------------------------------------------------------
  */
 class EED_Multisite_Auto_Site_Cleanup extends EED_Module
