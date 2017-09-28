@@ -146,7 +146,6 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
             && ! wp_doing_ajax()
         ) {
             $current_blog = EEM_Blog::instance()->get_one_by_ID(get_current_blog_id());
-            $last_visit = (int)$current_blog->get_raw('BLG_last_admin_visit');
             $current_blog->save(
                 array(
                     'BLG_last_admin_visit'=> EEM_Blog::instance()->current_time_for_query('BLG_last_admin_visit')
@@ -159,10 +158,22 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
                     'FHEE__EED_Multisite_Auto_Site_Cleanup__track_admin_visits__frequency',
                     DAY_IN_SECONDS)
             );
-            $threshold_time = strtotime('-22 months');
-            if($last_visit < $threshold_time){
+            //fetch the first cleanup tasks' label, so we can check if it was already done
+            //(don't just assume someone hasn't filtered the get_cleanup_tasks method and changed it)
+            $cleanup_tasks = EED_Multisite_Auto_Site_Cleanup::get_cleanup_tasks();
+            $cleanup_task_labels = array_keys($cleanup_tasks);
+            $first_cleanup_task = reset($cleanup_task_labels);
+            switch_to_blog(1);
+            if (
+            $current_blog->get_extra_meta(
+                EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name(
+                    $first_cleanup_task
+                ),
+                true,
+                false
+            )
+            ) {
                 //ok forget we ever sent them any warnings etc
-                switch_to_blog(1);
                 foreach(EED_Multisite_Auto_Site_Cleanup::get_cleanup_tasks() as $label => $time_threshold) {
                     $current_blog->delete_extra_meta(EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name($label));
                 }
@@ -179,6 +190,7 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
                 );
                 wp_die($content, esc_html__('Thanks for Coming Back!', 'event_espresso'), 200);
             }
+            restore_current_blog();
         }
     }
 
