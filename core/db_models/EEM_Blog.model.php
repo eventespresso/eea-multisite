@@ -82,11 +82,12 @@ class EEM_Blog extends EEM_Soft_Delete_Base
                 'BLM_ID'             => new EE_DB_Only_Int_Field('BLM_ID', __('Blog Meta ID', 'event_espresso'), false, 0),
                 'blog_id_fk'         => new EE_DB_Only_Int_Field('blog_id_fk', __('Blog ID', 'event_espresso'), false, 0),
                 'STS_ID'             => new EE_Foreign_Key_String_Field('STS_ID', __('Status', 'event_espresso'), false, self::status_unsure, 'Status'),
-                'BLG_last_requested' => new EE_Datetime_Field('BLG_last_requested', __('Last Request for this Blog', 'event_espresso'), false, current_time('timestamp')),
+                'BLG_last_requested' => new EE_Datetime_Field('BLG_last_requested', __('Last Request for this Blog', 'event_espresso'), false, EE_Datetime_Field::now),
+                'BLG_last_admin_visit' => new EE_Datetime_Field('BLG_last_admin_visit', __('Last Request for this Blog by an Admin', 'event_espresso'), false, EE_Datetime_Field::now),
             ),
         );
         $this->_model_relations = array(
-            'Site' => new EE_Belongs_To_Relation(),
+            'Site' => new EE_Belongs_To_Relation()
         );
         parent::__construct();
     }
@@ -319,6 +320,60 @@ class EEM_Blog extends EEM_Soft_Delete_Base
         }
     }
 
+
+
+    /**
+     * Gets all blogs which have been visited by an event admin since the specified time,
+     * who also have an entry for the specified extra meta key
+     *
+     * @param int|DateTime $threshold_time
+     * @param string       $key_that_should_exist
+     * @param string       $key_that_shouldnt_exist
+     * @param array        $protected_blogs blog IDs that shouldn't be returned
+     * @return EE_Blog[]
+     */
+    public function get_all_logged_into_since_time_with_extra_meta(
+        $threshold_time,
+        $key_that_should_exist,
+        $key_that_shouldnt_exist,
+        $protected_blogs = array()
+    ) {
+        global $wpdb;
+
+        $query = 'SELECT blog_id FROM ' . $wpdb->base_prefix . 'blogs as b'
+            . ' LEFT JOIN ' . $wpdb->base_prefix . 'esp_blog_meta AS bm'
+            . ' ON b.blog_id = bm.blog_id_fk';
+        if ($key_that_should_exist !== null) {
+            $query .= ' LEFT JOIN ' . $wpdb->base_prefix . 'esp_extra_meta m1'
+                      . ' ON b.blog_id = m1.OBJ_ID AND m1.EXM_type = "Blog" AND m1.EXM_key="'
+                      . $key_that_should_exist . '"';
+        }
+        $query .= ' LEFT JOIN ' . $wpdb->base_prefix . 'esp_extra_meta m2'
+                  . ' ON b.blog_id = m2.OBJ_ID AND m2.EXM_type = "Blog" AND m2.EXM_key="'
+                  . $key_that_shouldnt_exist . '"'
+                  . ' WHERE';
+        if( $key_that_should_exist !== null) {
+            $query .= ' m1.EXM_value IS NOT NULL AND';
+        }
+        $query .= ' m2.EXM_value IS NULL AND bm.BLG_last_admin_visit < "'
+                  . date(EE_Datetime_Field::mysql_timestamp_format, $threshold_time)
+                  . '"';
+        if (! empty($protected_blogs)) {
+            $query .= ' AND b.blog_id NOT IN (' . implode(',', $protected_blogs) . ')';
+        }
+        $blog_ids = $this->_do_wpdb_query('get_col',array($query));
+        if (! is_array($blog_ids) || empty($blog_ids)) {
+            return array();
+        }
+        return $this->get_all(
+            array(
+                array(
+                    'blog_id' => array('IN', $blog_ids)
+                ),
+                'limit' => count($blog_ids)
+            )
+        );
+    }
 
 
 }
