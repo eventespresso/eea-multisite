@@ -43,12 +43,29 @@ class EE_DMS_Multisite_1_0_0 extends EE_Data_Migration_Script_Base
 				blog_id_fk int(10) unsigned,
 				STS_ID VARCHAR(10) NOT NULL,
 				BLG_last_requested datetime NOT NULL default '0000-00-00 00:00:00',
+				BLG_last_admin_visit datetime NOT NULL default '0000-00-00 00:00:00',
 				PRIMARY KEY  (BLM_ID),
 				KEY blog_id_fk (blog_id_fk),
 				KEY STS_ID (STS_ID)"
             );
-            //			$this->insert_default_status_codes();
+            //now make sure BLG_last_event_admin_visit is set.
+            //BLG_last_requested might have been an admin visit, so thats's a good guess
+            //if somehow that isn't set, give them the benefit of the doubt and
+            //set it to right now
+            global $wpdb;
+            $wpdb->query('UPDATE '
+                         . EEM_Blog::instance()->second_table()
+                         . ' SET BLG_last_admin_visit = BLG_last_requested'
+                         . ' WHERE BLG_last_admin_visit = NULL or BLG_last_admin_visit = \'0000-00-00 00:00:00\';'
+            );
+            $wpdb->query('UPDATE '
+                         . EEM_Blog::instance()->second_table()
+                         . ' SET BLG_last_admin_visit = "' . current_time('mysql')
+                         . '" WHERE (BLG_last_admin_visit = NULL or BLG_last_admin_visit = \'0000-00-00 00:00:00\')'
+                         . ' AND BLG_last_requested = NULL'
+            );
         }
+
     }
 
 
