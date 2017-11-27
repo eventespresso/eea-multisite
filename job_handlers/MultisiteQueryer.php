@@ -100,10 +100,14 @@ class MultisiteQueryer extends JobHandlerFile
             array(
                 '{$wpdb->prefix}',
                 '{$wpdb->base_prefix}',
+                '{$wpdb->blogid}',
+                '{$wpdb->siteid}'
             ),
             array(
                 $wpdb->prefix,
                 $wpdb->base_prefix,
+                $wpdb->blogid,
+                $wpdb->siteid
             ),
             stripslashes($sql_query)
         );
