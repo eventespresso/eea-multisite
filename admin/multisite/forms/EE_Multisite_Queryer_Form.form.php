@@ -41,7 +41,7 @@ class EE_Multisite_Queryer_Form extends EE_Form_Section_Proper
                         )),
                     'sql_query'     => new EE_Text_Area_Input(
                         array(
-                            'html_help_text' => __('Only SELECT queries allowed (for now). Use the string "{$wpdb->prefix}", "{$wpdb->base_prefix}", "{$wpdb->sideid}", and "{$wpdb->blogid}" as you would normally. These strings will be replaced appropriately when querying each blog.',
+                            'html_help_text' => __('Only SELECT queries allowed (for now). Use the string "{$wpdb->prefix}", "{$wpdb->base_prefix}", "{$wpdb->siteid}", and "{$wpdb->blogid}" as you would normally. These strings will be replaced appropriately when querying each blog.',
                                 'event_espresso'),
                             'required'       => true,
                             'default'        => 'SELECT',
