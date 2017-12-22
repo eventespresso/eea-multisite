@@ -20,3 +20,5 @@ $addon_loader = new AddonLoader(
 );
 $addon_loader->init();
 require EEA_MULTISITE_TESTS_DIR . 'includes/EE_Multisite_UnitTestCase.class.php';
+//tell core to not do any db collation changes. Those will break transactions.
+add_filter('FHEE__EE_DMS_Core_4_9_0__verify_db_collations__check_overridden', '__return_true');
