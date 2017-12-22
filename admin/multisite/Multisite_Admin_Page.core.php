@@ -604,15 +604,11 @@ class Multisite_Admin_Page extends EE_Admin_Page
         $range = '-'
                  . (isset(EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_threshold) ? (int)EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_threshold : 30)
                  . ' days';
-        $excludes = isset(EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_excludes) ? EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_excludes : array(1);
-        //always make sure that the main site is excluded from any deletes and that we've typecast the values in the array.
-        $excludes[] = 1;
-        $excludes = array_map('absint', $excludes);
         //use appropriate call for current_time depending on what version of EE core is active.
         $current_time = method_exists(EEM_Blog::instance(), 'current_time_for_query') ? time() : current_time('timestamp');
         $delete_where_conditions = array(
             'last_updated' => array('<', strtotime($range, $current_time)),
-            'blog_id'      => array('NOT_IN', $excludes),
+            'blog_id'      => array('NOT_IN', EED_Multisite_Auto_Site_Cleanup::get_protected_blogs()),
         );
         $sites_to_delete_total = EEM_Blog::instance()->count(array($delete_where_conditions, 'default_where_conditions' => 'none'));
         //get the original count of blogs to delete.  If that's empty then this is the initial request.

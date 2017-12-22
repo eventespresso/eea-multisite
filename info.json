@@ -2,17 +2,18 @@
   "versionFile": "eea-multisite.php",
   "slug": "ee4-multisite",
   "name": "EE4 Multisite Addon",
-  "archiveBaseUrl": "http://build.eventespresso.com/",
-  "archiveBasePath": "~/www/build/",
   "releaseFilesRemove": [
-    "src/tests/**",
-    "src/info.json",
-    "src/circle.yml",
-    "src/.travis.yml",
-    "src/readme.txt"
+    "src\/tests\/**",
+    "src\/info.json",
+    "src\/circle.yml",
+    "src\/.travis.yml",
+    "src\/readme.txt"
   ],
   "github": true,
-  "demoee": true,
   "srcBuildFolderName": "eea-multisite",
-  "textDomain": "event_espresso"
+  "textDomain": "event_espresso",
+  "wpOrgRelease": "1.0.3.p",
+  "remoteNamesToPushTo": [
+    "demoee"
+  ]
 }

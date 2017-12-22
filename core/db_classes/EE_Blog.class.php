@@ -313,9 +313,6 @@ class EE_Blog extends EE_Soft_Delete_Base_Class
                 return __('Invalid State', 'event_espresso');
         }
     }
-
-
-
 }
 
 // End of file EE_Blog.class.php
