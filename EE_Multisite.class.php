@@ -14,7 +14,7 @@ define('EE_MULTISITE_ADMIN', EE_MULTISITE_PATH . 'admin' . DS . 'multisite' . DS
  * @package        Event Espresso
  * @subpackage     espresso-multisite
  * @author         Darren Ethier
- * @version        $VID:$
+ * 
  */
 Class EE_Multisite extends EE_Addon
 {

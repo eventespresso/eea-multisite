@@ -10,7 +10,7 @@ if (! defined('EVENT_ESPRESSO_VERSION')) {
  * @ copyright        (c) 2008-2014 Event Espresso  All Rights Reserved.
  * @ license            http://eventespresso.com/support/terms-conditions/   * see Plugin Licensing *
  * @ link                    http://www.eventespresso.com
- * @ version            $VID:$
+ *
  * ------------------------------------------------------------------------
  */
 
@@ -23,7 +23,7 @@ if (! defined('EVENT_ESPRESSO_VERSION')) {
  * @package               Event Espresso
  * @subpackage            core
  * @author                Brent Christensen
- * @since                 $VID:$
+ *
  */
 class EE_Multisite_Config extends EE_Config_Base
 {
