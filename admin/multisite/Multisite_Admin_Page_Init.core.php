@@ -13,7 +13,7 @@ if (! defined('EVENT_ESPRESSO_VERSION')) {
  * @ copyright    (c) 2008-2011 Event Espresso  All Rights Reserved.
  * @ license        {@link http://eventespresso.com/support/terms-conditions/}   * see Plugin Licensing *
  * @ link                {@link http://www.eventespresso.com}
- * @ since            $VID:$
+ *
  * ------------------------------------------------------------------------
  * Multisite_Admin_Page_Init class
  * This is the init for the Multisite Addon Admin Pages.  See EE_Admin_Page_Init for method inline docs.
