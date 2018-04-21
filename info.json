@@ -9,7 +9,6 @@
     "src\/.travis.yml",
     "src\/readme.txt"
   ],
-  "github": true,
   "srcBuildFolderName": "eea-multisite",
   "textDomain": "event_espresso",
   "wpOrgRelease": "1.0.3.p",
