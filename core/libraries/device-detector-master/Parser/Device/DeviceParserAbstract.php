@@ -451,7 +451,7 @@ abstract class DeviceParserAbstract extends ParserAbstract
     public static function getFullName($brandId)
     {
         if (array_key_exists($brandId, self::$deviceBrands)) {
-            return self::$deviceBrands[$brandId];
+            return self::$deviceBrands[ $brandId ];
         }
         return '';
     }
@@ -477,7 +477,7 @@ abstract class DeviceParserAbstract extends ParserAbstract
         }
         $this->brand = $brandId;
         if (isset($regex['device']) && in_array($regex['device'], self::$deviceTypes)) {
-            $this->deviceType = self::$deviceTypes[$regex['device']];
+            $this->deviceType = self::$deviceTypes[ $regex['device'] ];
         }
         if (isset($regex['model'])) {
             $this->model = $this->buildModel($regex['model'], $matches);
@@ -497,7 +497,7 @@ abstract class DeviceParserAbstract extends ParserAbstract
                 $this->brand = $brandId;
             }
             if (isset($modelRegex['device']) && in_array($modelRegex['device'], self::$deviceTypes)) {
-                $this->deviceType = self::$deviceTypes[$modelRegex['device']];
+                $this->deviceType = self::$deviceTypes[ $modelRegex['device'] ];
             }
         }
         return true;

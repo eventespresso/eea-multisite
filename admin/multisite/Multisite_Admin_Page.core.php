@@ -162,7 +162,7 @@ class Multisite_Admin_Page extends EE_Admin_Page
             'error_occured'           => __('An error occurred', 'event_espresso'),
             'no_progress_assessing'   => __('It appears we are not making any progress assessing the sites needing migration. Something is wrong', 'event_espresso'),
         ));
-        //steal the styles etc from the normal maintenance page
+        // steal the styles etc from the normal maintenance page
         wp_register_style('espresso_multisite_migration', EE_MULTISITE_ADMIN_ASSETS_URL . 'espresso_multisite_admin.css', array(), EE_MULTISITE_VERSION);
         wp_enqueue_style('espresso_multisite_migration');
     }
@@ -211,13 +211,16 @@ class Multisite_Admin_Page extends EE_Admin_Page
             $this->display_admin_page_with_sidebar();
         } else {
             $migration_page = get_admin_url(get_current_blog_id(), 'admin.php?page=espresso_maintenance_settings');
-            $this->_template_args['admin_page_content'] = EEH_Template::display_template(EE_MULTISITE_ADMIN_TEMPLATE_PATH . 'multisite_migration_in_mm.template.php',
-                array('migration_page_url' => $migration_page), true);
-            //			$this->_template_args['whatever'] ='';
-            //			$this->_set_add_edit_form_tags( 'update_settings' );
-            //			$this->_set_publish_post_box_vars( NULL, FALSE, FALSE, NULL, FALSE );
+            $this->_template_args['admin_page_content'] = EEH_Template::display_template(
+                EE_MULTISITE_ADMIN_TEMPLATE_PATH . 'multisite_migration_in_mm.template.php',
+                array('migration_page_url' => $migration_page),
+                true
+            );
+            //          $this->_template_args['whatever'] ='';
+            //          $this->_set_add_edit_form_tags( 'update_settings' );
+            //          $this->_set_publish_post_box_vars( NULL, FALSE, FALSE, NULL, FALSE );
             //
-            //		$this->_template_args[ 'reassess_url' ] = EE_Admin_Page::add_query_args_and_nonce( array( 'action' => 'force_reassess' ), EE_MULTISITE_ADMIN_URL );
+            //      $this->_template_args[ 'reassess_url' ] = EE_Admin_Page::add_query_args_and_nonce( array( 'action' => 'force_reassess' ), EE_MULTISITE_ADMIN_URL );
             $this->display_admin_page_with_sidebar();
         }
     }
@@ -250,7 +253,7 @@ class Multisite_Admin_Page extends EE_Admin_Page
             $form = $this->_get_multisite_queryer_form();
             $form->receive_form_submission($this->_req_data);
             if ($form->is_valid()) {
-                //redirect
+                // redirect
                 wp_redirect(
                     EE_Admin_Page::add_query_args_and_nonce(
                         array(
@@ -331,7 +334,7 @@ class Multisite_Admin_Page extends EE_Admin_Page
         } else {
             $config = EE_Config::instance()->get_config('addons', 'EED_Espresso_Multisite', 'EE_Multisite_Config');
             $count = 0;
-            //otherwise we assume you want to allow full html
+            // otherwise we assume you want to allow full html
             foreach ($this->_req_data['multisite'] as $top_level_key => $top_level_value) {
                 if (is_array($top_level_value)) {
                     foreach ($top_level_value as $second_level_key => $second_level_value) {
@@ -360,37 +363,37 @@ class Multisite_Admin_Page extends EE_Admin_Page
     /**
      * resets the multisite data and redirects to where they came from
      */
-    //	protected function _reset_settings(){
-    //		EE_Config::instance()->addons['multisite'] = new EE_Multisite_Config();
-    //		EE_Config::instance()->update_espresso_config();
-    //		$this->_redirect_after_action(1, 'Settings', 'reset', array('action' => $this->_req_data['return_action']));
-    //	}
+    //  protected function _reset_settings(){
+    //      EE_Config::instance()->addons['multisite'] = new EE_Multisite_Config();
+    //      EE_Config::instance()->update_espresso_config();
+    //      $this->_redirect_after_action(1, 'Settings', 'reset', array('action' => $this->_req_data['return_action']));
+    //  }
     private function _sanitize_config_input($top_level_key, $second_level_key, $value)
     {
         $sanitization_methods = array(
             'display' => array(
                 'enable_multisite' => 'bool',
-                //				'multisite_height'=>'int',
-                //				'enable_multisite_filters'=>'bool',
-                //				'enable_category_legend'=>'bool',
-                //				'use_pickers'=>'bool',
-                //				'event_background'=>'plaintext',
-                //				'event_text_color'=>'plaintext',
-                //				'enable_cat_classes'=>'bool',
-                //				'disable_categories'=>'bool',
-                //				'show_attendee_limit'=>'bool',
+                //              'multisite_height'=>'int',
+                //              'enable_multisite_filters'=>'bool',
+                //              'enable_category_legend'=>'bool',
+                //              'use_pickers'=>'bool',
+                //              'event_background'=>'plaintext',
+                //              'event_text_color'=>'plaintext',
+                //              'enable_cat_classes'=>'bool',
+                //              'disable_categories'=>'bool',
+                //              'show_attendee_limit'=>'bool',
             ),
         );
         $sanitization_method = null;
-        if (isset($sanitization_methods[$top_level_key]) && $second_level_key === null && ! is_array($sanitization_methods[$top_level_key])) {
-            $sanitization_method = $sanitization_methods[$top_level_key];
-        } elseif (is_array($sanitization_methods[$top_level_key]) && isset($sanitization_methods[$top_level_key][$second_level_key])) {
-            $sanitization_method = $sanitization_methods[$top_level_key][$second_level_key];
+        if (isset($sanitization_methods[ $top_level_key ]) && $second_level_key === null && ! is_array($sanitization_methods[ $top_level_key ])) {
+            $sanitization_method = $sanitization_methods[ $top_level_key ];
+        } elseif (is_array($sanitization_methods[ $top_level_key ]) && isset($sanitization_methods[ $top_level_key ][ $second_level_key ])) {
+            $sanitization_method = $sanitization_methods[ $top_level_key ][ $second_level_key ];
         }
-        //		echo "$top_level_key [$second_level_key] with value $value will be sanitized as a $sanitization_method<br>";
+        //      echo "$top_level_key [$second_level_key] with value $value will be sanitized as a $sanitization_method<br>";
         switch ($sanitization_method) {
             case 'bool':
-                return ( boolean )intval($value);
+                return (boolean) intval($value);
             case 'plaintext':
                 return wp_strip_all_tags($value);
             case 'int':
@@ -419,10 +422,10 @@ class Multisite_Admin_Page extends EE_Admin_Page
 
     public function migration_error()
     {
-        //our last ajax response didn't send proper JSON
-        //probably because of a fatal error or something
-        //so update the last blog as borked
-        //and ask its data migration manager to log the error
+        // our last ajax response didn't send proper JSON
+        // probably because of a fatal error or something
+        // so update the last blog as borked
+        // and ask its data migration manager to log the error
         $blog_migrating = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested();
         if ($blog_migrating) {
             $blog_migrating->set_STS_ID(EEM_Blog::status_borked);
@@ -444,9 +447,20 @@ class Multisite_Admin_Page extends EE_Admin_Page
             $blog_id = __('Unknown', 'event_espresso');
             $last_migration_script_option = array();
         }
-        wp_mail(get_site_option('admin_email'), sprintf(__('General error running multisite migration. Last ran blog was: %s', 'event_espresso'), $blog_name),
-            sprintf(__('Did not receive proper JSON response while running multisite migration. This was the response: \'%1$s\' while migrating blog %2$s (ID %3$d). The last ran migration script had data: %4$s',
-                'event_espresso'), $this->_req_data['message'], $blog_name, $blog_id, print_r($last_migration_script_option, true)));
+        wp_mail(
+            get_site_option('admin_email'),
+            sprintf(__('General error running multisite migration. Last ran blog was: %s', 'event_espresso'), $blog_name),
+            sprintf(
+                __(
+                    'Did not receive proper JSON response while running multisite migration. This was the response: \'%1$s\' while migrating blog %2$s (ID %3$d). The last ran migration script had data: %4$s',
+                    'event_espresso'
+                ),
+                $this->_req_data['message'],
+                $blog_name,
+                $blog_id,
+                print_r($last_migration_script_option, true)
+            )
+        );
     }
 
 
@@ -524,8 +538,10 @@ class Multisite_Admin_Page extends EE_Admin_Page
                         array(
                             'html_label_text' => __('Excluded sites', 'event_espresso'),
                             'html_help_text'  => __('Enter a comma delimited list of site_ids to exclude from the delete query', 'event_espresso'),
-                            'default'         => isset(EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_excludes) ? implode(',',
-                                EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_excludes) : 1,
+                            'default'         => isset(EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_excludes) ? implode(
+                                ',',
+                                EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_excludes
+                            ) : 1,
                         )
                     ),
                     'delete_non_super_admin_users' => new EE_Yes_No_Input(
@@ -551,9 +567,9 @@ class Multisite_Admin_Page extends EE_Admin_Page
         try {
             $form = $this->_site_management_delete_form();
             if ($form->was_submitted()) {
-                //capture form data
+                // capture form data
                 $form->receive_form_submission();
-                //validate_form_data
+                // validate_form_data
                 if ($form->is_valid()) {
                     $valid_data = $form->valid_data();
                     $config->delete_site_threshold = $valid_data['delete_sites_settings']['delete_threshold'];
@@ -592,26 +608,26 @@ class Multisite_Admin_Page extends EE_Admin_Page
      */
     protected function _delete_sites_range()
     {
-        //let's only allow activity via ajax
+        // let's only allow activity via ajax
         if (! defined('DOING_AJAX') || ! DOING_AJAX) {
             EE_Error::add_error(__('Deleting sites is only allowable via ajax currently', 'event_espresso'), __FILE__, __FUNCTION__, __LINE__);
             $this->redirect_after_action(false, '', '', array('action' => 'site_management'), true);
         }
         $response = array();
-        //set the number of sites deleted in each batch
-        $batch_size = defined('EE_DELETE_SITES_BATCH_SIZE') ? (int)EE_DELETE_SITES_BATCH_SIZE : 20;
-        //instructions for deletes
+        // set the number of sites deleted in each batch
+        $batch_size = defined('EE_DELETE_SITES_BATCH_SIZE') ? (int) EE_DELETE_SITES_BATCH_SIZE : 20;
+        // instructions for deletes
         $range = '-'
-                 . (isset(EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_threshold) ? (int)EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_threshold : 30)
+                 . (isset(EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_threshold) ? (int) EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_threshold : 30)
                  . ' days';
-        //use appropriate call for current_time depending on what version of EE core is active.
+        // use appropriate call for current_time depending on what version of EE core is active.
         $current_time = method_exists(EEM_Blog::instance(), 'current_time_for_query') ? time() : current_time('timestamp');
         $delete_where_conditions = array(
             'last_updated' => array('<', strtotime($range, $current_time)),
             'blog_id'      => array('NOT_IN', EED_Multisite_Auto_Site_Cleanup::get_protected_blogs()),
         );
         $sites_to_delete_total = EEM_Blog::instance()->count(array($delete_where_conditions, 'default_where_conditions' => 'none'));
-        //get the original count of blogs to delete.  If that's empty then this is the initial request.
+        // get the original count of blogs to delete.  If that's empty then this is the initial request.
         if (! $this->_req_data['total_sites_to_be_deleted']) {
             $response['total_sites_to_be_deleted'] = $sites_to_delete_total;
         }
@@ -631,20 +647,20 @@ class Multisite_Admin_Page extends EE_Admin_Page
      */
     protected function _delete_sites($delete_where_conditions, $batch_size)
     {
-        //First the blog IDs are retrieved rather than doing a direct delete through the model.  The reason for this
-        //is because the blogs are being deleted via the WP core methods for doing so that any related data is also deleted.
+        // First the blog IDs are retrieved rather than doing a direct delete through the model.  The reason for this
+        // is because the blogs are being deleted via the WP core methods for doing so that any related data is also deleted.
         $total_deleted = 0;
         $blog_ids_to_delete = EEM_Blog::instance()->get_col(array($delete_where_conditions, 'limit' => $batch_size, 'default_where_conditions' => 'none'), 'blog_id');
-        //loop through the blog_ids and let's get deleting!
+        // loop through the blog_ids and let's get deleting!
         foreach ($blog_ids_to_delete as $blog_id) {
             wpmu_delete_blog($blog_id, true);
-            //since WordPress doesn't return any info on the success of the deleted blog, let's verify it was deleted
+            // since WordPress doesn't return any info on the success of the deleted blog, let's verify it was deleted
             if (! EEM_Blog::instance()->exists_by_ID($blog_id)) {
-                //deleted!
+                // deleted!
                 $total_deleted++;
             }
         }
-        //all done, return the total blogs deleted.
+        // all done, return the total blogs deleted.
         return $total_deleted;
     }
 
@@ -658,32 +674,32 @@ class Multisite_Admin_Page extends EE_Admin_Page
      */
     function cleanup_partially_deleted_sites()
     {
-        //		return;
+        //      return;
         $deleted_sites = get_option('pruner_cleanup', false);
         global $wpdb;
         if ($deleted_sites === false) {
-            //get the highest blog id
+            // get the highest blog id
             $max = max($wpdb->get_var('SELECT max(blog_id) FROM ' . $wpdb->blogs), 5);
-            //create an array with all ids up to taht number
+            // create an array with all ids up to taht number
             $all_possible_blog_ids = range(1, $max);
-            //select all blog ids
+            // select all blog ids
             $existing_blog_ids = $wpdb->get_col('SELECT blog_id FROM ' . $wpdb->blogs);
-            //remove all existing blog IDs from all blog IDs.
+            // remove all existing blog IDs from all blog IDs.
             $deleted_sites = array_values(array_diff($all_possible_blog_ids, $existing_blog_ids));
-            //save the result
+            // save the result
             update_option('pruner_cleanup', $deleted_sites);
         }
-        // 		echo "deleted sites:";var_dump($deleted_sites);die;
+        //      echo "deleted sites:";var_dump($deleted_sites);die;
         $offset = get_option('pruner_cleanup_index', 0);
         for ($i = $offset; $i < $offset + 10; $i++) {
-            if (! isset($deleted_sites[$i])) {
+            if (! isset($deleted_sites[ $i ])) {
                 delete_option('pruner_cleanup');
                 delete_option('pruner_cleanup_offset');
                 delete_option('pruner_cleanup_index');
                 return;
             }
-            $blog_id_to_cleanup = $deleted_sites[$i];
-            //remember underscores are WILDCARDS in SQL like queries! so escape them
+            $blog_id_to_cleanup = $deleted_sites[ $i ];
+            // remember underscores are WILDCARDS in SQL like queries! so escape them
             $this_blog_prefix = str_replace('_', '\_', $wpdb->base_prefix . $blog_id_to_cleanup . '_');
             $sql = 'SHOW TABLES LIKE "' . $this_blog_prefix . '%";';
             echo $sql;
@@ -694,20 +710,17 @@ class Multisite_Admin_Page extends EE_Admin_Page
                 echo "<br/>delete table $table_name. success? " . $success;
             }
         }
-        if (! isset($deleted_sites[$i])) {
+        if (! isset($deleted_sites[ $i ])) {
             echo "<hr>We seem to be all done";
             delete_option('pruner_cleanup');
             delete_option('pruner_cleanup_offset');
             delete_option('pruner_cleanup_index');
         } else {
-            echo "<hr>Next up:" . $deleted_sites[$i];
+            echo "<hr>Next up:" . $deleted_sites[ $i ];
             update_option('pruner_cleanup_index', $i);
             echo '<a href="">Proceed</a><script>location.reload();</script>';
         }
     }
-
-
-
 }
 
 // End of file Multisite_Admin_Page.core.php

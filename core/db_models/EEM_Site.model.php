@@ -47,9 +47,6 @@ class EEM_Site extends EEM_Base
         );
         parent::__construct();
     }
-
-
-
 }
 
 // End of file EEM_Site.model.php

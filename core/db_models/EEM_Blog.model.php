@@ -245,8 +245,8 @@ class EEM_Blog extends EEM_Soft_Delete_Base
             $rows_affected = $wpdb->query($query);
             return $rows_affected;
         } else {
-            //don't do anything. the table doesn't exist, and its default value for STS_ID is self::status_unsure anyways
-            //so there is nothing to do to mark it as status unsure
+            // don't do anything. the table doesn't exist, and its default value for STS_ID is self::status_unsure anyways
+            // so there is nothing to do to mark it as status unsure
             return 0;
         }
     }
@@ -265,12 +265,12 @@ class EEM_Blog extends EEM_Soft_Delete_Base
     public function mark_current_blog_as($new_status = EEM_Blog::status_up_to_date)
     {
         $current_blog_id = get_current_blog_id();
-        //needs to use WP's core switch_to_blog() instead of EED_Multisite::switch_to_blog()
-        //instead ot avoid an infinite loop.
+        // needs to use WP's core switch_to_blog() instead of EED_Multisite::switch_to_blog()
+        // instead ot avoid an infinite loop.
         EE_Registry::instance()->load_helper('Activation');
         if (EEH_Activation::table_exists($this->second_table())) {
             global $wpdb;
-            //first check the current blog isn't ALREADY marked as up-to-date
+            // first check the current blog isn't ALREADY marked as up-to-date
             $verify_query = $wpdb->prepare('SELECT STS_ID FROM ' . $this->second_table() . ' WHERE blog_id_fk=%d LIMIT 1', $current_blog_id);
             $current_status = $wpdb->get_var($verify_query);
             if ($current_status !== $new_status) {
@@ -278,9 +278,9 @@ class EEM_Blog extends EEM_Soft_Delete_Base
                 $wpdb->query($query);
             }
         } else {
-            //dang can't update it because the esp_blog_meta doesn't yet exist. Oh well, we'll just need to check it again
-            //later when either the site's maintenance page is visited or the multisite migrator checks it.
-            //not a HUGE deal though.
+            // dang can't update it because the esp_blog_meta doesn't yet exist. Oh well, we'll just need to check it again
+            // later when either the site's maintenance page is visited or the multisite migrator checks it.
+            // not a HUGE deal though.
         }
     }
 
@@ -298,19 +298,19 @@ class EEM_Blog extends EEM_Soft_Delete_Base
         if (EEH_Activation::table_exists($this->second_table())) {
             return $wpdb->update(
                 $this->second_table(),
-                //update columns
+                // update columns
                 array(
                     'BLG_last_requested' => current_time('mysql', true),
                 ),
-                //where columns
+                // where columns
                 array(
                     'blog_id_fk' => $blog_id,
                 ),
-                //update format
+                // update format
                 array(
                     '%s',
                 ),
-                //where format
+                // where format
                 array(
                     '%d',
                 )
@@ -352,7 +352,7 @@ class EEM_Blog extends EEM_Soft_Delete_Base
                   . ' ON b.blog_id = m2.OBJ_ID AND m2.EXM_type = "Blog" AND m2.EXM_key="'
                   . $key_that_shouldnt_exist . '"'
                   . ' WHERE';
-        if( $key_that_should_exist !== null) {
+        if ($key_that_should_exist !== null) {
             $query .= ' m1.EXM_value IS NOT NULL AND';
         }
         $query .= ' m2.EXM_value IS NULL AND bm.BLG_last_admin_visit < "'
@@ -361,7 +361,7 @@ class EEM_Blog extends EEM_Soft_Delete_Base
         if (! empty($protected_blogs)) {
             $query .= ' AND b.blog_id NOT IN (' . implode(',', $protected_blogs) . ')';
         }
-        $blog_ids = $this->_do_wpdb_query('get_col',array($query));
+        $blog_ids = $this->_do_wpdb_query('get_col', array($query));
         if (! is_array($blog_ids) || empty($blog_ids)) {
             return array();
         }
@@ -374,8 +374,6 @@ class EEM_Blog extends EEM_Soft_Delete_Base
             )
         );
     }
-
-
 }
 
 // End of file EE_Blogs.model.php

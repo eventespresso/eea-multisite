@@ -206,7 +206,7 @@ abstract class ParserAbstract
             if (strpos($item, '$' . $nb) === false) {
                 continue;
             }
-            $replace = isset($matches[$nb]) ? $matches[$nb] : '';
+            $replace = isset($matches[ $nb ]) ? $matches[ $nb ] : '';
             $item = trim(str_replace('$' . $nb, $replace, $item));
         }
         return $item;

@@ -29,21 +29,21 @@ class StaticCache implements Cache
 
     public function fetch($id)
     {
-        return $this->contains($id) ? self::$staticCache[$id] : false;
+        return $this->contains($id) ? self::$staticCache[ $id ] : false;
     }
 
 
 
     public function contains($id)
     {
-        return isset(self::$staticCache[$id]) || array_key_exists($id, self::$staticCache);
+        return isset(self::$staticCache[ $id ]) || array_key_exists($id, self::$staticCache);
     }
 
 
 
     public function save($id, $data, $lifeTime = 0)
     {
-        self::$staticCache[$id] = $data;
+        self::$staticCache[ $id ] = $data;
         return true;
     }
 
@@ -51,7 +51,7 @@ class StaticCache implements Cache
 
     public function delete($id)
     {
-        unset(self::$staticCache[$id]);
+        unset(self::$staticCache[ $id ]);
         return true;
     }
 

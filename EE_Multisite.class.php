@@ -14,9 +14,9 @@ define('EE_MULTISITE_ADMIN', EE_MULTISITE_PATH . 'admin' . DS . 'multisite' . DS
  * @package        Event Espresso
  * @subpackage     espresso-multisite
  * @author         Darren Ethier
- * 
+ *
  */
-Class EE_Multisite extends EE_Addon
+class EE_Multisite extends EE_Addon
 {
 
     /**
@@ -89,12 +89,12 @@ Class EE_Multisite extends EE_Addon
      */
     public function after_registration()
     {
-        //autoload device detector
+        // autoload device detector
         EE_Psr4AutoloaderInit::psr4_loader()->addNamespace(
             'DeviceDetector',
             EE_MULTISITE_PATH . 'core' . DS . 'libraries' . DS . 'device-detector-master'
         );
-        //set hooks for detecting an upgrade to EE or an addon
+        // set hooks for detecting an upgrade to EE or an addon
         $actions_that_could_change_mm = array(
             'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation',
             'AHEE__EE_System__detect_if_activation_or_upgrade__new_activation_but_not_installed',
@@ -110,7 +110,7 @@ Class EE_Multisite extends EE_Addon
         foreach ($actions_that_could_change_mm as $action_name) {
             add_action($action_name, array('EE_Multisite', 'possible_maintenance_mode_change_detected'));
         }
-        //a very specific hook for when running the EE_DMS_Core_4_5_0
+        // a very specific hook for when running the EE_DMS_Core_4_5_0
         add_filter(
             'FHEE__EEH_Activation__get_default_creator_id__pre_filtered_id',
             array('EE_Multisite', 'filter_get_default_creator_id')
@@ -119,19 +119,20 @@ Class EE_Multisite extends EE_Addon
             'AHEE__EE_System__initialize',
             array('EE_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed')
         );
-        //set hook for actions/filters we want to have set after core config is loaded.
+        // set hook for actions/filters we want to have set after core config is loaded.
         add_action(
             'AHEE__EE_System__load_core_configuration__complete',
             array('EE_Multisite', 'load_after_modules_loaded'),
             20
         );
-        //setup cron task on main site to check for cleanup tasks
-        if( is_main_site()) {
+        // setup cron task on main site to check for cleanup tasks
+        if (is_main_site()) {
             add_filter(
                 'FHEE__EEH_Activation__get_cron_tasks',
                 array('EE_Multisite','add_cron_task')
             );
-            add_filter( 'cron_schedules',
+            add_filter(
+                'cron_schedules',
                 array(
                     'EE_Multisite',
                     'cron_add_weekly'
@@ -183,7 +184,7 @@ Class EE_Multisite extends EE_Addon
      */
     public static function load_after_modules_loaded()
     {
-        //hook into core WordPress switch_to_blog so we run additional resets etc after.  This will execute on
+        // hook into core WordPress switch_to_blog so we run additional resets etc after.  This will execute on
         // switch_to_blog() and restore_current_blog(). This hook is added here because a `switch_to_blog` or
         // `restore_current_blog` may happen before 'init' on WordPress installs.  Other plugins may need to ensure EE
         // is reset on those switches.
@@ -250,7 +251,7 @@ Class EE_Multisite extends EE_Addon
         if (! empty(self::$_default_creator_id)) {
             return self::$_default_creator_id;
         }
-        //find the earliest admin id for the current blog
+        // find the earliest admin id for the current blog
         global $wpdb;
         $offset = 0;
         $role_to_check = apply_filters('FHEE__EE_Multisite__get_default_creator_id__role_to_check', 'administrator');
@@ -262,7 +263,7 @@ Class EE_Multisite extends EE_Addon
             );
             $user_id = $wpdb->get_var($query);
         } while ($user_id && ! user_can($user_id, $role_to_check));
-        $user_id = (int)apply_filters('FHEE__EE_Multisite__get_default_creator_id__user_id', $user_id);
+        $user_id = (int) apply_filters('FHEE__EE_Multisite__get_default_creator_id__user_id', $user_id);
         if ($user_id) {
             self::$_default_creator_id = $user_id;
             return self::$_default_creator_id;
@@ -279,13 +280,12 @@ Class EE_Multisite extends EE_Addon
      */
     public static function mark_blog_as_up_to_date_if_no_migrations_needed()
     {
-        //in order to optimize frontend requests, let's just do this check during cron tasks
-        //or admin requests
-        if (
-            ! defined('DOING_AJAX')
+        // in order to optimize frontend requests, let's just do this check during cron tasks
+        // or admin requests
+        if (! defined('DOING_AJAX')
             && (defined('DOING_CRON') || is_admin())
         ) {
-            $maintenance_level = (int)EE_Maintenance_Mode::instance()->real_level();
+            $maintenance_level = (int) EE_Maintenance_Mode::instance()->real_level();
             if ($maintenance_level === EE_Maintenance_Mode::level_2_complete_maintenance) {
                 EEM_Blog::instance()->mark_current_blog_as(EEM_Blog::status_out_of_date);
             } else {
@@ -322,8 +322,6 @@ Class EE_Multisite extends EE_Addon
         );
         return $schedules;
     }
-
-
 }
 
 // End of file EE_Multisite.class.php

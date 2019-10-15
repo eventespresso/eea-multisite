@@ -7,7 +7,7 @@ use EventEspressoBatchRequest\Helpers\BatchRequestException;
 use EventEspressoBatchRequest\Helpers\JobParameters;
 use EventEspressoBatchRequest\Helpers\JobStepResponse;
 
-/* 
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -47,7 +47,7 @@ class MultisiteQueryer extends JobHandlerFile
     {
         $wpdb_method = $job_parameters->request_datum('wpdb_method', 'get_results');
         $sql_query = $job_parameters->request_datum('sql_query');
-        //get next blog
+        // get next blog
         $blogs = \EEM_Blog::instance()->get_all_wpdb_results(
             array(
                 'limit' => array(
@@ -72,7 +72,7 @@ class MultisiteQueryer extends JobHandlerFile
         \EE_Registry::instance()->load_helper('Export');
         \EEH_Export::write_data_array_to_csv($job_parameters->extra_datum('filepath'), $rows_generated_this_step, $job_parameters->extra_datum('need_to_write_headers', $write_headers));
         $units_processed = count($blogs);
-        //if we just wrote the headers, we don't need to do it anymore now do we?
+        // if we just wrote the headers, we don't need to do it anymore now do we?
         if ($units_processed > 0) {
             $job_parameters->add_extra_data('write_headers', false);
         }
@@ -124,7 +124,7 @@ class MultisiteQueryer extends JobHandlerFile
             $args
         );
         restore_current_blog();
-        //if there's an error just blow up
+        // if there's an error just blow up
         if (($results === false || $results === null || ! empty($wpdb->last_error))) {
             if ($stop_on_error) {
                 throw new \EE_Error(
@@ -160,8 +160,10 @@ class MultisiteQueryer extends JobHandlerFile
             $job_parameters,
             sprintf(
                 __('Wrote rows for %1$d blogs...', 'event_espresso'),
-                count($units_processed)),
-            $extra_response_data);
+                count($units_processed)
+            ),
+            $extra_response_data
+        );
     }
 
 
@@ -183,4 +185,3 @@ class MultisiteQueryer extends JobHandlerFile
         return new JobStepResponse($job_parameters, __('Cleaned up temporary file', 'event_espresso'));
     }
 }
-

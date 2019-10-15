@@ -38,7 +38,7 @@ class EED_Multisite_Site_List_Table extends EED_Module
      */
     public static function set_hooks_admin()
     {
-        //		echo "add columns";
+        //      echo "add columns";
         add_filter('wpmu_blogs_columns', array('EED_Multisite_Site_List_Table', 'columns'));
         add_action('manage_sites_custom_column', array('EED_Multisite_Site_List_Table', 'cell_content'), 10, 2);
         add_filter('manage_sites-network_sortable_columns', array('EED_Multisite_Site_List_Table', 'sortable_columns'));
@@ -73,8 +73,8 @@ class EED_Multisite_Site_List_Table extends EED_Module
 
     public static function sortable_columns($sortable_columns)
     {
-        //we tell it to sort on  a column that doesn't yet exist... but we'll change the
-        //database query to join to the esp_blog_meta table where it DOES exist
+        // we tell it to sort on  a column that doesn't yet exist... but we'll change the
+        // database query to join to the esp_blog_meta table where it DOES exist
         $sortable_columns['ee_status'] = 'STS_ID';
         return $sortable_columns;
     }
@@ -86,7 +86,7 @@ class EED_Multisite_Site_List_Table extends EED_Module
         global $wpdb;
         if (function_exists('get_current_screen')) {
             $screen = get_current_screen();
-            //		var_dump( $screen) ;
+            //      var_dump( $screen) ;
             $from_blogs_sql = "FROM {$wpdb->blogs}";
             if (isset($screen->base) && $screen->base == 'sites-network' && strpos($query, $from_blogs_sql) !== false) {
                 $from_blogs_join_blog_meta_sql = $from_blogs_sql . " LEFT JOIN {$wpdb->base_prefix}esp_blog_meta ON {$wpdb->blogs}.blog_id = {$wpdb->base_prefix}esp_blog_meta.blog_id_fk";
@@ -99,7 +99,7 @@ class EED_Multisite_Site_List_Table extends EED_Module
                     $order_by_and_limit_sql = "ORDER BY FIELD( STS_ID, 'BRK','BOD','BUN','BCM','BUD' ) {$order}" . $limit_sql_only;
                     $query = str_replace($limit_sql_only, $order_by_and_limit_sql, $query);
                 }
-                //				echo "new query: $query<br>";
+                //              echo "new query: $query<br>";
             }
         }
         return $query;
@@ -170,9 +170,6 @@ class EED_Multisite_Site_List_Table extends EED_Module
     {
         return false;
     }
-
-
-
 }
 
 // End of file EED_Multisite.module.php

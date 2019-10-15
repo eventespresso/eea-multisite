@@ -6,7 +6,7 @@
  * @package               Event Espresso
  * @subpackage
  * @author                Mike Nelson
- * 
+ *
  */
 if (! defined('EVENT_ESPRESSO_VERSION')) {
     exit('No direct script access allowed');
@@ -34,18 +34,22 @@ class EE_Multisite_Queryer_Form extends EE_Form_Section_Proper
                     'wpdb_method'   => new EE_Radio_Button_Input(
                         array(
                             'get_results' => __('get_results (for selects)', 'event_espresso'),
-                            //								'query' => __( 'query (for inserts, updates, or deletes)', 'event_espresso' )
+                            //                              'query' => __( 'query (for inserts, updates, or deletes)', 'event_espresso' )
                         ),
                         array(
                             'default' => 'get_results',
-                        )),
+                        )
+                    ),
                     'sql_query'     => new EE_Text_Area_Input(
                         array(
-                            'html_help_text' => __('Only SELECT queries allowed (for now). Use the string "{$wpdb->prefix}", "{$wpdb->base_prefix}", "{$wpdb->siteid}", and "{$wpdb->blogid}" as you would normally. These strings will be replaced appropriately when querying each blog.',
-                                'event_espresso'),
+                            'html_help_text' => __(
+                                'Only SELECT queries allowed (for now). Use the string "{$wpdb->prefix}", "{$wpdb->base_prefix}", "{$wpdb->siteid}", and "{$wpdb->blogid}" as you would normally. These strings will be replaced appropriately when querying each blog.',
+                                'event_espresso'
+                            ),
                             'required'       => true,
                             'default'        => 'SELECT',
-                        )),
+                        )
+                    ),
                     'stop_on_error' => new EE_Yes_No_Input(
                         array(
                             'html_help_text' => __('Whether to stop everything on exception, or just skip', 'event_espresso'),
@@ -54,7 +58,8 @@ class EE_Multisite_Queryer_Form extends EE_Form_Section_Proper
                     'submit'        => new EE_Submit_Input(
                         array(
                             'default' => __('Run Query', 'event_espresso'),
-                        )),
+                        )
+                    ),
                 ),
             ),
             $options_array
@@ -75,8 +80,10 @@ class EE_Multisite_Queryer_Form extends EE_Form_Section_Proper
     {
         if ($input instanceof EE_Form_Input_Base) {
             $value = $input->normalized_value();
-            if (strpos($value,
-                    'UPDATE') === 0
+            if (strpos(
+                $value,
+                'UPDATE'
+            ) === 0
                 || strpos($value, 'INSERT') === 0
                 || strpos($value, 'DELETE') === 0
                 || strpos($value, 'DROP') === 0
@@ -85,6 +92,4 @@ class EE_Multisite_Queryer_Form extends EE_Form_Section_Proper
             }
         }
     }
-
-
 }

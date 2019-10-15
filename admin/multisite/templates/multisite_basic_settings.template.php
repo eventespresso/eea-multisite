@@ -13,8 +13,8 @@
             <td>
                 <?php echo EEH_Form_Fields::select(__('Reset Multisite Settings?', 'event_espresso'), 0, $yes_no_values, 'reset_multisite', 'reset_multisite'); ?><br/>
                 <span class="description">
-						<?php _e('Set to \'Yes\' and then click \'Save\' to confirm reset all basic and advanced Event Espresso Multisite settings to their plugin defaults.', 'event_espresso'); ?>
-					</span>
+                        <?php _e('Set to \'Yes\' and then click \'Save\' to confirm reset all basic and advanced Event Espresso Multisite settings to their plugin defaults.', 'event_espresso'); ?>
+                    </span>
             </td>
         </tr>
 

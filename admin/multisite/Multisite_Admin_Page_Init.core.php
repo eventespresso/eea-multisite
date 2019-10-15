@@ -11,8 +11,8 @@ if (! defined('EVENT_ESPRESSO_VERSION')) {
  * @ package        Event Espresso
  * @ author            Seth Shoultes
  * @ copyright    (c) 2008-2011 Event Espresso  All Rights Reserved.
- * @ license        {@link http://eventespresso.com/support/terms-conditions/}   * see Plugin Licensing *
- * @ link                {@link http://www.eventespresso.com}
+ * @linkense        {@link http://eventespresso.com/support/terms-conditions/}   * see Plugin Licensing *
+ * @linkk                {@link http://www.eventespresso.com}
  *
  * ------------------------------------------------------------------------
  * Multisite_Admin_Page_Init class
@@ -75,7 +75,6 @@ class Multisite_Admin_Page_Init extends EE_Admin_Page_Init
             'admin_init_page'         => $this,
         ));
     }
-
 }
 
 // End of file Multisite_Admin_Page_Init.core.php

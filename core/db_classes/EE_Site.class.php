@@ -85,9 +85,6 @@ class EE_Site extends EE_Soft_Delete_Base_Class
     {
         return $this->set('path', $path);
     }
-
-
-
 }
 
 // End of file EE_Site.class.php

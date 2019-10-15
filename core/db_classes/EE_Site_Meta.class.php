@@ -110,9 +110,6 @@ class EE_Blog extends EE_Soft_Delete_Base_Class
     {
         return $this->set('registered', $registered);
     }
-
-
-
 }
 
 // End of file EE_Blog.class.php

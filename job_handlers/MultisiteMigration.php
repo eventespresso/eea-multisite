@@ -7,7 +7,7 @@ use EventEspressoBatchRequest\Helpers\BatchRequestException;
 use EventEspressoBatchRequest\Helpers\JobParameters;
 use EventEspressoBatchRequest\Helpers\JobStepResponse;
 
-/* 
+/*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
@@ -48,21 +48,21 @@ class MultisiteMigration extends JobHandler
                 if (isset($migration_step_response['current_dms']['status'])
                     && $migration_step_response['current_dms']['status'] !== \EE_Data_Migration_Manager::status_continue
                 ) {
-                    //ok so we've finished the last migration script of that site.
-                    //we should count that as an assessment step (the wrap-up from
-                    //a migration is quite expensive but isn't a "step" per say)
+                    // ok so we've finished the last migration script of that site.
+                    // we should count that as an assessment step (the wrap-up from
+                    // a migration is quite expensive but isn't a "step" per say)
                     $blogs_assessed_and_migrated++;
                     $steps_taken += $assess_step_size_value;
                 }
             } else {
-                //no blogs need to be migrated right now.
-                //Maybe we need to assess some more?
+                // no blogs need to be migrated right now.
+                // Maybe we need to assess some more?
                 $blogs_needing_assessment = \EEM_Blog::instance()->get_all_blogs_maybe_needing_migration(array('limit' => 1));
                 if (empty($blogs_needing_assessment)) {
-                    //so none need migrating. And none need assessment. We're done right?
+                    // so none need migrating. And none need assessment. We're done right?
                     $job_parameters->set_status(JobParameters::status_complete);
                 } else {
-                    //so we found a blog that needs to be assessed. so assess it
+                    // so we found a blog that needs to be assessed. so assess it
                     $blog = array_shift($blogs_needing_assessment);
                     $needs_migrating = $this->site_need_migration($blog);
                     if ($needs_migrating) {
@@ -116,4 +116,3 @@ class MultisiteMigration extends JobHandler
         return new JobStepResponse($job_parameters, __('All done multisite migration and assessment', 'event_espresso'));
     }
 }
-
