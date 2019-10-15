@@ -238,7 +238,7 @@ class EE_Blog extends EE_Soft_Delete_Base_Class
      */
     public function get_blog_option($option_name, $default = false)
     {
-        if (! isset($this->_cached_blog_options[$option_name])) {
+        if (! isset($this->_cached_blog_options[ $option_name ])) {
             $this->cache_blog_options(array($option_name));
         }
         return $this->_get_cached_blog_option($option_name, $default);
@@ -255,8 +255,8 @@ class EE_Blog extends EE_Soft_Delete_Base_Class
      */
     protected function _get_cached_blog_option($option_name, $default = false)
     {
-        if (isset($this->_cached_blog_options[$option_name])) {
-            return $this->_cached_blog_options[$option_name];
+        if (isset($this->_cached_blog_options[ $option_name ])) {
+            return $this->_cached_blog_options[ $option_name ];
         } else {
             return $default;
         }
@@ -275,13 +275,13 @@ class EE_Blog extends EE_Soft_Delete_Base_Class
      */
     public function cache_blog_options($option_names)
     {
-        //make sure they passed an array
+        // make sure they passed an array
         if (! is_array($option_names)) {
             $option_names = array($option_names);
         }
         switch_to_blog($this->ID());
         foreach ($option_names as $option_name) {
-            $this->_cached_blog_options[$option_name] = get_option($option_name);
+            $this->_cached_blog_options[ $option_name ] = get_option($option_name);
         }
         /* reminder: switches to PREVIOUS blog, NOT the one originally requested by client
          * @see http://codex.wordpress.org/WPMU_Functions/restore_current_blog

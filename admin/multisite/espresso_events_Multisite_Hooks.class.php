@@ -43,9 +43,6 @@ class espresso_events_Multisite_Hooks extends EE_Admin_Hooks
     public function _redirect_action_early_insert_category($redirection_query_args)
     {
     }
-
-
-
 }
 
 // End of file espresso_events_Multisite_Hooks.class.php

@@ -111,9 +111,9 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
 
     protected static function set_hooks_both()
     {
-        //don't do multisite stuff if multisite isn't enabled
+        // don't do multisite stuff if multisite isn't enabled
         if (is_multisite()) {
-            //handle cron task callback
+            // handle cron task callback
             add_action(
                 'AHEE__EED_Multisite_Auto_Site_Cleanup__check_for_cleanup_tasks',
                 array(
@@ -121,7 +121,7 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
                     'check_for_cleanup_tasks'
                 )
             );
-            //redirect to splash if first visit in x months
+            // redirect to splash if first visit in x months
         }
     }
 
@@ -140,8 +140,7 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
      */
     public static function track_admin_visits()
     {
-        if (
-            ! get_transient(EED_Multisite_Auto_Site_Cleanup::SITE_ADMIN_VISIT_RECORD)
+        if (! get_transient(EED_Multisite_Auto_Site_Cleanup::SITE_ADMIN_VISIT_RECORD)
             &&  EED_Multisite_Auto_Site_Cleanup::current_user_is_tracked()
             && ! wp_doing_ajax()
         ) {
@@ -156,16 +155,16 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
                 1,
                 apply_filters(
                     'FHEE__EED_Multisite_Auto_Site_Cleanup__track_admin_visits__frequency',
-                    DAY_IN_SECONDS)
+                    DAY_IN_SECONDS
+                )
             );
-            //fetch the first cleanup tasks' label, so we can check if it was already done
-            //(don't just assume someone hasn't filtered the get_cleanup_tasks method and changed it)
+            // fetch the first cleanup tasks' label, so we can check if it was already done
+            // (don't just assume someone hasn't filtered the get_cleanup_tasks method and changed it)
             $cleanup_tasks = EED_Multisite_Auto_Site_Cleanup::get_cleanup_tasks();
             $cleanup_task_labels = array_keys($cleanup_tasks);
             $first_cleanup_task = reset($cleanup_task_labels);
             switch_to_blog(1);
-            if (
-            $current_blog->get_extra_meta(
+            if ($current_blog->get_extra_meta(
                 EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name(
                     $first_cleanup_task
                 ),
@@ -173,12 +172,12 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
                 false
             )
             ) {
-                //ok forget we ever sent them any warnings etc
-                foreach(EED_Multisite_Auto_Site_Cleanup::get_cleanup_tasks() as $label => $time_threshold) {
+                // ok forget we ever sent them any warnings etc
+                foreach (EED_Multisite_Auto_Site_Cleanup::get_cleanup_tasks() as $label => $time_threshold) {
                     $current_blog->delete_extra_meta(EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name($label));
                 }
                 restore_current_blog();
-                //tell them we won't be deleting their site anymore
+                // tell them we won't be deleting their site anymore
                 $site_details = get_blog_details();
                 $blog_name = trim($site_details->blogname) === '' ? $site_details->domain : $site_details->blogname;
                 $content = EEH_Template::display_template(
@@ -201,7 +200,7 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
      */
     public static function current_user_is_tracked()
     {
-        $cap_that_determines_track_worthiness = defined( 'EE_MULTISITE_TRACK_CAP')
+        $cap_that_determines_track_worthiness = defined('EE_MULTISITE_TRACK_CAP')
             ? EE_MULTISITE_TRACK_CAP
             : 'ee_read_ee';
 
@@ -265,7 +264,7 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
         $intervals = EED_Multisite_Auto_Site_Cleanup::get_cleanup_tasks();
         $last_interval = end($intervals);
         reset($intervals);
-        foreach($intervals as $label => $interval) {
+        foreach ($intervals as $label => $interval) {
             $threshold_time = strtotime('-' . $interval);
             $blogs_matching_criteria = EEM_Blog::instance()->get_all_logged_into_since_time_with_extra_meta(
                 $threshold_time,
@@ -277,25 +276,25 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
                 ),
                 EED_Multisite_Auto_Site_Cleanup::get_protected_blogs()
             );
-            foreach($blogs_matching_criteria as $blog) {
-                if($last_interval === $interval) {
-                    //it's the last interval. Cleanup time
+            foreach ($blogs_matching_criteria as $blog) {
+                if ($last_interval === $interval) {
+                    // it's the last interval. Cleanup time
                     $blog->set('archived', true);
                 }
-                //in case there was a mixup and this action is getting fired much later than it should
-                //avoid sending all the events in rapid succession by making sure the last recorded
-                //visit by an admin matches what this action expected it to. This means if we send a
-                //message saying the site will be archived in 4 months, and it's actually 1 month from
-                //the date, because we're sending the message late somehow, we're actually delaying
-                //the site's archival so that the message is correct.
+                // in case there was a mixup and this action is getting fired much later than it should
+                // avoid sending all the events in rapid succession by making sure the last recorded
+                // visit by an admin matches what this action expected it to. This means if we send a
+                // message saying the site will be archived in 4 months, and it's actually 1 month from
+                // the date, because we're sending the message late somehow, we're actually delaying
+                // the site's archival so that the message is correct.
                 $blog->set('BLG_last_admin_visit', $threshold_time);
-                //record that it's been fired
+                // record that it's been fired
                 $blog->add_extra_meta(EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name($label), current_time('mysql', true));
-                //fire an action other plugins can listen for
+                // fire an action other plugins can listen for
                 do_action('AHEE__EED_Multisite_Auto_Site_Cleanup', $blog, $label, $interval);
                 $blog->save();
             }
-            //remember this label during the next iteration
+            // remember this label during the next iteration
             $previous_interval_label = $label;
         }
     }
@@ -306,9 +305,10 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
      * Gets an array of all the blog IDs that are "protected" from being automatically archived etc.
      * @return array
      */
-    public static function get_protected_blogs(){
+    public static function get_protected_blogs()
+    {
         $protected_blogs = isset(EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_excludes) ? EE_Registry::instance()->CFG->addons->ee_multisite->delete_site_excludes : array();
-        //always make sure that the main site is excluded from any deletes and that we've typecast the values in the array.
+        // always make sure that the main site is excluded from any deletes and that we've typecast the values in the array.
         $protected_blogs[] = 1;
         $protected_blogs = array_map('absint', $protected_blogs);
         return $protected_blogs;
@@ -319,7 +319,9 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
     /**
      * Declare unused abstract method
      */
-    public function run($WP){}
+    public function run($WP)
+    {
+    }
 }
 
 // End of file EED_Multisite.module.php

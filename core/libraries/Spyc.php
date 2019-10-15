@@ -268,7 +268,7 @@ class Spyc
         }
         // Start at the base of the array and move through it.
         if ($array) {
-            $array = (array)$array;
+            $array = (array) $array;
             $previous_key = -1;
             foreach ($array as $key => $value) {
                 if (! isset($first_key)) {
@@ -295,7 +295,7 @@ class Spyc
     private function _yamlize($key, $value, $indent, $previous_key = -1, $first_key = 0, $source_array = null)
     {
         if (is_array($value)) {
-            if (empty ($value)) {
+            if (empty($value)) {
                 return $this->_dumpNode($key, array(), $indent, $previous_key, $first_key, $source_array);
             }
             // It has children.  What to do?
@@ -397,7 +397,7 @@ class Spyc
             $value = null;
         }
         $spaces = str_repeat(' ', $indent);
-        //if (is_int($key) && $key - 1 == $previous_key && $first_key===0) {
+        // if (is_int($key) && $key - 1 == $previous_key && $first_key===0) {
         if (is_array($source_array) && array_keys($source_array) === range(0, count($source_array) - 1)) {
             // It's a sequence
             $string = $spaces . '- ' . $value . "\n";
@@ -528,9 +528,9 @@ class Spyc
     {
         if (self::isTrueWord($value)) {
             $value = true;
-        } else if (self::isFalseWord($value)) {
+        } elseif (self::isFalseWord($value)) {
             $value = false;
-        } else if (self::isNullWord($value)) {
+        } elseif (self::isNullWord($value)) {
             $value = null;
         }
     }
@@ -574,7 +574,7 @@ class Spyc
 
     private function loadWithSource($Source)
     {
-        if (empty ($Source)) {
+        if (empty($Source)) {
             return array();
         }
         if ($this->setting_use_syck_is_possible && function_exists('syck_load')) {
@@ -585,7 +585,7 @@ class Spyc
         $this->result = array();
         $cnt = count($Source);
         for ($i = 0; $i < $cnt; $i++) {
-            $line = $Source[$i];
+            $line = $Source[ $i ];
             $this->indent = strlen($line) - strlen(ltrim($line));
             $tempPath = $this->getParentPathByIndent($this->indent);
             $line = self::stripIndent($line, $this->indent);
@@ -601,9 +601,9 @@ class Spyc
                 $line = rtrim($line, $literalBlockStyle . " \n");
                 $literalBlock = '';
                 $line .= ' ' . $this->LiteralPlaceHolder;
-                $literal_block_indent = strlen($Source[$i + 1]) - strlen(ltrim($Source[$i + 1]));
-                while (++$i < $cnt && $this->literalBlockContinues($Source[$i], $this->indent)) {
-                    $literalBlock = $this->addLiteralLine($literalBlock, $Source[$i], $literalBlockStyle, $literal_block_indent);
+                $literal_block_indent = strlen($Source[ $i + 1 ]) - strlen(ltrim($Source[ $i + 1 ]));
+                while (++$i < $cnt && $this->literalBlockContinues($Source[ $i ], $this->indent)) {
+                    $literalBlock = $this->addLiteralLine($literalBlock, $Source[ $i ], $literalBlockStyle, $literal_block_indent);
                 }
                 $i--;
             }
@@ -612,7 +612,7 @@ class Spyc
                 $line = preg_replace('/\s*#([^"\']+)$/', '', $line);
             }
             while (++$i < $cnt && self::greedilyNeedNextLine($line)) {
-                $line = rtrim($line, " \n\t\r") . ' ' . ltrim($Source[$i], " \t");
+                $line = rtrim($line, " \n\t\r") . ' ' . ltrim($Source[ $i ], " \t");
             }
             $i--;
             $lineArray = $this->_parseLine($line);
@@ -621,7 +621,7 @@ class Spyc
             }
             $this->addArray($lineArray, $this->indent);
             foreach ($this->delayedPath as $indent => $delayedPath) {
-                $this->path[$indent] = $delayedPath;
+                $this->path[ $indent ] = $delayedPath;
             }
             $this->delayedPath = array();
         }
@@ -644,7 +644,7 @@ class Spyc
     {
         $lines = explode("\n", $input);
         foreach ($lines as $k => $_) {
-            $lines[$k] = rtrim($_, "\r");
+            $lines[ $k ] = rtrim($_, "\r");
         }
         return $lines;
     }
@@ -762,7 +762,7 @@ class Spyc
                     continue;
                 }
                 if (is_array($SubArr)) {
-                    $array[key($SubArr)] = $SubArr[key($SubArr)];
+                    $array[ key($SubArr) ] = $SubArr[ key($SubArr) ];
                     continue;
                 }
                 $array[] = $SubArr;
@@ -773,7 +773,7 @@ class Spyc
             return null;
         }
         if (is_numeric($value) && preg_match('/^(-|)[1-9]+[0-9]*$/', $value)) {
-            $intvalue = (int)$value;
+            $intvalue = (int) $value;
             if ($intvalue != PHP_INT_MAX) {
                 $value = $intvalue;
             }
@@ -789,7 +789,7 @@ class Spyc
                 return 0;
             }
             if (rtrim($value, 0) === $value) {
-                $value = (float)$value;
+                $value = (float) $value;
             }
             return $value;
         }
@@ -855,8 +855,8 @@ class Spyc
                 foreach ($explode as $key => $value) {
                     if (strpos($value, 'YAMLSeq') !== false) {
                         foreach ($seqs as $seqk => $seq) {
-                            $explode[$key] = str_replace(('YAMLSeq' . $seqk . 's'), $seq, $value);
-                            $value = $explode[$key];
+                            $explode[ $key ] = str_replace(('YAMLSeq' . $seqk . 's'), $seq, $value);
+                            $value = $explode[ $key ];
                         }
                     }
                 }
@@ -866,8 +866,8 @@ class Spyc
                 foreach ($explode as $key => $value) {
                     if (strpos($value, 'YAMLMap') !== false) {
                         foreach ($maps as $mapk => $map) {
-                            $explode[$key] = str_replace(('YAMLMap' . $mapk . 's'), $map, $value);
-                            $value = $explode[$key];
+                            $explode[ $key ] = str_replace(('YAMLMap' . $mapk . 's'), $map, $value);
+                            $value = $explode[ $key ];
                         }
                     }
                 }
@@ -876,10 +876,10 @@ class Spyc
             if (! empty($saved_strings)) {
                 foreach ($explode as $key => $value) {
                     while (strpos($value, 'YAMLString') !== false) {
-                        $explode[$key] = preg_replace('/YAMLString/', $saved_strings[$stringi], $value, 1);
-                        unset($saved_strings[$stringi]);
+                        $explode[ $key ] = preg_replace('/YAMLString/', $saved_strings[ $stringi ], $value, 1);
+                        unset($saved_strings[ $stringi ]);
                         ++$stringi;
-                        $value = $explode[$key];
+                        $value = $explode[ $key ];
                     }
                 }
             }
@@ -887,8 +887,8 @@ class Spyc
             if (! empty($saved_empties)) {
                 foreach ($explode as $key => $value) {
                     while (strpos($value, 'YAMLEmpty') !== false) {
-                        $explode[$key] = preg_replace('/YAMLEmpty/', '', $value, 1);
-                        $value = $explode[$key];
+                        $explode[ $key ] = preg_replace('/YAMLEmpty/', '', $value, 1);
+                        $value = $explode[ $key ];
                     }
                 }
             }
@@ -940,14 +940,14 @@ class Spyc
     private function referenceContentsByAlias($alias)
     {
         do {
-            if (! isset($this->SavedGroups[$alias])) {
+            if (! isset($this->SavedGroups[ $alias ])) {
                 echo "Bad group name: $alias.";
                 break;
             }
-            $groupPath = $this->SavedGroups[$alias];
+            $groupPath = $this->SavedGroups[ $alias ];
             $value = $this->result;
             foreach ($groupPath as $k) {
-                $value = $value[$k];
+                $value = $value[ $k ];
             }
         } while (false);
         return $value;
@@ -958,7 +958,7 @@ class Spyc
     private function addArrayInline($array, $indent)
     {
         $CommonGroupPath = $this->path;
-        if (empty ($array)) {
+        if (empty($array)) {
             return false;
         }
         foreach ($array as $k => $_) {
@@ -977,26 +977,26 @@ class Spyc
             return $this->addArrayInline($incoming_data, $incoming_indent);
         }
         $key = key($incoming_data);
-        $value = isset($incoming_data[$key]) ? $incoming_data[$key] : null;
+        $value = isset($incoming_data[ $key ]) ? $incoming_data[ $key ] : null;
         if ($key === '__!YAMLZero') {
             $key = '0';
         }
         if ($incoming_indent == 0 && ! $this->_containsGroupAlias && ! $this->_containsGroupAnchor) { // Shortcut for root-level values.
             if ($key || $key === '' || $key === '0') {
-                $this->result[$key] = $value;
+                $this->result[ $key ] = $value;
             } else {
                 $this->result[] = $value;
                 end($this->result);
                 $key = key($this->result);
             }
-            $this->path[$incoming_indent] = $key;
+            $this->path[ $incoming_indent ] = $key;
             return;
         }
         $history = array();
         // Unfolding inner array tree.
         $history[] = $_arr = $this->result;
         foreach ($this->path as $k) {
-            $history[] = $_arr = $_arr[$k];
+            $history[] = $_arr = $_arr[ $k ];
         }
         if ($this->_containsGroupAlias) {
             $value = $this->referenceContentsByAlias($this->_containsGroupAlias);
@@ -1008,11 +1008,11 @@ class Spyc
                 $_arr = array();
             }
             $_arr = array_merge($_arr, $value);
-        } else if ($key || $key === '' || $key === '0') {
+        } elseif ($key || $key === '' || $key === '0') {
             if (! is_array($_arr)) {
                 $_arr = array($key => $value);
             } else {
-                $_arr[$key] = $value;
+                $_arr[ $key ] = $value;
             }
         } else {
             if (! is_array($_arr)) {
@@ -1029,16 +1029,16 @@ class Spyc
         $reverse_history[0] = $_arr;
         $cnt = count($reverse_history) - 1;
         for ($i = 0; $i < $cnt; $i++) {
-            $reverse_history[$i + 1][$reverse_path[$i]] = $reverse_history[$i];
+            $reverse_history[ $i + 1 ][ $reverse_path[ $i ] ] = $reverse_history[ $i ];
         }
-        $this->result = $reverse_history[$cnt];
-        $this->path[$incoming_indent] = $key;
+        $this->result = $reverse_history[ $cnt ];
+        $this->path[ $incoming_indent ] = $key;
         if ($this->_containsGroupAnchor) {
-            $this->SavedGroups[$this->_containsGroupAnchor] = $this->path;
+            $this->SavedGroups[ $this->_containsGroupAnchor ] = $this->path;
             if (is_array($value)) {
                 $k = key($value);
                 if (! is_int($k)) {
-                    $this->SavedGroups[$this->_containsGroupAnchor][$incoming_indent + 2] = $k;
+                    $this->SavedGroups[ $this->_containsGroupAnchor ][ $incoming_indent + 2 ] = $k;
                 }
             }
             $this->_containsGroupAnchor = false;
@@ -1113,9 +1113,9 @@ class Spyc
     {
         foreach ($lineArray as $k => $_) {
             if (is_array($_)) {
-                $lineArray[$k] = $this->revertLiteralPlaceHolder($_, $literalBlock);
-            } else if (substr($_, -1 * strlen($this->LiteralPlaceHolder)) == $this->LiteralPlaceHolder) {
-                $lineArray[$k] = rtrim($literalBlock, " \r\n");
+                $lineArray[ $k ] = $this->revertLiteralPlaceHolder($_, $literalBlock);
+            } elseif (substr($_, -1 * strlen($this->LiteralPlaceHolder)) == $this->LiteralPlaceHolder) {
+                $lineArray[ $k ] = rtrim($literalBlock, " \r\n");
             }
         }
         return $lineArray;
@@ -1156,12 +1156,12 @@ class Spyc
         if ($indent == 0) {
             $this->path = array();
         }
-        if (empty ($this->path)) {
+        if (empty($this->path)) {
             return true;
         }
         foreach ($this->path as $k => $_) {
             if ($k > $indent) {
-                unset ($this->path[$k]);
+                unset($this->path[ $k ]);
             }
         }
         return true;
@@ -1260,7 +1260,7 @@ class Spyc
     {
         $array = array();
         $key = self::unquote(trim(substr($line, 1, -1)));
-        $array[$key] = array();
+        $array[ $key ] = array();
         $this->delayedPath = array(strpos($line, $key) + $this->indent => $key);
         return array($array);
     }
@@ -1283,7 +1283,7 @@ class Spyc
         $this->checkKeysInValue($line);
         $array = array();
         $key = self::unquote(trim(substr($line, 0, -1)));
-        $array[$key] = '';
+        $array[ $key ] = '';
         return $array;
     }
 
@@ -1332,7 +1332,7 @@ class Spyc
             if ($key === '0') {
                 $key = '__!YAMLZero';
             }
-            $array[$key] = $value;
+            $array[ $key ] = $value;
         } else {
             $array = array($line);
         }
@@ -1392,7 +1392,7 @@ class Spyc
         if ($group[0] == '*') {
             $this->_containsGroupAlias = substr($group, 1);
         }
-        //print_r ($this->path);
+        // print_r ($this->path);
     }
 
 
@@ -1412,10 +1412,10 @@ do {
     if (PHP_SAPI != 'cli') {
         break;
     }
-    if (empty ($_SERVER['argc']) || $_SERVER['argc'] < 2) {
+    if (empty($_SERVER['argc']) || $_SERVER['argc'] < 2) {
         break;
     }
-    if (empty ($_SERVER['PHP_SELF']) || false === strpos($_SERVER['PHP_SELF'], 'Spyc.php')) {
+    if (empty($_SERVER['PHP_SELF']) || false === strpos($_SERVER['PHP_SELF'], 'Spyc.php')) {
         break;
     }
     $file = $argv[1];

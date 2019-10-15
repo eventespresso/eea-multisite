@@ -12,7 +12,7 @@ if (! defined('EVENT_ESPRESSO_VERSION')) {
  * @ copyright	(c) 2008-2014 Event Espresso  All Rights Reserved.
  * @ license		http://eventespresso.com/support/terms-conditions/   * see Plugin Licensing *
  * @ link				http://www.eventespresso.com
- * 
+ *
  *
  * ------------------------------------------------------------------------
  */
@@ -70,11 +70,11 @@ class EED_Multisite extends EED_Module
     public static function set_hooks_admin()
     {
         self::set_hooks_both();
-        //don't do multisite stuff if multisite isn't enabled
+        // don't do multisite stuff if multisite isn't enabled
         if (is_multisite()) {
             add_action('network_admin_notices', array('EED_Multisite', 'check_network_maintenance_mode'));
             add_action('network_admin_notices', array('EED_Multisite', 'check_main_blog_maintenance_mode'));
-            //filter the existing maintenance mode messages in EE core
+            // filter the existing maintenance mode messages in EE core
             add_filter('FHEE__Maintenance_Admin_Page_Init__check_maintenance_mode__notice', array('EED_Multisite', 'check_main_blog_maintenance_mode'), 10);
         }
     }
@@ -91,10 +91,14 @@ class EED_Multisite extends EED_Module
 
     protected static function set_hooks_both()
     {
-        //don't do multisite stuff if multisite isn't enabled
+        // don't do multisite stuff if multisite isn't enabled
         if (is_multisite()) {
-            add_action('AHEE__EE_Data_Migration_Manager__check_for_applicable_data_migration_scripts__scripts_that_should_run',
-                array('EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed'), 10, 1);
+            add_action(
+                'AHEE__EE_Data_Migration_Manager__check_for_applicable_data_migration_scripts__scripts_that_should_run',
+                array('EED_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed'),
+                10,
+                1
+            );
             add_action('wpmu_new_blog', array('EED_Multisite', 'new_blog_created'), 10, 1);
             add_action('wp_loaded', array('EED_Multisite', 'update_last_requested'));
             add_filter('delete_blog', array('EED_Multisite', 'delete_ee_custom_tables_too'), 10, 2);
@@ -112,35 +116,34 @@ class EED_Multisite extends EED_Module
      */
     public static function delete_ee_custom_tables_too($blog_id, $drop)
     {
-        if($drop){
+        if ($drop) {
             EEM_Base::set_model_query_blog_id($blog_id);
             EEH_Activation::drop_espresso_tables();
             EEM_Base::set_model_query_blog_id();
-            //clean up blog_meta table
+            // clean up blog_meta table
             $tables = EEM_Blog::instance()->get_tables();
             if (isset($tables['Blog_Meta']) && $tables['Blog_Meta'] instanceof EE_Secondary_Table) {
-                //the main blog entry is already deleted, let's clean up the entry in the secondary table
+                // the main blog entry is already deleted, let's clean up the entry in the secondary table
                 global $wpdb;
                 $wpdb->delete($tables['Blog_Meta']->get_table_name(), array('blog_id_fk' => $blog_id));
             }
-            //delete all non super_admin users that were attached to that blog if configured to drop them
-            //so long as they're not a member of another site (main site's ok; we want to delete them from there too)
+            // delete all non super_admin users that were attached to that blog if configured to drop them
+            // so long as they're not a member of another site (main site's ok; we want to delete them from there too)
             if (EE_Registry::instance()->CFG->addons->ee_multisite->delete_non_super_admin_users) {
                 $users = get_users(array('blog_id' => $blog_id, 'fields' => 'ids'));
                 foreach ($users as $user_id) {
                     if (EED_Multisite::user_never_gets_deleted($user_id)) {
                         continue;
                     }
-                    //are they a member of another site (besides the main site)? If so, don't delete them
+                    // are they a member of another site (besides the main site)? If so, don't delete them
                     if (! array_diff_key(
                         get_blogs_of_user($user_id),
                         array(
                             1 => true,
                             $blog_id => true
                         )
-                    )){
+                    )) {
                         wpmu_delete_user($user_id);
-
                     }
                 }
             }
@@ -191,13 +194,15 @@ class EED_Multisite extends EED_Module
     {
         if (EE_Maintenance_Mode::instance()->level() != EE_Maintenance_Mode::level_2_complete_maintenance) {
             if (is_network_admin()) {
-                //check that all the blogs are up-to-date
+                // check that all the blogs are up-to-date
                 $blogs_needing_migration = EEM_Blog::instance()->count_blogs_maybe_needing_migration();
                 if ($blogs_needing_migration) {
                     $network = EE_Admin_Page::add_query_args_and_nonce(array(), EE_MULTISITE_ADMIN_URL);
                     echo '<div class="error">
-						<p>' . sprintf(__('A change has been detected to your Event Espresso plugin or addons. Blogs on your network may require migration. %1$sClick here to check%2$s',
-                            "event_espresso"), "<a href='$network'>", "</a>") .
+						<p>' . sprintf(__(
+                        'A change has been detected to your Event Espresso plugin or addons. Blogs on your network may require migration. %1$sClick here to check%2$s',
+                        "event_espresso"
+                    ), "<a href='$network'>", "</a>") .
                          '</div>';
                 }
             }
@@ -214,15 +219,19 @@ class EED_Multisite extends EED_Module
             if (is_main_site()) {
                 $new_notice = '<div class="error">
 					<p>'
-                              . sprintf(__('Your main site\'s Event Espresso data is out of date %1$sand needs to be migrated.%2$s After doing this, you should check that the other blogs on your network are up-to-date.',
-                        "event_espresso"), "<a href='$maintenance_page_url'>", "</a>")
+                              . sprintf(__(
+                                  'Your main site\'s Event Espresso data is out of date %1$sand needs to be migrated.%2$s After doing this, you should check that the other blogs on your network are up-to-date.',
+                                  "event_espresso"
+                              ), "<a href='$maintenance_page_url'>", "</a>")
                               .
                               '</div>';
             } else {
                 $new_notice = '<div class="error">
 				<p>'
-                              . __('Your event site is in the process of being updated and is currently in maintainance mode.  It has been bumped to the front of the queue and you should be able to have full access again in about 5 minutes.',
-                        'event_espresso')
+                              . __(
+                                  'Your event site is in the process of being updated and is currently in maintainance mode.  It has been bumped to the front of the queue and you should be able to have full access again in about 5 minutes.',
+                                  'event_espresso'
+                              )
                               . '</p>'
                               .
                               '</div>';
@@ -244,9 +253,9 @@ class EED_Multisite extends EED_Module
      */
     public static function update_last_requested()
     {
-        //only record visits by non-bots, and non-cron
-        //also, only do this on the main site when its out of maintenance mode;
-        //other sites can do it fine in mainteannce mode
+        // only record visits by non-bots, and non-cron
+        // also, only do this on the main site when its out of maintenance mode;
+        // other sites can do it fine in mainteannce mode
         $user_agent = isset($_SERVER['HTTP_USER_AGENT'])
             ?
             $_SERVER['HTTP_USER_AGENT']
@@ -303,17 +312,17 @@ class EED_Multisite extends EED_Module
      */
     public static function switch_to_blog($new_blog_id, $old_blog_id = 0)
     {
-        //we DON'T call anything in here if wp is installing
-        if (wp_installing() || (int)$new_blog_id == (int)$old_blog_id) {
+        // we DON'T call anything in here if wp is installing
+        if (wp_installing() || (int) $new_blog_id == (int) $old_blog_id) {
             return;
         }
-        //if made it here then we just set_model_query_blog_id
+        // if made it here then we just set_model_query_blog_id
         EEM_Base::set_model_query_blog_id($new_blog_id);
-        //if not a full reset then return
+        // if not a full reset then return
         if (! self::$_do_full_reset) {
             return;
         }
-        //make sure that we reset _do_full_reset so the next switch doesn't happen.
+        // make sure that we reset _do_full_reset so the next switch doesn't happen.
         self::$_do_full_reset = false;
         self::perform_full_reset();
     }
@@ -388,9 +397,9 @@ class EED_Multisite extends EED_Module
      */
     public function enqueue_scripts()
     {
-        //Check to see if the multisite css file exists in the '/uploads/espresso/' directory
+        // Check to see if the multisite css file exists in the '/uploads/espresso/' directory
         if (is_readable(EVENT_ESPRESSO_UPLOAD_DIR . "css/multisite.css")) {
-            //This is the url to the css file if available
+            // This is the url to the css file if available
             wp_register_style('espresso_multisite', EVENT_ESPRESSO_UPLOAD_URL . 'css/espresso_multisite.css');
         } else {
             // EE multisite style
@@ -488,9 +497,6 @@ class EED_Multisite extends EED_Module
     {
         return false;
     }
-
-
-
 }
 
 // End of file EED_Multisite.module.php

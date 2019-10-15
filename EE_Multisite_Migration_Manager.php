@@ -83,8 +83,8 @@ class EE_Multisite_Migration_Manager
         $num_migrated = 0;
         $multisite_migration_message = '';
         $current_script_names = array();
-        //in addition to limiting the number of records we migrate during each step,
-        //see https://events.codebasehq.com/projects/event-espresso/tickets/8332
+        // in addition to limiting the number of records we migrate during each step,
+        // see https://events.codebasehq.com/projects/event-espresso/tickets/8332
         $max_blogs_to_migrate = max(
             1,
             defined('EE_MIGRATION_STEP_SIZE_BLOGS') ? EE_MIGRATION_STEP_SIZE_BLOGS : 5
@@ -92,15 +92,15 @@ class EE_Multisite_Migration_Manager
         $blogs_migrated = 0;
         $blog_to_migrate = null;
         try {
-            //while we have more records and blogs to migrate, step through each blog
+            // while we have more records and blogs to migrate, step through each blog
             while ($blogs_migrated++ < $max_blogs_to_migrate
                    && $num_migrated < $records_to_migrate
                    && $blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested()) {
                 EED_Multisite::do_full_reset();
                 switch_to_blog($blog_to_migrate->ID());
-                //and keep hammering that blog so long as it has stuff to migrate
+                // and keep hammering that blog so long as it has stuff to migrate
                 do {
-                    //pretend each call is a separate request
+                    // pretend each call is a separate request
                     $results = EE_Data_Migration_Manager::reset()->migration_step($records_to_migrate - $num_migrated);
                     $num_migrated += $results['records_migrated'];
                     $multisite_migration_message .= "<br>" . $results['message'];
@@ -116,21 +116,24 @@ class EE_Multisite_Migration_Manager
                     }
                 } while ($num_migrated < $records_to_migrate
                          && $status_indicates_continue);
-                //if we're done this migration step, grab the remaining scripts for this blog
-                //before we switch back to the network admin
+                // if we're done this migration step, grab the remaining scripts for this blog
+                // before we switch back to the network admin
                 if ($num_migrated >= $records_to_migrate) {
                     $current_script_names = $this->_get_applicable_dms_names();
                 }
-                //if appropriate, update this blog's status
+                // if appropriate, update this blog's status
                 if ($results['status'] == EE_Data_Migration_Manager::status_fatal_error) {
                     $blog_to_migrate->set_STS_ID(EEM_Blog::status_borked);
                     $multisite_migration_message = sprintf(__('%1$sSkipping migration of %2$s%3$s', 'event_espresso'), '<del>', $blog_to_migrate->name(), '</del>')
                                                    . '<br>'
                                                    . $multisite_migration_message;
                     $crash_email_subject = sprintf(__('Multisite Migration Error migrating %s', 'event_espresso'), $blog_to_migrate->name());
-                    $crash_email_body = sprintf(__('The blog at %s had a fatal error while migrating. Here is their migration history: %s', 'event_espresso'), $blog_to_migrate->site_url(),
-                        print_r(EEM_System_Status::instance()->get_ee_migration_history(), true));
-                    //swithc blog now so we email the network admin, not the blog admin
+                    $crash_email_body = sprintf(
+                        __('The blog at %1$s had a fatal error while migrating. Here is their migration history: %2$s', 'event_espresso'),
+                        $blog_to_migrate->site_url(),
+                        print_r(EEM_System_Status::instance()->get_ee_migration_history(), true)
+                    );
+                    // swithc blog now so we email the network admin, not the blog admin
                     restore_current_blog();
                     $success = wp_mail(get_site_option('admin_email'), $crash_email_subject, $crash_email_body);
                 } elseif ($results['status'] == EE_Data_Migration_Manager::status_no_more_migration_scripts) {
@@ -151,8 +154,8 @@ class EE_Multisite_Migration_Manager
                     'message'                   => $multisite_migration_message,
                 );
             } else {
-                //theoreticlly we could receive another request like this when there are no
-                //more blogs that need to be migrated
+                // theoreticlly we could receive another request like this when there are no
+                // more blogs that need to be migrated
                 return array(
                     'current_blog_name'         => '',
                     'current_blog_script_names' => array(),
@@ -213,7 +216,7 @@ class EE_Multisite_Migration_Manager
         $blogs = EEM_Blog::instance()->get_all_blogs_maybe_needing_migration(array('limit' => $num_to_assess));
         $blogs_needing_to_migrate = 0;
         foreach ($blogs as $blog) {
-            //switch to that blog and assess whether or not it needs to be migrated
+            // switch to that blog and assess whether or not it needs to be migrated
             EED_Multisite::do_full_reset();
             switch_to_blog($blog->ID());
             $needs_migrating = EE_Maintenance_Mode::instance()->set_maintenance_mode_if_db_old();
@@ -228,8 +231,6 @@ class EE_Multisite_Migration_Manager
         }
         return $blogs_needing_to_migrate;
     }
-
-
 }
 
 // End of file EE_Multisite_Migration_Manager.php

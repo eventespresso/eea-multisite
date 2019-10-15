@@ -65,9 +65,9 @@ if ($wp_version < '4.4.0' && ! function_exists('wp_installing')) {
         if (! is_null($is_installing)) {
             $old_installing = $installing;
             $installing = $is_installing;
-            return (bool)$old_installing;
+            return (bool) $old_installing;
         }
-        return (bool)$installing;
+        return (bool) $installing;
     }
 }
 // End of file espresso_multisite.php

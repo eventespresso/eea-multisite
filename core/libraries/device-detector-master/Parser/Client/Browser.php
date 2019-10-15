@@ -228,7 +228,7 @@ class Browser extends ClientParserAbstract
         $name = $this->buildByMatch($regex['name'], $matches);
         foreach (self::getAvailableBrowsers() as $browserShort => $browserName) {
             if (strtolower($name) == strtolower($browserName)) {
-                $version = (string)$this->buildVersion($regex['version'], $matches);
+                $version = (string) $this->buildVersion($regex['version'], $matches);
                 $engine = $this->buildEngine(isset($regex['engine']) ? $regex['engine'] : array(), $version);
                 return array(
                     'type'       => 'browser',

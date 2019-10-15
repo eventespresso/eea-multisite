@@ -47,9 +47,6 @@ class EEM_Site_Meta extends EEM_Soft_Delete_Base
         );
         parent::__construct();
     }
-
-
-
 }
 
 // End of file EE_Site_meta.model.php

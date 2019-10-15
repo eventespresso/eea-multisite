@@ -407,10 +407,10 @@ class DeviceDetector
         if ($attr == '') {
             return $this->os;
         }
-        if (! isset($this->os[$attr])) {
+        if (! isset($this->os[ $attr ])) {
             return self::UNKNOWN;
         }
-        return $this->os[$attr];
+        return $this->os[ $attr ];
     }
 
 
@@ -427,10 +427,10 @@ class DeviceDetector
         if ($attr == '') {
             return $this->client;
         }
-        if (! isset($this->client[$attr])) {
+        if (! isset($this->client[ $attr ])) {
             return self::UNKNOWN;
         }
-        return $this->client[$attr];
+        return $this->client[ $attr ];
     }
 
 
@@ -627,7 +627,7 @@ class DeviceDetector
         if (is_null($this->device) && $osFamily == 'Android' && in_array($this->getClient('name'), array('Chrome', 'Chrome Mobile'))) {
             if ($this->matchUserAgent('Chrome/[\.0-9]* Mobile')) {
                 $this->device = DeviceParserAbstract::DEVICE_TYPE_SMARTPHONE;
-            } else if ($this->matchUserAgent('Chrome/[\.0-9]* (?!Mobile)')) {
+            } elseif ($this->matchUserAgent('Chrome/[\.0-9]* (?!Mobile)')) {
                 $this->device = DeviceParserAbstract::DEVICE_TYPE_TABLET;
             }
         }
