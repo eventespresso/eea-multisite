@@ -36,7 +36,7 @@
  *
  * ------------------------------------------------------------------------
  */
-define('EE_MULTISITE_CORE_VERSION_REQUIRED', '4.9.26.rc.000');
+define('EE_MULTISITE_CORE_VERSION_REQUIRED', '4.9.62.rc.000');
 define('EE_MULTISITE_VERSION', '1.0.4.rc.007');
 define('EE_MULTISITE_PLUGIN_FILE', __FILE__);
 function load_espresso_multisite()
