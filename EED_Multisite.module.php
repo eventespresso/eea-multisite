@@ -99,7 +99,7 @@ class EED_Multisite extends EED_Module
                 10,
                 1
             );
-            add_action('wpmu_new_blog', array('EED_Multisite', 'new_blog_created'), 10, 1);
+            add_action('wp_insert_site', array('EED_Multisite', 'new_blog_created'), 10, 1);
             add_action('wp_loaded', array('EED_Multisite', 'update_last_requested'));
             add_filter('delete_blog', array('EED_Multisite', 'delete_ee_custom_tables_too'), 10, 2);
         }
@@ -422,14 +422,14 @@ class EED_Multisite extends EED_Module
      * (otherwise, if we wait, it's possible to get multiple simultenous requests
      * which will cause duplicate entries in the blog meta table)
      */
-    public static function new_blog_created($blog_id)
+    public static function new_blog_created(WP_Site $blog)
     {
         EEM_Blog::instance()->update_by_ID(
             array(
                 'BLG_last_requested' => current_time('mysql', true),
                 'STS_ID'             => EEM_Blog::status_up_to_date,
             ),
-            $blog_id
+            $blog->blog_id
         );
     }
 
