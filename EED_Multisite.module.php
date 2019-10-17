@@ -1,4 +1,8 @@
 <?php
+
+use EventEspresso\core\exceptions\InvalidDataTypeException;
+use EventEspresso\core\exceptions\InvalidInterfaceException;
+
 if (! defined('EVENT_ESPRESSO_VERSION')) {
     exit('No direct script access allowed');
 }
@@ -415,12 +419,16 @@ class EED_Multisite extends EED_Module
     }
 
 
-
     /**
      * A blog was just created; let's immediately create its row in the blog meta table and
      * set its last updated time and status
      * (otherwise, if we wait, it's possible to get multiple simultenous requests
      * which will cause duplicate entries in the blog meta table)
+     * @param WP_Site $blog
+     * @throws EE_Error
+     * @throws InvalidArgumentException
+     * @throws InvalidDataTypeException
+     * @throws InvalidInterfaceException
      */
     public static function new_blog_created(WP_Site $blog)
     {
