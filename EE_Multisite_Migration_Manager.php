@@ -1,4 +1,6 @@
 <?php
+use EventEspresso\core\domain\services\custom_post_types\RewriteRules;
+
 if (! defined('EVENT_ESPRESSO_VERSION')) {
     exit('No direct script access allowed');
 }
@@ -91,6 +93,7 @@ class EE_Multisite_Migration_Manager
         );
         $blogs_migrated = 0;
         $blog_to_migrate = null;
+        $this->setupFilterToAvoidFlushingPermalinks();
         try {
             // while we have more records and blogs to migrate, step through each blog
             while ($blogs_migrated++ < $max_blogs_to_migrate
@@ -181,6 +184,55 @@ class EE_Multisite_Migration_Manager
                 'message'                   => $e->getMessage() . (WP_DEBUG ? $e->getTraceAsString() : ''),
             );
         }
+    }
+
+    /**
+     * Sets up a filter to avoid flushing permalinks during multisite migration
+     * @since $VID:$
+     */
+    protected function setupFilterToAvoidFlushingPermalinks()
+    {
+        add_filter(
+            $this->getEeRewriteRulesOptionName(),
+            [$this, 'dontFlushPermalinksDuringMigration']
+        );
+    }
+
+    /**
+     * Gets the name of the filter used to get the option storing whether EE's permalinks should be flushed or not.
+     * @since $VID:$
+     * @return string
+     */
+    protected function getEeRewriteRulesOptionName()
+    {
+        return 'pre_option_' . RewriteRules::OPTION_KEY_FLUSH_REWRITE_RULES;
+    }
+
+    /**
+     * Filter callback that prevents flushing permalinks during a multisite migration, which led to broken permalinks.
+     * See https://github.com/eventespresso/eventsmart.com-website/issues/562.
+     * @since $VID:$
+     * @param $flush_permalink_flag_option_value
+     * @return null
+     */
+    public function dontFlushPermalinksDuringMigration($flush_permalink_flag_option_value)
+    {
+        // I assume this is being called from event-espresso-core/core/domain/services/custom_post_types/RewriteRules.php.
+        // where, when running on multisite, we don't want to actually call flush_rewrite_rules() because of the
+        // reasons mentioned on
+        // https://jeremyfelt.com/2015/07/17/flushing-rewrite-rules-in-wordpress-multisite-for-fun-and-profit/.
+        // So instead, just delete the rewrite rules (they'll get re-generated on next normal visit to the site)
+        delete_option('rewrite_rules');
+        // and pretend the option to refresh permalinks wasn't set.
+        // But of course, in order to do that, avoid an infinite loop by temporarily removing this filter.
+        remove_filter(
+            $this->getEeRewriteRulesOptionName(),
+            [$this,'dontFlushPermalinksDuringMigration']
+        );
+        update_option(RewriteRules::OPTION_KEY_FLUSH_REWRITE_RULES, false);
+        // then put it back in place for the next site migrated during this request.
+        $this->setupFilterToAvoidFlushingPermalinks();
+        return null;
     }
 
 
