@@ -37,6 +37,8 @@ class EE_Multisite extends EE_Addon
             array(
                 'version'          => EE_MULTISITE_VERSION,
                 'min_core_version' => EE_MULTISITE_CORE_VERSION_REQUIRED,
+                // requires hook wp_insert_site introduced in WP 5.1
+                'min_wp_version' => '5.1',
                 'main_file_path'   => EE_MULTISITE_PLUGIN_FILE,
                 'admin_path'       => EE_MULTISITE_ADMIN,
                 'admin_callback'   => 'additional_admin_hooks',
