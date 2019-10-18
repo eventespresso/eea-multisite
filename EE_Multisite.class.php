@@ -126,7 +126,7 @@ class EE_Multisite extends EE_Addon
             20
         );
         // setup cron task on main site to check for cleanup tasks
-        if (is_main_site()) {
+        if (is_multisite() && is_main_site()) {
             add_filter(
                 'FHEE__EEH_Activation__get_cron_tasks',
                 array('EE_Multisite','add_cron_task')

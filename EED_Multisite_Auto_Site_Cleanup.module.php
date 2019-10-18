@@ -260,6 +260,21 @@ class EED_Multisite_Auto_Site_Cleanup extends EED_Module
      */
     public static function check_for_cleanup_tasks()
     {
+        // You would think we'd only run this from the main site? Well, nope. Somehow it runs from elsewhere.
+        if (! is_main_site()) {
+            // This should only run from the main site, otherwise we're duplicating efforts.
+            // Also, never run this again from this site. Thank you.
+            wp_unschedule_hook('AHEE__EED_Multisite_Auto_Site_Cleanup__check_for_cleanup_tasks');
+            // Also, clean up the mess we left on this site. These records should only be on the main site.
+            EEM_Extra_Meta::instance()->delete(
+                array(
+                    'EXM_type' => 'Blog',
+                    'EXM_key' => EED_Multisite_Auto_Site_Cleanup::get_action_record_extra_meta_name('first_warning')
+                )
+            );
+            // Good day to you! *slam*
+            return;
+        }
         $previous_interval_label = null;
         $intervals = EED_Multisite_Auto_Site_Cleanup::get_cleanup_tasks();
         $last_interval = end($intervals);
