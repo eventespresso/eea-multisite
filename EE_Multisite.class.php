@@ -112,11 +112,14 @@ class EE_Multisite extends EE_Addon
         foreach ($actions_that_could_change_mm as $action_name) {
             add_action($action_name, array('EE_Multisite', 'possible_maintenance_mode_change_detected'));
         }
-        // a very specific hook for when running the EE_DMS_Core_4_5_0
-        add_filter(
-            'FHEE__EEH_Activation__get_default_creator_id__pre_filtered_id',
-            array('EE_Multisite', 'filter_get_default_creator_id')
-        );
+        // a very specific hook for when running the EE_DMS_Core_4_5_0, use it only on the maintenance mode enabled.
+        $maintenanceEnabled = EE_Maintenance_Mode::instance()->level();
+        if ($maintenanceEnabled) {
+            add_filter(
+                'FHEE__EEH_Activation__get_default_creator_id__pre_filtered_id',
+                array('EE_Multisite', 'filter_get_default_creator_id')
+            );
+        }
         add_action(
             'AHEE__EE_System__initialize',
             array('EE_Multisite', 'mark_blog_as_up_to_date_if_no_migrations_needed')
