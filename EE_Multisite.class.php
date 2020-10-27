@@ -258,16 +258,18 @@ class EE_Multisite extends EE_Addon
         }
         // find the earliest admin id for the current blog
         global $wpdb;
-        $offset = 0;
+        $blogId = get_current_blog_id();
         $role_to_check = apply_filters('FHEE__EE_Multisite__get_default_creator_id__role_to_check', 'administrator');
-        do {
-            $query = $wpdb->prepare(
-                "SELECT user_id from {$wpdb->usermeta} WHERE meta_key='primary_blog' AND meta_value=%s ORDER BY user_id ASC LIMIT %d, 1",
-                get_current_blog_id(),
-                $offset++
-            );
-            $user_id = $wpdb->get_var($query);
-        } while ($user_id && ! user_can($user_id, $role_to_check));
+        $query = $wpdb->prepare(
+            "SELECT u1.user_id FROM {$wpdb->usermeta} AS u1 "
+            . "INNER JOIN {$wpdb->usermeta} AS u2 ON u1.user_id = u2.user_id "
+            . "WHERE u1.meta_key='primary_blog' AND u1.meta_value=%s AND u2.meta_key=%s "
+            . "AND u2.meta_value LIKE %s ORDER BY user_id ASC LIMIT 1",
+            $blogId,
+            $wpdb->prefix . 'capabilities',
+            "%{$role_to_check}%"
+        );
+        $user_id = $wpdb->get_var($query);
         $user_id = (int) apply_filters('FHEE__EE_Multisite__get_default_creator_id__user_id', $user_id);
         if ($user_id) {
             self::$_default_creator_id = $user_id;
