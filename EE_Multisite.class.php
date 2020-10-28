@@ -267,7 +267,7 @@ class EE_Multisite extends EE_Addon
             . "AND u2.meta_value LIKE %s ORDER BY user_id ASC LIMIT 1",
             $blogId,
             $wpdb->prefix . 'capabilities',
-            "%{$role_to_check}%"
+            '%"' . $role_to_check . '"%'
         );
         $user_id = $wpdb->get_var($query);
         $user_id = (int) apply_filters('FHEE__EE_Multisite__get_default_creator_id__user_id', $user_id);
