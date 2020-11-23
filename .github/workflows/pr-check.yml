@@ -101,8 +101,8 @@ jobs:
       - name: Check PHP Version
         run: php -v
 
-      - name: Composer install
-        run: composer install --optimize-autoloader --prefer-dist
+      # - name: Composer install
+      #   run: composer install --optimize-autoloader --prefer-dist
 
       - name: Install WP Tests
         run: |
