@@ -55,8 +55,7 @@ jobs:
     strategy:
       matrix:
         operating-system: [ubuntu-latest]
-        php-versions:
-          ["5.5", "5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1"]
+        php-versions: ["5.6", "7.0", "7.1", "7.2", "7.3", "7.4", "8.0", "8.1"]
     name: Unit Tests with PHP ${{ matrix.php-versions }}
     steps:
       - name: Checkout
@@ -73,10 +72,6 @@ jobs:
               5.6)
                 echo "Using PHPUnit 5"
                 echo "PHPUNIT_VER=5.7.22" >> $GITHUB_ENV
-                ;;
-              5.5)
-                echo "Using PHPUnit 4"
-                echo "PHPUNIT_VER=4.8.36" >> $GITHUB_ENV
                 ;;
             esac
           fi
