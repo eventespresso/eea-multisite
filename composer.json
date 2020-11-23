@@ -46,7 +46,7 @@
       "\"vendor/bin/phpcs\" --config-set default_standard EventEspresso"
     ],
     "lint": "vendor/bin/phpcs",
-    "lint:skip-warnings": "vendor/bin/phpcs -n",
+    "lint:skip-warnings": "vendor/bin/phpcs -n .",
     "lint:fix": "vendor/bin/phpcbf"
   }
 }
