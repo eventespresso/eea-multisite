@@ -47,6 +47,6 @@
     ],
     "lint": "vendor/bin/phpcs",
     "lint:skip-warnings": "vendor/bin/phpcs -n .",
-    "lint:fix": "vendor/bin/phpcbf"
+    "lint:fix": "vendor/bin/phpcbf ."
   }
 }
