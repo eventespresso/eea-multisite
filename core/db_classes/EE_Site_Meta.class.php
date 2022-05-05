@@ -12,7 +12,7 @@ if (! defined('EVENT_ESPRESSO_VERSION')) {
  * @subpackage
  * @author                Mike Nelson
  */
-class EE_Blog extends EE_Soft_Delete_Base_Class
+class EE_Site_Meta extends EE_Soft_Delete_Base_Class
 {
 
     /**
