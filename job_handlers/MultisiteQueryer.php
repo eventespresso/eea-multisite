@@ -12,15 +12,8 @@ use EventEspressoBatchRequest\Helpers\JobStepResponse;
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-if (! defined('EVENT_ESPRESSO_VERSION')) {
-    exit('No direct script access allowed');
-}
-
-
-
 class MultisiteQueryer extends JobHandlerFile
 {
-
     public function create_job(JobParameters $job_parameters)
     {
         if (! \EE_Capabilities::instance()->current_user_can('manage_options', 'generating_report')) {

@@ -1,12 +1,10 @@
 <?php
-defined('EVENT_ESPRESSO_VERSION') || exit();
+
 // define the plugin directory path and URL
 define('EE_MULTISITE_BASENAME', plugin_basename(EE_MULTISITE_PLUGIN_FILE));
 define('EE_MULTISITE_PATH', plugin_dir_path(__FILE__));
 define('EE_MULTISITE_URL', plugin_dir_url(__FILE__));
 define('EE_MULTISITE_ADMIN', EE_MULTISITE_PATH . 'admin' . DS . 'multisite' . DS);
-
-
 
 /**
  * Class  EE_Multisite
@@ -18,7 +16,6 @@ define('EE_MULTISITE_ADMIN', EE_MULTISITE_PATH . 'admin' . DS . 'multisite' . DS
  */
 class EE_Multisite extends EE_Addon
 {
-
     /**
      * Cache for _default_creator_id.
      * Gets reset on switch/reset blog.
@@ -289,7 +286,8 @@ class EE_Multisite extends EE_Addon
     {
         // in order to optimize frontend requests, let's just do this check during cron tasks
         // or admin requests
-        if (! defined('DOING_AJAX')
+        if (
+            ! defined('DOING_AJAX')
             && (defined('DOING_CRON') || is_admin())
         ) {
             $maintenance_level = (int) EE_Maintenance_Mode::instance()->real_level();

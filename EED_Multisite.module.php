@@ -1,9 +1,5 @@
 <?php
 
-if (! defined('EVENT_ESPRESSO_VERSION')) {
-    exit('No direct script access allowed');
-}
-
 /**
  * Class  EED_Multisite
  *
@@ -13,7 +9,6 @@ if (! defined('EVENT_ESPRESSO_VERSION')) {
  */
 class EED_Multisite extends EED_Module
 {
-
     /**
      * @var        bool
      * @access    public
@@ -189,16 +184,19 @@ class EED_Multisite extends EED_Module
                 $blogs_needing_migration = EEM_Blog::instance()->count_blogs_maybe_needing_migration();
                 if ($blogs_needing_migration) {
                     $network = EE_Admin_Page::add_query_args_and_nonce([], EE_MULTISITE_ADMIN_URL);
-                    echo '<div class="error">
-                        <p>' . sprintf(
-                            __(
-                                'A change has been detected to your Event Espresso plugin or addons. Blogs on your network may require migration. %1$sClick here to check%2$s',
-                                "event_espresso"
-                            ),
-                            "<a href='$network'>",
-                            "</a>"
-                        ) .
-                         '</div>';
+                    echo '
+                <div class="error">
+                    <p>
+                    ' . sprintf(
+                        esc_html__(
+                            'A change has been detected to your Event Espresso plugin or addons. Blogs on your network may require migration. %1$sClick here to check%2$s',
+                            "event_espresso"
+                        ),
+                        "<a href='$network'>",
+                        "</a>"
+                    )
+                    . '</p>
+                </div>';
                 }
             }
         }

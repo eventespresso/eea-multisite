@@ -1,9 +1,5 @@
 <?php
 
-if (! defined('EVENT_ESPRESSO_VERSION')) {
-    exit('No direct script access allowed');
-}
-
 /**
  * EEM_Site. The DB Site, of course, actually being the NETWORK
  *
@@ -13,7 +9,6 @@ if (! defined('EVENT_ESPRESSO_VERSION')) {
  */
 class EEM_Site extends EEM_Base
 {
-
     /**
      * private instance of the EEM_Site object
      *
@@ -46,7 +41,8 @@ class EEM_Site extends EEM_Base
                     'localhost'
                 ),
                 'path'   => new EE_Plain_Text_Field(
-                    'path', esc_html__('Path', 'event_espresso'),
+                    'path',
+                    esc_html__('Path', 'event_espresso'),
                     false,
                     '/'
                 ),

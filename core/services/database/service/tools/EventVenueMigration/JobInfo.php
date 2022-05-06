@@ -14,38 +14,38 @@ use EventSmart\Multisite\core\services\database\service\DbServiceJobInfo;
  */
 class JobInfo extends DbServiceJobInfo
 {
-	/**
-	 * constant used for saving job progress information in the database
-	 */
-	private const OPTION_NAME = 'sites_repaired_event_venue_migration_v4_12';
+    /**
+     * constant used for saving job progress information in the database
+     */
+    private const OPTION_NAME = 'sites_repaired_event_venue_migration_v4_12';
 
 
-	public function description(): string
-	{
-		return 'Fixes missing Event Venues caused by timeouts during migration';
-	}
+    public function description(): string
+    {
+        return 'Fixes missing Event Venues caused by timeouts during migration';
+    }
 
 
-	public function name(): string
-	{
-		return 'Event Venue Migration';
-	}
+    public function name(): string
+    {
+        return 'Event Venue Migration';
+    }
 
 
-	public function dbOptionName(): string
-	{
-		return JobInfo::OPTION_NAME;
-	}
+    public function dbOptionName(): string
+    {
+        return JobInfo::OPTION_NAME;
+    }
 
 
-	public function product(): string
-	{
-		return 'Event Espresso Core';
-	}
+    public function product(): string
+    {
+        return 'Event Espresso Core';
+    }
 
 
-	public function version(): string
-	{
-		return 'v4.12';
-	}
+    public function version(): string
+    {
+        return 'v4.12';
+    }
 }

@@ -114,7 +114,7 @@ class Multisite_Admin_Page extends EE_Admin_Page
                 ],
                 'require_nonce' => false,
             ],
-            DbServiceForm::FORM_SLUG => [
+            DbServiceForm::FORM_SLUG          => [
                 'nav'           => [
                     'label' => esc_html__('DB Service & Repair', 'event_espresso'),
                     'order' => 40,
@@ -212,24 +212,24 @@ class Multisite_Admin_Page extends EE_Admin_Page
         if (EE_Maintenance_Mode::instance()->models_can_query()) {
             $this->_template_path = EE_MULTISITE_ADMIN_TEMPLATE_PATH . 'multisite_migration.template.php';
 
-            $this->_template_args['reassess_url'] = EE_Admin_Page::add_query_args_and_nonce(
+            $this->_template_args['reassess_url']           = EE_Admin_Page::add_query_args_and_nonce(
                 ['action' => 'force_reassess'],
                 EE_MULTISITE_ADMIN_URL
             );
-            $this->_template_args['borked_sites_url'] = add_query_arg(
+            $this->_template_args['borked_sites_url']       = add_query_arg(
                 ['orderby' => 'STS_ID'],
                 network_admin_url('sites.php')
             );
             $this->_template_args['assess_and_migrate_url'] = EE_Admin_Page::add_query_args_and_nonce(
                 [
                     'page'        => EED_Batch::PAGE_SLUG,
-                    'batch' 	  => EED_Batch::batch_job,
+                    'batch'       => EED_Batch::batch_job,
                     'job_handler' => urlencode('EventEspressoBatchRequest\JobHandlers\MultisiteMigration'),
                     'return_url'  => urlencode("//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}"),
                 ],
                 admin_url()
             );
-            $this->_template_args['queryer_url'] = EE_Admin_Page::add_query_args_and_nonce(
+            $this->_template_args['queryer_url']            = EE_Admin_Page::add_query_args_and_nonce(
                 ['action' => 'multisite_queryer'],
                 EE_MULTISITE_ADMIN_URL
             );
@@ -241,7 +241,8 @@ class Multisite_Admin_Page extends EE_Admin_Page
                 true
             );
         } else {
-            $migration_page = get_admin_url(get_current_blog_id(), 'admin.php?page=espresso_maintenance_settings');
+            $migration_page                             =
+                get_admin_url(get_current_blog_id(), 'admin.php?page=espresso_maintenance_settings');
             $this->_template_args['admin_page_content'] = EEH_Template::display_template(
                 EE_MULTISITE_ADMIN_TEMPLATE_PATH . 'multisite_migration_in_mm.template.php',
                 ['migration_page_url' => $migration_page],
@@ -273,13 +274,13 @@ class Multisite_Admin_Page extends EE_Admin_Page
     {
         $form_action = EE_Admin_Page::add_query_args_and_nonce(
             [
-                'action' => 'run_multisite_query',
+                'action'        => 'run_multisite_query',
                 'return_action' => $this->_req_action,
             ],
             EE_MULTISITE_ADMIN_URL
         );
 
-        $form = $this->_get_multisite_queryer_form();
+        $form                                       = $this->_get_multisite_queryer_form();
         $this->_template_args['admin_page_content'] = $form->form_open($form_action, 'post');
         $this->_template_args['admin_page_content'] .= $form->get_html_and_js();
         $this->_template_args['admin_page_content'] .= $form->form_close();
@@ -351,21 +352,21 @@ class Multisite_Admin_Page extends EE_Admin_Page
             EE_Question_Option::new_instance(
                 [
                     'QSO_value' => 0,
-                    'QSO_desc' => esc_html__('No', 'event_espresso')
+                    'QSO_desc'  => esc_html__('No', 'event_espresso'),
                 ]
             ),
             EE_Question_Option::new_instance(
                 [
                     'QSO_value' => 1,
-                    'QSO_desc' => esc_html__('Yes', 'event_espresso')
+                    'QSO_desc'  => esc_html__('Yes', 'event_espresso'),
                 ]
             ),
         ];
         $this->_template_args['return_action'] = $this->_req_action;
         $this->_template_args['reset_url']     = EE_Admin_Page::add_query_args_and_nonce(
             [
-                'action' => 'reset_settings',
-                'return_action' => $this->_req_action
+                'action'        => 'reset_settings',
+                'return_action' => $this->_req_action,
             ],
             EE_MULTISITE_ADMIN_URL
         );
@@ -478,7 +479,7 @@ class Multisite_Admin_Page extends EE_Admin_Page
         //      echo "$top_level_key [$second_level_key] with value $value will be sanitized as a $sanitization_method<br>";
         switch ($sanitization_method) {
             case 'bool':
-                return (boolean) intval($value);
+                return (bool) intval($value);
             case 'plaintext':
                 return wp_strip_all_tags($value);
             case 'int':
@@ -761,7 +762,7 @@ class Multisite_Admin_Page extends EE_Admin_Page
 
         $range = "-$delete_site_threshold days";
         // use appropriate call for current_time() depending on what version of EE core is active.
-        $current_time = method_exists(EEM_Blog::instance(), 'current_time_for_query')
+        $current_time            = method_exists(EEM_Blog::instance(), 'current_time_for_query')
             ? time()
             : current_time('timestamp');
         $delete_where_conditions = [
@@ -771,7 +772,7 @@ class Multisite_Admin_Page extends EE_Admin_Page
         $sites_to_delete_total   = EEM_Blog::instance()->count(
             [
                 $delete_where_conditions,
-                'default_where_conditions' => 'none'
+                'default_where_conditions' => 'none',
             ]
         );
         // get the original count of blogs to delete.  If that's empty then this is the initial request.
@@ -825,7 +826,7 @@ class Multisite_Admin_Page extends EE_Admin_Page
      * @return void
      * @global wpdb $wpdb
      */
-    function cleanup_partially_deleted_sites()
+    public function cleanup_partially_deleted_sites()
     {
         //      return;
         $deleted_sites = get_option('pruner_cleanup', false);

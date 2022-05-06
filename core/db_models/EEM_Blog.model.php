@@ -13,7 +13,6 @@ use EventEspresso\core\services\loaders\LoaderFactory;
  */
 class EEM_Blog extends EEM_Soft_Delete_Base
 {
-
     /**
      * Blog status bRoKen
      * The blog is borked. Probably because a migration script died on it.

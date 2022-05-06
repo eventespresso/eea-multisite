@@ -32,7 +32,8 @@ class MultisiteMigration extends JobHandler
     {
         $job_parameters->set_job_size(EEM_Blog::instance()->count());
         return new JobStepResponse(
-            $job_parameters, esc_html__('Assessment (and possible migrations) started', 'event_espresso')
+            $job_parameters,
+            esc_html__('Assessment (and possible migrations) started', 'event_espresso')
         );
     }
 
@@ -143,7 +144,8 @@ class MultisiteMigration extends JobHandler
     public function cleanup_job(JobParameters $job_parameters): JobStepResponse
     {
         return new JobStepResponse(
-            $job_parameters, esc_html__('All done multisite migration and assessment', 'event_espresso')
+            $job_parameters,
+            esc_html__('All done multisite migration and assessment', 'event_espresso')
         );
     }
 }

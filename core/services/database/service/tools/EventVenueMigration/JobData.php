@@ -14,28 +14,28 @@ use EventSmart\Multisite\core\services\database\service\DbServiceJobData;
  */
 class JobData extends DbServiceJobData
 {
-	/**
-	 * IMPORTANT !!!
-	 * This method needs to be overridden and return true
-	 * if a job requires an initial assessment phase,
-	 * otherwise the batch job will jump directly to the service job
-	 *
-	 * @return bool
-	 */
-	public function hasAssessmentPhase(): bool
-	{
-		return true;
-	}
+    /**
+     * IMPORTANT !!!
+     * This method needs to be overridden and return true
+     * if a job requires an initial assessment phase,
+     * otherwise the batch job will jump directly to the service job
+     *
+     * @return bool
+     */
+    public function hasAssessmentPhase(): bool
+    {
+        return true;
+    }
 
 
-	public function assessmentStartNotice(): string
-	{
-		return __('Beginning Service Assessment.', 'event_espresso');
-	}
+    public function assessmentStartNotice(): string
+    {
+        return __('Beginning Service Assessment.', 'event_espresso');
+    }
 
 
-	public function jobStartNotice(): string
-	{
-		return __('Service in Progress...', 'event_espresso');
-	}
+    public function jobStartNotice(): string
+    {
+        return __('Service in Progress...', 'event_espresso');
+    }
 }

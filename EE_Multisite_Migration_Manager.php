@@ -11,7 +11,6 @@ use EventEspresso\core\domain\services\custom_post_types\RewriteRules;
  */
 class EE_Multisite_Migration_Manager
 {
-
     /**
      * @var EE_Multisite_Migration_Manager|null $_instance
      */
@@ -92,9 +91,10 @@ class EE_Multisite_Migration_Manager
         $this->setupFilterToAvoidFlushingPermalinks();
         try {
             // while we have more records and blogs to migrate, step through each blog
-            while ($blogs_migrated++ < $max_blogs_to_migrate
-                   && $num_migrated < $records_to_migrate
-                   && $blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested()
+            while (
+                $blogs_migrated++ < $max_blogs_to_migrate
+                && $num_migrated < $records_to_migrate
+                && $blog_to_migrate = EEM_Blog::instance()->get_migrating_blog_or_most_recently_requested()
             ) {
                 EED_Multisite::do_full_reset();
                 switch_to_blog($blog_to_migrate->ID());
@@ -128,7 +128,10 @@ class EE_Multisite_Migration_Manager
                     $blog_to_migrate->set_STS_ID(EEM_Blog::status_borked);
 
                     $multisite_migration_message = sprintf(
-                        esc_html__('%1$sSkipping migration of %2$s%3$s', 'event_espresso'),
+                        esc_html__(
+                            '%1$sSkipping migration of %2$s%3$s',
+                            'event_espresso'
+                        ),
                         '<del>',
                         $blog_to_migrate->name(),
                         '</del>'

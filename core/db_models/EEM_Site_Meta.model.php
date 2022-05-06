@@ -1,9 +1,5 @@
 <?php
 
-if (! defined('EVENT_ESPRESSO_VERSION')) {
-    exit('No direct script access allowed');
-}
-
 /**
  * EE_Site_Meta. THe DB site actually being the NETWORK
  *
@@ -13,7 +9,6 @@ if (! defined('EVENT_ESPRESSO_VERSION')) {
  */
 class EEM_Site_Meta extends EEM_Soft_Delete_Base
 {
-
     /**
      * @type EEM_Site_Meta
      */
