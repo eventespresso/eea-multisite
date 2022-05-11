@@ -96,12 +96,12 @@ class JobAssessment extends DbServiceJobHandler
 
         $start_button = "<a class='button button--primary' href='$this->service_job_url'>begin update process</a>";
         switch ($blogs) {
-            case 0;
+            case 0:
                 $this->updateText("There are $blogs blogs currently using reCaptcha.");
                 $this->updateText("<a class='button button--primary' href='$this->return_url'>Finish Job</a>");
                 // $job_parameters->deleteJobRecord();
                 break;
-            case 1;
+            case 1:
                 $this->updateText(
                     $this->infoWrapper(
                         "There is $blogs blog currently using reCaptcha."
@@ -110,7 +110,7 @@ class JobAssessment extends DbServiceJobHandler
                 $this->updateText($start_button);
                 // $job_parameters->dontDeleteJobRecord();
                 break;
-            case 2;
+            case 2:
             default:
                 $this->updateText(
                     $this->infoWrapper(
