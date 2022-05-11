@@ -11,8 +11,13 @@
 
     <rule ref="EventEspresso" />
 
-
     <exclude-pattern>core/libraries/device-detector-master/*</exclude-pattern>
     <exclude-pattern>core/libraries/Spyc.php</exclude-pattern>
+
+    <rule ref="PSR1.Methods.CamelCapsMethodName.NotCamelCaps">
+        <exclude-pattern>DbServiceJobHandler.php</exclude-pattern>
+        <exclude-pattern>JobAssessment.php</exclude-pattern>
+        <exclude-pattern>JobHandler.php</exclude-pattern>
+    </rule>
 
 </ruleset>
