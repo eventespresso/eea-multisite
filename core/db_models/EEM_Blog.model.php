@@ -62,10 +62,10 @@ class EEM_Blog extends EEM_Soft_Delete_Base
 
 
     /**
-     * @param string $timezone
+     * @param string|null $timezone
      * @throws EE_Error
      */
-    protected function __construct(string $timezone = '')
+    protected function __construct(?string $timezone = '')
     {
         $this->singular_item    = esc_html__('Blog', 'event_espresso');
         $this->plural_item      = esc_html__('Blogs', 'event_espresso');
@@ -190,7 +190,7 @@ class EEM_Blog extends EEM_Soft_Delete_Base
     private function tableAnalysis(): TableAnalysis
     {
         if (! $this->table_analysis instanceof TableAnalysis) {
-            $this->table_analysis = LoaderFactory::getShared(TableAnalysis::class);
+            $this->table_analysis = LoaderFactory::getLoader()->getShared(TableAnalysis::class);
         }
         return $this->table_analysis;
     }
