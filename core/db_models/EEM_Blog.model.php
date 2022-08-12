@@ -65,7 +65,7 @@ class EEM_Blog extends EEM_Soft_Delete_Base
      * @param string|null $timezone
      * @throws EE_Error
      */
-    protected function __construct(?string $timezone = '')
+    protected function __construct($timezone = '')
     {
         $this->singular_item    = esc_html__('Blog', 'event_espresso');
         $this->plural_item      = esc_html__('Blogs', 'event_espresso');
