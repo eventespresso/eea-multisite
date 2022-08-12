@@ -1,9 +1,4 @@
 <?php
-if (! defined('EVENT_ESPRESSO_VERSION')) {
-    exit('No direct script access allowed');
-}
-
-
 
 /**
  * EE_Site
@@ -14,77 +9,80 @@ if (! defined('EVENT_ESPRESSO_VERSION')) {
  */
 class EE_Site extends EE_Soft_Delete_Base_Class
 {
-
     /**
      * @param array $props_n_values
      * @return EE_Site
+     * @throws EE_Error
+     * @throws ReflectionException
      */
-    public static function new_instance($props_n_values = array())
+    public static function new_instance($props_n_values = [])
     {
         $has_object = parent::_check_for_object($props_n_values, __CLASS__);
-        return $has_object ? $has_object : new self($props_n_values);
+        return $has_object ?: new self($props_n_values);
     }
 
 
-
     /**
      * @param array $props_n_values
      * @return EE_Site
+     * @throws EE_Error
+     * @throws ReflectionException
      */
-    public static function new_instance_from_db($props_n_values = array())
+    public static function new_instance_from_db($props_n_values = [])
     {
         return new self($props_n_values, true);
     }
-
 
 
     /**
      * Gets domain
      *
      * @return string
+     * @throws EE_Error
+     * @throws ReflectionException
      */
-    function domain()
+    public function domain()
     {
         return $this->get('domain');
     }
-
 
 
     /**
      * Sets domain
      *
      * @param string $domain
-     * @return boolean
+     * @throws EE_Error
+     * @throws ReflectionException
      */
-    function set_domain($domain)
+    public function set_domain($domain)
     {
-        return $this->set('domain', $domain);
+        $this->set('domain', $domain);
     }
-
 
 
     /**
      * Gets path
      *
      * @return string
+     * @throws EE_Error
+     * @throws ReflectionException
      */
-    function path()
+    public function path()
     {
         return $this->get('path');
     }
-
 
 
     /**
      * Sets path
      *
      * @param string $path
-     * @return boolean
+     * @throws EE_Error
+     * @throws ReflectionException
      */
-    function set_path($path)
+    public function set_path($path)
     {
-        return $this->set('path', $path);
+        $this->set('path', $path);
     }
 }
-
 // End of file EE_Site.class.php

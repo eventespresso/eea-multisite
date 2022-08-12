@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<ruleset name="EventEspresso">
+    <description>Event Espresso Core rules for PHP_CodeSniffer</description>
+    <config name="testVersion" value="7.3"/>
+
+    <file>./</file>
+
+    <arg name="extensions" value="php"/>
+    <arg value="sp"/>
+    <arg name="colors" />
+
+    <rule ref="EventEspresso" />
+
+    <exclude-pattern>core/libraries/device-detector-master/*</exclude-pattern>
+    <exclude-pattern>core/libraries/Spyc.php</exclude-pattern>
+
+    <rule ref="PSR1.Methods.CamelCapsMethodName.NotCamelCaps">
+        <exclude-pattern>DbServiceJobHandler.php</exclude-pattern>
+        <exclude-pattern>JobAssessment.php</exclude-pattern>
+        <exclude-pattern>JobHandler.php</exclude-pattern>
+    </rule>
+
+</ruleset>

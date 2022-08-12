@@ -1,9 +1,4 @@
 <?php
-if (! defined('EVENT_ESPRESSO_VERSION')) {
-    exit('No direct script access allowed');
-}
-
-
 
 /**
  * EE_DMS_Multisite_0_0_1
@@ -14,7 +9,6 @@ if (! defined('EVENT_ESPRESSO_VERSION')) {
  */
 class EE_DMS_Multisite_1_0_0 extends EE_Data_Migration_Script_Base
 {
-
     /**
      * only run when Multisite is at exactly version 0.0.1
      *
